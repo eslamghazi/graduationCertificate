@@ -9,10 +9,10 @@ import { ExcelReaderService } from 'src/app/services/excel-reader.service';
 })
 export class ViewEditComponent implements OnInit {
   id = new FormControl(null, [Validators.required]);
-  image: any
+
   excelData: any
 
-  searchResult: any[] | null = null;
+  searchResult: any
   notFound = false
 
   constructor(private excelReaderService: ExcelReaderService) { }
@@ -78,10 +78,9 @@ export class ViewEditComponent implements OnInit {
     this.searchResult = this.excelReaderService.searchByStudentId(this.id.value as any, 'الرقم القومي', this.excelData);
     if (this.searchResult == null) {
       this.notFound = true
-      this.image = null
     } else {
       this.notFound = false
-      this.image = this.searchResult[5]
+
     }
 
   }
