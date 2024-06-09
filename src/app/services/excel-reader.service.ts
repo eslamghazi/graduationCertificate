@@ -64,6 +64,7 @@ export class ExcelReaderService {
 
 
   async fetchImageAsBase64(url: string): Promise<string> {
+    debugger
     const proxyUrl = `https://graduation-certificate.vercel.app/api/proxy?url=${encodeURIComponent(url)}`;
     const response = await fetch(proxyUrl);
     if (!response.ok) {
