@@ -1,6 +1,6 @@
 <form class="form-signin" [formGroup]="idForm">
   <div class="text-center mb-4">
-    <img *ngIf="searchResult && searchResult[5]" class="mb-4" src="{{searchResult[5]}}" alt="" width="200" height="200">
+    <img *ngIf="searchResult && image" class="mb-4" src="{{image}}" alt="" width="200" height="200">
     <img *ngIf="!searchResult" src="assets/svgs/viewEdit.svg" alt="" width="100" height="100">
   </div>
 
