@@ -8,38 +8,35 @@ import * as XLSX from 'xlsx';
 })
 export class ExcelReaderService {
 
-  private excelData: any[][] = [];
-  private headers: any
-
   constructor(private http: HttpClient) { }
 
-  loadExcelFile(filePath: string): Observable<any[][]> {
+  loadExcelFile(filePath: string): Observable<any> {
+    let excelData
+    let headers
     return this.http.get(filePath, { responseType: 'arraybuffer' }).pipe(
       map(data => {
         const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
-        this.excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        this.headers = this.excelData.shift(); // Extract and remove headers from data
-        return this.excelData;
+        excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        headers = excelData.shift(); // Extract and remove headers from data
+
+        return { excelData, headers };
       })
     );
   }
 
-  searchByStudentId(studentId: string | number, header: string): any[] | null {
-    const studentIdIndex = this.headers.indexOf(header);
+  searchByStudentId(studentId: string | number, header: string, content: any): any[] | null {
+    const studentIdIndex = content.headers.indexOf(header);
     if (studentIdIndex === -1) {
       return null;
     }
-    for (let i = 0; i < this.excelData.length; i++) {
-      if (this.excelData[i][studentIdIndex] == studentId) {
-        return this.excelData[i];
+    for (let i = 0; i < content.excelData.length; i++) {
+      if (content.excelData[i][studentIdIndex] == studentId) {
+        return content.excelData[i];
       }
     }
     return null;
   }
 
-  getHeaders(): string[] {
-    return this.headers;
-  }
 }
