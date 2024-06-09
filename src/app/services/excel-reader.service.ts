@@ -7,8 +7,13 @@ import * as XLSX from 'xlsx';
   providedIn: 'root'
 })
 export class ExcelReaderService {
+  private vercelApiUrl = 'https://graduation-certificate.vercel.app/api/get-excel';
 
   constructor(private http: HttpClient) { }
+
+  loadEditFormExcelFile(): Observable<any> {
+    return this.http.get(this.vercelApiUrl, { responseType: 'blob' });
+  }
 
   loadExcelFile(filePath: string): Observable<any> {
     let excelData
