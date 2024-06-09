@@ -10,7 +10,8 @@ import { ExcelReaderService } from 'src/app/services/excel-reader.service';
 export class ViewEditComponent implements OnInit {
   id = new FormControl(null, [Validators.required]);
 
-  excelData: any[][] = [];
+  excelData: any
+
   searchResult: any[] | null = null;
   notFound = false
 
@@ -35,26 +36,49 @@ export class ViewEditComponent implements OnInit {
 
 
   loadExcelFile() {
-    this.excelReaderService.loadEditFormExcelFile().subscribe(data => {
-      this.excelData = data;
-      console.log(this.excelData);
+    this.excelReaderService.getExcelFile().subscribe({
+      next: blob => {
+        if (blob instanceof Blob) {
+          this.blobToArrayBuffer(blob).then(arrayBuffer => {
+            // Handle the ArrayBuffer
+            this.excelData = this.excelReaderService.loadExcelFileContent(arrayBuffer)
+            console.log(this.excelData);
 
-    }, error => {
-      console.error('Error edit file:', error);
+          }).catch(error => {
+            console.error('Error converting blob to array buffer:', error);
+          });
+        } else {
+          console.error('The fetched data is not a Blob:', blob);
+        }
+      },
+      error: error => {
+        console.error('Error fetching Excel file:', error);
+      }
     });
+  }
 
+  blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result) {
+          resolve(reader.result as ArrayBuffer);
+        } else {
+          reject(new Error('FileReader failed to convert blob to array buffer'));
+        }
+      };
+      reader.onerror = () => {
+        reject(new Error('FileReader encountered an error'));
+      };
+      reader.readAsArrayBuffer(blob);
+    });
   }
 
   onSearch() {
-
-    // defaultSearchResult = this.excelReaderService.searchByStudentId(this.id.value as any, 'الرقم القومي', this.defaultExcelData);
-    // if (defaultSearchResult == null) {
-    // } else {
-    //   this.searchResult = defaultSearchResult
-    // }
-
-
-
+    this.searchResult = this.excelReaderService.searchByStudentId(this.id.value as any, 'الرقم القومي', this.excelData);
+    if (this.searchResult == null) {
+      this.notFound = true
+    }
 
   }
 }
