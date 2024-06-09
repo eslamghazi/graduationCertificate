@@ -9,7 +9,7 @@ import { ExcelReaderService } from 'src/app/services/excel-reader.service';
 })
 export class ViewEditComponent implements OnInit {
   id = new FormControl(null, [Validators.required]);
-
+  image: any
   excelData: any
 
   searchResult: any[] | null = null;
@@ -74,14 +74,25 @@ export class ViewEditComponent implements OnInit {
     });
   }
 
-  onSearch() {
+  async onSearch() {
     this.searchResult = this.excelReaderService.searchByStudentId(this.id.value as any, 'الرقم القومي', this.excelData);
     if (this.searchResult == null) {
       this.notFound = true
     } else {
+      await this.convertImageToBase64(this.searchResult[5])
       this.notFound = false
 
     }
-
   }
+
+
+  async convertImageToBase64(url: string): Promise<void> {
+    try {
+      this.image = await this.excelReaderService.fetchImageAsBase64(url);
+      console.log('Base64 Image:', this.image);
+    } catch (error) {
+      console.error('Error fetching and converting image:', error);
+    }
+  }
+
 }

@@ -63,27 +63,18 @@ export class ExcelReaderService {
 
 
 
-  async urlToBase64(url: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', url);
-      xhr.responseType = 'blob';
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(xhr.response);
-        } else {
-          reject(`Failed to load image from URL: ${url}`);
-        }
-      };
-
-      xhr.onerror = () => {
-        reject(`Failed to load image from URL: ${url}`);
-      };
-
-      xhr.send();
+  async fetchImageAsBase64(url: string): Promise<string> {
+    const proxyUrl = `https://graduation-certificate.vercel.app/api/proxy?url=${encodeURIComponent(url)}`;
+    const response = await fetch(proxyUrl);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const blob = await response.blob();
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to convert to base64'));
+      reader.readAsDataURL(blob);
     });
   }
 
