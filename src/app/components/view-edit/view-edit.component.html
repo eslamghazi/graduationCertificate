@@ -18,7 +18,7 @@
   </div>
   <button [hidden]="searchResult" [disabled]="id.invalid" (click)="onSearch()"
     class="btn btn-lg btn-primary btn-block mt-4" type="submit">بحث</button>
-  <div *ngIf="!searchResult" class="shadow p-3 mb-5 bg-danger text-center text-white rounded h5 mt-4">
+  <div *ngIf="notFound" class="shadow p-3 mb-5 bg-danger text-center text-white rounded h5 mt-4">
     لا يوجد تعديل مسجل علي هذا الرقم القومي <a href="https://form.jotform.com/241595019999575">اضغط هنا</a> لتقوم
     بالتعديل مره اخرى.
   </div>

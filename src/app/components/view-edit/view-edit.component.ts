@@ -78,6 +78,8 @@ export class ViewEditComponent implements OnInit {
     this.searchResult = this.excelReaderService.searchByStudentId(this.id.value as any, 'الرقم القومي', this.excelData);
     if (this.searchResult == null) {
       this.notFound = true
+    } else {
+      this.notFound = false
     }
 
   }
