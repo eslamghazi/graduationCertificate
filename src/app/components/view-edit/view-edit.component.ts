@@ -12,7 +12,7 @@ export class ViewEditComponent implements OnInit {
 
   excelData: any
 
-  searchResult: any
+  searchResult: any[] | null = null;
   notFound = false
 
   constructor(private excelReaderService: ExcelReaderService) { }

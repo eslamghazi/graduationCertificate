@@ -61,4 +61,30 @@ export class ExcelReaderService {
     return null;
   }
 
+
+
+  async urlToBase64(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      xhr.responseType = 'blob';
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(xhr.response);
+        } else {
+          reject(`Failed to load image from URL: ${url}`);
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(`Failed to load image from URL: ${url}`);
+      };
+
+      xhr.send();
+    });
+  }
+
 }
