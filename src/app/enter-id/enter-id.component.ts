@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ExcelReaderService } from 'src/app/services/excel-reader.service';
+import { ExcelReaderService } from '../excel-reader.service';
 
 @Component({
   selector: 'app-enter-id',

@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { EnterIdComponent } from './components/enter-id/enter-id.component';
+import { EnterIdComponent } from './enter-id/enter-id.component';
 
 @NgModule({
   declarations: [

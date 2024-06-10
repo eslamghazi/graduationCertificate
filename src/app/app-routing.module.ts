@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { EnterIdComponent } from './components/enter-id/enter-id.component';
+import { EnterIdComponent } from './enter-id/enter-id.component';
 
 const routes: Routes = [
   { path: '', component: EnterIdComponent, pathMatch: 'full' },
