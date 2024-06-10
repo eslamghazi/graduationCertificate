@@ -3,7 +3,7 @@
     <img class="mb-4" src="assets/images/{{searchResult[6]}}/{{searchResult[6]}}.jpg" alt="" width="200" height="200">
   </div>
 
-  <div [hidden]="searchResult" class="form-label-group">
+  <div *ngIf="!searchResult" class="form-label-group">
     <h1 class="h3 my-5 font-weight-normal text-center text-info">ادخل رقمك القومي</h1>
     <input #inputId (keyup)="typingId($event.target)" type="number" id="id" class="form-control"
       placeholder="ادخل رقمك القومي" formControlName="id">
