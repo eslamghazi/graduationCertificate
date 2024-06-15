@@ -40,37 +40,37 @@ export class EnterIdComponent implements OnInit {
 
 
   loadExcelFile() {
-    this.excelReaderService.loadExcelFile('assets/excelSheets/edit.xlsx').subscribe(data => {
+    // this.excelReaderService.loadExcelFile('assets/excelSheets/edit.xlsx').subscribe(data => {
+    //   this.editExcelData = data;
+
+    this.excelReaderService.loadExcelFile('assets/excelSheets/default.xlsx').subscribe(data => {
       this.defaultExcelData = data;
 
-      this.excelReaderService.loadExcelFile('assets/excelSheets/default.xlsx').subscribe(data => {
-        this.editExcelData = data;
-
-      }, error => {
-        console.error('Error default file:', error);
-      })
-
     }, error => {
-      console.error('Error edit file:', error);
-    });
+      console.error('Error default file:', error);
+    })
+
+    // }, error => {
+    //   console.error('Error edit file:', error);
+    // });
 
   }
 
   onSearch() {
     let defaultSearchResult
-    let editSearchResult
+    // let editSearchResult
 
+    // editSearchResult = this.excelReaderService.searchByStudentId(this.id.value as any, 'الرقم القومي', this.editExcelData);
+    // if (editSearchResult == null) {
     defaultSearchResult = this.excelReaderService.searchByStudentId(this.id.value as any, 'الرقم القومي', this.defaultExcelData);
     if (defaultSearchResult == null) {
-      editSearchResult = this.excelReaderService.searchByStudentId(this.id.value as any, 'الرقم القومي', this.editExcelData);
-      if (editSearchResult == null) {
-        this.notFound = true
-      } else {
-        this.searchResult = editSearchResult
-      }
+      this.notFound = true
     } else {
       this.searchResult = defaultSearchResult
     }
+    // } else {
+    //   this.searchResult = editSearchResult
+    // }
 
 
 
