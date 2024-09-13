@@ -1,0 +1,9 @@
+{
+  "projects": {
+    "graduationCertificate": "graduationcertificate",
+    "default": "graduationcertificate"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}

@@ -1,0 +1,31 @@
+<form class="form-signin" [formGroup]="userForm">
+
+  <div class="form-group my-5" *ngIf="!selectClass.value && selectClass.value == 0">
+    <select class="form-control" formControlName="selectClass">
+      <option value="0" selected>الرجاء اختيار دفعتك</option>
+      <option value="1">امتياز 2024</option>
+    </select>
+  </div>
+
+  <div *ngIf="selectClass.value && selectClass.value != 0">
+    <div class="form-label-group">
+      <h1 class="h3 my-5 font-weight-normal text-center text-info">ادخل رقمك القومي</h1>
+      <input #inputId (keyup)="typingId($event.target)" type="number" id="id" class="form-control"
+        placeholder="ادخل رقمك القومي" formControlName="NationalId">
+
+      <ng-container *ngIf="NationalId.touched && NationalId.dirty" class="my-4">
+        <p class="h6 text-danger float-right" *ngIf="NationalId.errors?.['required']">يجب ملئ هذا الحقل</p>
+        <p class="h6 text-danger float-right" *ngIf="NationalId.errors?.['pattern']">الرجاء كتابة
+          الرقم القومي بشكل صحيح</p>
+
+      </ng-container>
+    </div>
+    <button class="btn btn-lg btn-primary btn-block mt-4" type="submit" (click)="searchFile()"
+      [disabled]="!userForm.valid">بحث</button>
+    <div class="shadow p-3 mb-5 bg-danger text-center text-white rounded h5 mt-4" *ngIf="notFound">لم يتم العثور علي
+      طالب
+      بهذا الرقم القومى
+      ، برجاء المراجعة مع المختص
+    </div>
+  </div>
+</form>

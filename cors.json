@@ -1,0 +1,9 @@
+[
+  {
+    "origin": ["https://graduation-certificate.vercel.app/*"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Authorization"]
+  }
+]
+

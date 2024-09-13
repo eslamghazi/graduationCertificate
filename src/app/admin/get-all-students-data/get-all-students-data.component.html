@@ -1,0 +1,82 @@
+<form class="form-signin" [formGroup]="adminForm">
+  <div class="form-group my-3">
+    <select class="form-control" formControlName="selectClass" (change)="selectClassFunc()">
+      <option value="0" selected>الرجاء اختيار الدفعه</option>
+      <option value="1">امتياز 2024 (دور يونيو)</option>
+      <option value="2">امتياز 2024 (دور سبتمبر)</option>
+    </select>
+  </div>
+
+  <div class="form-group my-3" *ngIf="selectClass.value && selectClass.value != 0" (change)="selectUserTypeFunc()">
+    <select class="form-control" formControlName="selectUserType">
+      <option value="0" selected>الرجاء اختيار حالة الطلاب</option>
+      <option value="1">الطلاب الذين قاموا بوضع صورهم</option>
+      <option value="2">الطلاب الذين لم يقوموا بوضع صورهم</option>
+    </select>
+  </div>
+</form>
+
+
+<div *ngIf="selectClass.value && selectClass.value != 0 && selectUserType.value && selectUserType.value != 0">
+  <!-- Search input -->
+  <div class="form-group my-3 mt-5">
+    <input type="text" class="form-control" placeholder="البحث بالإسم و الرقم القومي" [(ngModel)]="searchTerm"
+      (input)="search()" />
+  </div>
+
+  <div class="container text-center mt-4" *ngIf="filteredData && filteredData.length > 0 else NoData">
+    <h3 *ngIf="selectUserType.value == 1">الطلاب الذين قاموا بوضع صورهم <span class="text-danger">وعددهم:
+        {{filteredData.length}}</span></h3>
+    <h3 *ngIf="selectUserType.value == 2">الطلاب الذين لم يقوموا بوضع صورهم <span class="text-danger">وعددهم:
+        {{filteredData.length}}</span></h3>
+
+    <button (click)="exportToExcel()" class="btn btn-outline-info my-4"><img src="assets/svgs/excel.svg"
+        alt="excel"></button>
+
+    <button (click)="exportAllPhotos()" class="btn btn-outline-info my-4"><img src="assets/svgs/excel.svg"
+        alt="excel"></button>
+
+    <table class="table table-bordered table-striped" dir="rtl">
+      <thead class="thead-dark">
+        <tr>
+          <th>م</th>
+          <th>الإسم</th>
+          <th>الرقم القومي</th>
+          <th>تاريخ الميلاد</th>
+          <th>محل الميلاد</th>
+          <th>الصوره الشخصية</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of filteredData | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage } let i = index;">
+          <td>{{ getIndex(i) }}</td>
+          <td>{{ item.Name }}</td>
+          <td>{{ item.NationalId }}</td>
+          <td>{{ item.DateOfBirth }}</td>
+          <td>{{ item.PlaceOfBirth }}</td>
+          <td *ngIf="item.Image">
+            <img [src]="item.Image" alt="{{item.NationalId}}" role="button" class="img-thumbnail"
+              style="max-width: 100px;" (click)="openImage(item)" />
+          </td>
+          <td *ngIf="!item.Image">
+            لم يقم الطالب بوضع صورة بعد !
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <pagination-controls dir="rtl" (pageChange)="currentPage = $event"
+      class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
+    </pagination-controls>
+
+  </div>
+
+  <!-- Display message if no files found -->
+  <ng-template #NoData>
+    <p class="h5 text-center text-danger">
+      {{searchTerm ? 'عفوًا لا توجد بيانات للطلاب الذين تم البحث عنه'
+      :selectUserType.value == 1 ? 'لا توجد بيانات للطلاب الذين قاموا بوضع صورهم'
+      :selectUserType.value == 2 ? 'لا توجد بيانات للطلاب الذين لم يقوموا بوضع صورهم'
+      : ""}}</p>
+  </ng-template>
+</div>
