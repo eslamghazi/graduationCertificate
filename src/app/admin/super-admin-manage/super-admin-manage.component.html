@@ -100,80 +100,71 @@
     <ng-template ngbNavContent>
       <div *ngIf="foldersRealDatabase.length > 0 else NoData">
 
-        <h1 class="h3 my-3 font-weight-normal text-center text-info">المجلدات الموجوده بقاعدة البيانات</h1>
+        <h1 class="h3 my-3 font-weight-normal text-center text-info">المجلدات الموجوده بقاعدة البيانات <span
+            class="text-danger">وعددهم
+            {{studentsNumber}}</span></h1>
 
         <!-- Search input -->
         <div class="form-group my-3 mt-5">
           <input (keyup)="currentPage = 1" type="text" class="form-control" placeholder="ابحث عن مجلد أو رقم قومي"
             [(ngModel)]="searchTerm" />
         </div>
-
         <table class="table table-bordered table-striped text-center align-content-center" dir="rtl"
-          *ngIf="filteredFoldersRealtimeDatabase().length > 0 else NoData">
+          *ngIf="getFlattenedData().length > 0 else NoData">
           <thead class="thead-dark">
             <tr>
               <th>م</th>
-              <th>اسم المجلد</th>
-              <th>قائمة الأرقام القومية</th>
+              <th>اسم المجلد / الرقم القومي</th>
+              <th>قائمة الأرقام القومية / بيانات المجلد الفرعي</th>
               <th>الإجراءات</th>
             </tr>
           </thead>
           <tbody>
+            <!-- Flattened data loop with pagination -->
             <ng-container
-              *ngFor="let folder of filteredFoldersRealtimeDatabase() | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; let i = index">
-              <!-- Render Parent Folder (e.g., June, September) -->
-              <tr class="bg-danger text-white">
-                <td>{{ getIndex(i) }}</td>
-                <td>{{ folder.folderName }} <span class="text-warning">(مجلد رئيسي)</span></td>
+              *ngFor="let item of getFlattenedData() | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; let i = index">
+
+              <!-- Folder row -->
+              <tr *ngIf="item.isFolder" class="bg-danger text-white">
+                <td>{{ item.folderIndex +1 }}</td>
+                <td>{{ item.folderName }} <span class="text-warning">(مجلد رئيسي)</span></td>
                 <td>
                   <ul>
-                    <li *ngFor="let id of folder.nationalIds">{{ id }}</li>
+                    <li *ngFor="let id of item.nationalIds">{{ id }}</li>
                   </ul>
                 </td>
                 <td>
-                  <!-- Delete Subfolder -->
-                  <button (click)="deleteFolder('Class2024Intership/' + folder.folderName + '/', 'realtimeDatabase')"
+                  <button (click)="deleteFolder('Class2024Intership/' + item.folderName + '/', 'realtimeDatabase')"
                     class="btn btn-outline-warning btn-sm">
                     <img src="assets/svgs/trash.svg" alt="delete" width="40">
                   </button>
                 </td>
               </tr>
 
-              <!-- Render National IDs in each subfolder -->
-              <ng-container *ngFor="let id of folder.nationalIds; let subIndex = index">
-                <tr class="bg-light">
-                  <td> {{getIndex(i)}}.{{ subIndex+1 }}</td>
-                  <!-- Empty space for alignment -->
-                  <td>{{ id }}</td>
-                  <td style="width: 370px;" dir="ltr">
-                    {{folder.subFolderData[id] | json }}
-                  </td>
-                  <td>
-                    <!-- Delete Individual Object -->
-                    <button (click)="goEdit(folder.subFolderData[id].ClassMonth , id)"
-                      class="btn btn-outline-warning btn-sm">
-                      <img src="assets/svgs/edit.svg" alt="delete" width="40">
-                    </button>
+              <!-- National ID row -->
+              <tr *ngIf="!item.isFolder" class="bg-light">
+                <td> {{ item.folderIndex + 1 }}.{{ item.idIndex }}</td>
+                <td>{{ item.id }}</td>
+                <td style="width: 370px;" dir="ltr" (click)="aa(item)">{{ item.subFolderData | json }}</td>
+                <td>
+                  <button (click)="goEdit(item.subFolderData.ClassMonth, item.id)"
+                    class="btn btn-outline-warning btn-sm">
+                    <img src="assets/svgs/edit.svg" alt="edit" width="40">
+                  </button>
 
-                    <button
-                      (click)="deleteFolder('Class2024Intership/' + folder.folderName + '/' + id, 'realtimeDatabase')"
-                      class="btn btn-outline-info btn-sm mr-3">
-                      <img src="assets/svgs/trash.svg" alt="delete" width="40">
-                    </button>
-                  </td>
-                </tr>
-              </ng-container>
-
-              <!-- Separator Between Folder Groups -->
-              <tr>
-                <td colspan="4">
-                  <hr />
+                  <button
+                    (click)="deleteFolder('Class2024Intership/' + item.folderName + '/' + item.id, 'realtimeDatabase')"
+                    class="btn btn-outline-info btn-sm mr-3">
+                    <img src="assets/svgs/trash.svg" alt="delete" width="40">
+                  </button>
                 </td>
               </tr>
+
             </ng-container>
           </tbody>
         </table>
 
+        <!-- Pagination controls -->
         <pagination-controls dir="rtl" (pageChange)="currentPage = $event"
           class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
         </pagination-controls>

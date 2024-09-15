@@ -16,12 +16,13 @@ export class SuperAdminManageComponent implements OnInit {
   active = 1;
 
   foldersRealDatabase: any[] = [];
+  studentsNumber: any;
 
   folders: any[] = [];
   groupedFolders: any[] = [];
 
   searchTerm: string = '';
-  itemsPerPage: number = this.active == 1 ? 1 : 5;
+  itemsPerPage: any = 1;
   currentPage: number = 1;
 
   constructor(
@@ -40,10 +41,12 @@ export class SuperAdminManageComponent implements OnInit {
       this.active = 1;
       this.loadFolders();
       this.currentPage = 1;
+      this.itemsPerPage = 1;
     } else {
       this.active = 2;
       this.getFoldersFromRealtimeDatabase();
       this.currentPage = 1;
+      this.itemsPerPage = 5;
     }
   }
   getFoldersFromRealtimeDatabase() {
@@ -84,9 +87,42 @@ export class SuperAdminManageComponent implements OnInit {
     });
   }
 
+  // A method that flattens your folders and national IDs into a single list
+  getFlattenedData() {
+    const flattenedData: any = [];
+
+    this.filteredFoldersRealtimeDatabase().forEach((folder, folderIndex) => {
+      // Push folder as the main row
+      flattenedData.push({
+        isFolder: true,
+        folderIndex: folderIndex,
+        folderName: folder.folderName,
+        nationalIds: folder.nationalIds,
+      });
+
+      // Push each national ID as a separate row under the folder and reset numbering
+      let subIndex = 1; // Reset subIndex to 1 for each folder
+      folder.nationalIds.forEach((id: any, index: any) => {
+        flattenedData.push({
+          isFolder: false,
+          folderIndex: folderIndex,
+          idIndex: subIndex++, // Increment subIndex for each ID, reset to 1 at the start of each folder
+          id: id,
+          subFolderData: folder.subFolderData[id],
+        });
+      });
+    });
+
+    return flattenedData;
+  }
+
+  aa(item: any) {
+    console.log(item);
+  }
   // Flatten the folder structure to handle root and subfolders
   flattenFolderStructure(data: any): any[] {
     const folderArray = [];
+    this.studentsNumber = 0;
     for (const folder in data) {
       const subFolderData = data[folder];
       const nationalIds = Object.keys(subFolderData);
@@ -95,7 +131,9 @@ export class SuperAdminManageComponent implements OnInit {
         subFolderData, // Contains the objects inside
         nationalIds, // National IDs of the objects in the folder
       });
+      this.studentsNumber += nationalIds.length;
     }
+
     return folderArray;
   }
 
