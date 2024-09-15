@@ -12,6 +12,7 @@ import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from './shared/shared.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [AppComponent],
@@ -23,6 +24,7 @@ import { SharedModule } from './shared/shared.module';
     ReactiveFormsModule,
     AppRoutingModule,
     HttpClientModule,
+    NgbModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireStorageModule,
     AngularFireDatabaseModule,

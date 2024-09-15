@@ -7,7 +7,11 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { SuperAdminManageComponent } from './super-admin-manage/super-admin-manage.component';
-import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbActiveModal,
+  NgbModule,
+  NgbNavModule,
+} from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [GetAllStudentsDataComponent, SuperAdminManageComponent],
@@ -19,6 +23,7 @@ import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
     HttpClientModule,
     SharedModule,
     NgxPaginationModule,
+    NgbNavModule,
   ],
   providers: [],
 })

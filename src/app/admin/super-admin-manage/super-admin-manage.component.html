@@ -1,82 +1,189 @@
-<h1 class="h3 mb-3 font-weight-normal text-center text-info">المجلدات الموجوده بقاعدة البيانات</h1>
-
-<div *ngIf="folders.length > 0 else NoData">
-  <!-- Search input -->
-  <div class="form-group my-3 mt-5">
-    <input type="text" class="form-control" placeholder="ابحث عن مجلد" [(ngModel)]="searchTerm" />
-  </div>
-
-  <table class="table table-bordered table-striped text-center align-content-center" dir="rtl">
-    <thead class="thead-dark">
-      <tr>
-        <th>م</th>
-        <th>اسم المجلد</th>
-        <th>المسار الكامل</th>
-        <th>الإجراءات</th>
-      </tr>
-    </thead>
-    <tbody>
-      <ng-container
-        *ngFor="let group of filteredFolders() | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; let groupIndex = index">
-        <!-- Render Parent Folder -->
-        <tr class="bg-danger text-white">
-          <td>{{ getIndex(groupIndex)}}</td>
-          <td>{{ group.parentFolder }} <span class="text-warning">مجلد رئيسي</span></td>
-          <td>{{ group.parentFolder }}</td>
-          <td>
-            <button (click)="downloadFileNames(group.parentFolder, group.parentFolder)"
-              class="btn btn-outline-success btn-sm"><img src="assets/svgs/document.svg" alt="downloadFileNames"
-                width="40"></button>
-
-            <button (click)="deleteFolder(group.parentFolder)" class="btn btn-outline-warning btn-sm mr-3"><img
-                src="assets/svgs/trash.svg" alt="delete" width="40"></button>
-
-          </td>
-        </tr>
-
-        <!-- Render Subfolders -->
-        <ng-container *ngFor="let subFolder of group.subFolders; let subIndex = index">
-          <!-- Skip rendering the root folder in the subfolder list -->
-          <tr *ngIf="subFolder !== group.parentFolder" class="bg-light">
-            <td>{{ getIndex(groupIndex) }}.{{ subIndex + 1 }}</td>
-            <td [style.padding-right.px]="20">{{ getFolderName(subFolder) }}</td>
-            <td>{{ subFolder }}</td>
-            <td>
-
-              <button (click)="downloadFileNames(subFolder, subFolder)" class="btn btn-outline-success btn-sm"><img
-                  src="assets/svgs/document.svg" alt="downloadFileNames" width="40"></button>
-
-              <button (click)="exportAllPhotos(subFolder, subFolder)" class="btn btn-outline-success btn-sm mr-3"><img
-                  src="assets/svgs/gallery.svg" alt="exportAllPhotos" width="40"></button>
-
-              <button (click)="deleteFolder(subFolder)" class="btn btn-outline-info btn-sm mr-3"><img
-                  src="assets/svgs/trash.svg" alt="delete" width="40"></button>
-
-            </td>
-          </tr>
-        </ng-container>
-
-        <!-- Separator Between Folder Groups -->
-        <tr>
-          <td colspan="4">
-            <hr />
-          </td>
-        </tr>
-      </ng-container>
-    </tbody>
-  </table>
+<ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs my-4 subNav" dir="rtl" (navChange)="onTabChange($event)">
+  <li [ngbNavItem]="1">
+    <a ngbNavLink>المجلدات الموجوده بالسيرفر</a>
+    <ng-template ngbNavContent>
 
 
-  <pagination-controls dir="rtl" (pageChange)="currentPage = $event"
-    class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
-  </pagination-controls>
+      <div *ngIf="folders.length > 0 else NoDataStorage">
 
-</div>
+        <h1 class="h3 my-3 font-weight-normal text-center text-info">المجلدات الموجوده بالسيرفر</h1>
 
-<!-- Display message if no files found -->
-<ng-template #NoData>
-  <p class="h3 text-center text-danger">
-    {{searchTerm ? 'عفوًا لا توجد بيانات للطلاب الذي تم البحث عنهم'
-    :folders ? 'لا توجد مجلدات موجوده بقاعدة البيانات'
-    : ""}}</p>
-</ng-template>
+        <!-- Search input -->
+        <div class="form-group my-3 mt-5">
+          <input type="text" class="form-control" placeholder="ابحث عن مجلد" [(ngModel)]="searchTerm"
+            (keyup)="currentPage = 1;" />
+        </div>
+
+        <table class="table table-bordered table-striped text-center align-content-center" dir="rtl"
+          *ngIf="filteredFolders().length > 0">
+          <thead class="thead-dark">
+            <tr>
+              <th>م</th>
+              <th>اسم المجلد</th>
+              <th>المسار الكامل</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container
+              *ngFor="let group of filteredFolders() | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; let groupIndex = index">
+              <!-- Render Parent Folder -->
+              <tr class="bg-danger text-white">
+                <td>{{ getIndex(groupIndex)}}</td>
+                <td>{{ group.parentFolder }} <span class="text-warning">(مجلد رئيسي)</span></td>
+                <td>{{ group.parentFolder }}</td>
+                <td>
+                  <button (click)="downloadFileNames(group.parentFolder, group.parentFolder)"
+                    class="btn btn-outline-success btn-sm"><img src="assets/svgs/document.svg" alt="downloadFileNames"
+                      width="40"></button>
+
+                  <button (click)="deleteFolder(group.parentFolder)" class="btn btn-outline-warning btn-sm mr-3"><img
+                      src="assets/svgs/trash.svg" alt="delete" width="40"></button>
+
+                </td>
+              </tr>
+
+              <!-- Render Subfolders -->
+              <ng-container *ngFor="let subFolder of group.subFolders; let subIndex = index">
+                <!-- Skip rendering the root folder in the subfolder list -->
+                <tr *ngIf="subFolder !== group.parentFolder" class="bg-light">
+                  <td>{{ getIndex(groupIndex) }}.{{ subIndex + 1 }}</td>
+                  <td [style.padding-right.px]="20">{{ getFolderName(subFolder) }}</td>
+                  <td>{{ subFolder | json }}</td>
+                  <td>
+
+                    <button (click)="downloadFileNames(subFolder, subFolder)"
+                      class="btn btn-outline-success btn-sm"><img src="assets/svgs/document.svg" alt="downloadFileNames"
+                        width="40"></button>
+
+                    <button (click)="exportAllPhotos(subFolder, subFolder)"
+                      class="btn btn-outline-success btn-sm mr-3"><img src="assets/svgs/gallery.svg"
+                        alt="exportAllPhotos" width="40"></button>
+
+                    <button (click)="deleteFolder(subFolder)" class="btn btn-outline-info btn-sm mr-3"><img
+                        src="assets/svgs/trash.svg" alt="delete" width="40"></button>
+
+                  </td>
+                </tr>
+              </ng-container>
+
+              <!-- Separator Between Folder Groups -->
+              <tr>
+                <td colspan="4">
+                  <hr />
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+
+
+        <pagination-controls dir="rtl" (pageChange)="currentPage = $event"
+          class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
+        </pagination-controls>
+
+      </div>
+
+      <!-- Display message if no files found -->
+      <ng-template #NoDataStorage>
+        <p class="h3 my-3 text-center text-danger">
+          {{searchTerm ? 'عفوًا لا توجد بيانات للطلاب الذي تم البحث عنهم'
+          :folders ? 'لا توجد مجلدات بالسيرفر'
+          : ""}}</p>
+      </ng-template>
+
+    </ng-template>
+  </li>
+
+  <li [ngbNavItem]="2">
+    <a ngbNavLink>المجلدات الموجوده بقاعدة البيانات</a>
+    <ng-template ngbNavContent>
+      <div *ngIf="foldersRealDatabase.length > 0 else NoData">
+
+        <h1 class="h3 my-3 font-weight-normal text-center text-info">المجلدات الموجوده بقاعدة البيانات</h1>
+
+        <!-- Search input -->
+        <div class="form-group my-3 mt-5">
+          <input (keyup)="currentPage = 1" type="text" class="form-control" placeholder="ابحث عن مجلد أو رقم قومي"
+            [(ngModel)]="searchTerm" />
+        </div>
+
+        <table class="table table-bordered table-striped text-center align-content-center" dir="rtl"
+          *ngIf="filteredFoldersRealtimeDatabase().length > 0 else NoData">
+          <thead class="thead-dark">
+            <tr>
+              <th>م</th>
+              <th>اسم المجلد</th>
+              <th>قائمة الأرقام القومية</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container
+              *ngFor="let folder of filteredFoldersRealtimeDatabase() | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; let i = index">
+              <!-- Render Parent Folder (e.g., June, September) -->
+              <tr class="bg-danger text-white">
+                <td>{{ getIndex(i) }}</td>
+                <td>{{ folder.folderName }} <span class="text-warning">(مجلد رئيسي)</span></td>
+                <td>
+                  <ul>
+                    <li *ngFor="let id of folder.nationalIds">{{ id }}</li>
+                  </ul>
+                </td>
+                <td>
+                  <!-- Delete Subfolder -->
+                  <button (click)="deleteFolder('Class2024Intership/' + folder.folderName + '/', 'realtimeDatabase')"
+                    class="btn btn-outline-warning btn-sm">
+                    <img src="assets/svgs/trash.svg" alt="delete" width="40">
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Render National IDs in each subfolder -->
+              <ng-container *ngFor="let id of folder.nationalIds; let subIndex = index">
+                <tr class="bg-light">
+                  <td> {{getIndex(i)}}.{{ subIndex+1 }}</td>
+                  <!-- Empty space for alignment -->
+                  <td>{{ id }}</td>
+                  <td style="width: 370px;" dir="ltr">
+                    {{folder.subFolderData[id] | json }}
+                  </td>
+                  <td>
+                    <!-- Delete Individual Object -->
+                    <button (click)="goEdit(folder.subFolderData[id].ClassMonth , id)"
+                      class="btn btn-outline-warning btn-sm">
+                      <img src="assets/svgs/edit.svg" alt="delete" width="40">
+                    </button>
+
+                    <button
+                      (click)="deleteFolder('Class2024Intership/' + folder.folderName + '/' + id, 'realtimeDatabase')"
+                      class="btn btn-outline-info btn-sm mr-3">
+                      <img src="assets/svgs/trash.svg" alt="delete" width="40">
+                    </button>
+                  </td>
+                </tr>
+              </ng-container>
+
+              <!-- Separator Between Folder Groups -->
+              <tr>
+                <td colspan="4">
+                  <hr />
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+
+        <pagination-controls dir="rtl" (pageChange)="currentPage = $event"
+          class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
+        </pagination-controls>
+      </div>
+
+      <ng-template #NoData>
+        <p class="h3 my-3 text-center text-danger">لا توجد بيانات بقاعدة البيانات</p>
+      </ng-template>
+
+    </ng-template>
+  </li>
+</ul>
+<div [ngbNavOutlet]="nav"></div>

@@ -29,7 +29,7 @@ export class FireBaseAdminService {
   ) {}
 
   getAllData(path = '/'): Observable<any> {
-    return this.firebaseDb.list(path).valueChanges();
+    return this.firebaseDb.object(path).valueChanges();
   }
 
   async downloadFolderAsZip(path: any, zipNameWillBe: any) {
@@ -185,7 +185,7 @@ export class FireBaseAdminService {
   }
 
   // Helper method to remove the 'Image' property from Firebase Realtime Database
-  private removeImagePropertyFromDatabase(
+  public removeImagePropertyFromDatabase(
     dbPath: string,
     deleteState: string
   ): Promise<void> {

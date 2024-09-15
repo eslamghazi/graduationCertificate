@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -12,21 +13,107 @@ import { SwalService } from 'src/app/shared/swal.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class SuperAdminManageComponent implements OnInit {
-  folders: string[] = [];
+  active = 1;
+
+  foldersRealDatabase: any[] = [];
+
+  folders: any[] = [];
   groupedFolders: any[] = [];
+
   searchTerm: string = '';
-  itemsPerPage: number = 1; // Change this based on your preference
+  itemsPerPage: number = this.active == 1 ? 1 : 5;
   currentPage: number = 1;
 
   constructor(
     private fireBaseAdminService: FireBaseAdminService,
     private spinner: NgxSpinnerService,
     private swal: SwalService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private route: Router
   ) {}
 
   ngOnInit() {
     this.loadFolders();
+  }
+  onTabChange(event: any) {
+    if (event.nextId == 1) {
+      this.active = 1;
+      this.loadFolders();
+      this.currentPage = 1;
+    } else {
+      this.active = 2;
+      this.getFoldersFromRealtimeDatabase();
+      this.currentPage = 1;
+    }
+  }
+  getFoldersFromRealtimeDatabase() {
+    this.spinner.show();
+
+    this.fireBaseAdminService
+      .getAllData('/Class2024Intership')
+      .subscribe((result) => {
+        this.foldersRealDatabase = this.flattenFolderStructure(result);
+        console.log(result);
+        console.log(this.foldersRealDatabase);
+        this.spinner.hide();
+      });
+  }
+
+  goEdit(ClassMonth: any, id: any) {
+    const classMonth =
+      ClassMonth == 'June' ? '1' : ClassMonth == 'September' ? '2' : null;
+
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    // Passing data to the modal
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message =
+      'هل انت متأكد من الذهاب لقائمة تعديل الطالب';
+
+    // Handle modal result
+    modalRef.result.then((result) => {
+      if (result) {
+        this.route.navigateByUrl(
+          `/student/editStudentData/${classMonth}/${id}`
+        );
+      }
+    });
+  }
+
+  // Flatten the folder structure to handle root and subfolders
+  flattenFolderStructure(data: any): any[] {
+    const folderArray = [];
+    for (const folder in data) {
+      const subFolderData = data[folder];
+      const nationalIds = Object.keys(subFolderData);
+      folderArray.push({
+        folderName: folder, // E.g., 'June', 'September'
+        subFolderData, // Contains the objects inside
+        nationalIds, // National IDs of the objects in the folder
+      });
+    }
+    return folderArray;
+  }
+
+  // Search logic (optional)
+  filteredFoldersRealtimeDatabase() {
+    return this.foldersRealDatabase.filter(
+      (folder) =>
+        folder.folderName
+          .toString()
+          .toLowerCase()
+          .includes(this.searchTerm.toString().toLowerCase()) ||
+        folder.nationalIds.some((id: any) =>
+          id.includes(this.searchTerm.toString().toLowerCase())
+        )
+    );
+  }
+  getIndex(index: number) {
+    return index + 1 + (this.currentPage - 1) * this.itemsPerPage;
   }
 
   async loadFolders() {
@@ -81,11 +168,7 @@ export class SuperAdminManageComponent implements OnInit {
     return filtered;
   }
 
-  getIndex(i: number): number {
-    return (this.currentPage - 1) * this.itemsPerPage + i + 1;
-  }
-
-  deleteFolder(path: any) {
+  deleteFolder(path: any, comingFrom?: any) {
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
@@ -94,14 +177,31 @@ export class SuperAdminManageComponent implements OnInit {
 
     // Passing data to the modal
     modalRef.componentInstance.deleteSvg = true;
-    modalRef.componentInstance.message = 'هل انت متأكد من حذف المجلد ؟';
+    modalRef.componentInstance.message =
+      comingFrom == 'realtimeDatabase'
+        ? 'هل انت متأكد من حذف البيانات ؟'
+        : 'هل انت متأكد من حذف المجلد ؟';
 
     // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
         const folderPath = path; // Replace with your folder path
-
+        if (comingFrom == 'realtimeDatabase') {
+          this.fireBaseAdminService
+            .removeImagePropertyFromDatabase(path, 'deleteAll')
+            .then(() => {
+              this.spinner.hide();
+              this.swal.toastr('success', 'تم حذف البيانات بنجاح');
+              this.getFoldersFromRealtimeDatabase();
+            })
+            .catch((error) => {
+              this.spinner.hide();
+              this.swal.toastr('error', 'عفوًا حدث خطأ أثناء حذف البيانات');
+              this.getFoldersFromRealtimeDatabase();
+            });
+          return;
+        }
         this.fireBaseAdminService.deleteFolder(folderPath).subscribe({
           next: () => {
             this.spinner.hide();

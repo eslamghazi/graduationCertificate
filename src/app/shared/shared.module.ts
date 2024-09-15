@@ -13,7 +13,7 @@ import {
 } from './access-path.guard';
 import { SharedModalComponent } from './shared-modal/shared-modal.component';
 import { FormsModule } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [NavBarComponent, FooterComponent, SharedModalComponent],
@@ -28,6 +28,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
     AccessGetAllStudentsData,
     AccessEditStudentData,
     NgbActiveModal,
+    NgbNavModule,
   ],
   exports: [NavBarComponent, FooterComponent, SharedModalComponent],
 })
