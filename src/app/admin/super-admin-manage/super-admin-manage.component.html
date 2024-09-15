@@ -4,7 +4,7 @@
     <ng-template ngbNavContent>
 
 
-      <div *ngIf="folders.length > 0 else NoDataStorage">
+      <div *ngIf="folders.length > 0 else NoDataStorage" style="overflow: auto;">
 
         <h1 class="h3 my-3 font-weight-normal text-center text-info">المجلدات الموجوده بالسيرفر</h1>
 
@@ -98,7 +98,7 @@
   <li [ngbNavItem]="2">
     <a ngbNavLink>المجلدات الموجوده بقاعدة البيانات</a>
     <ng-template ngbNavContent>
-      <div *ngIf="foldersRealDatabase.length > 0 else NoData">
+      <div *ngIf="foldersRealDatabase.length > 0 else NoData" style="overflow: auto;">
 
         <h1 class="h3 my-3 font-weight-normal text-center text-info">المجلدات الموجوده بقاعدة البيانات <span
             class="text-danger">وعددهم
@@ -144,7 +144,7 @@
               <!-- National ID row -->
               <tr *ngIf="!item.isFolder" class="bg-light">
                 <td> {{ item.folderIndex + 1 }}.{{ item.idIndex }}</td>
-                <td>{{ item.id }}</td>
+                <td>{{ item.id }} ({{item.subFolderData.ClassMonth}})</td>
                 <td style="width: 370px;" dir="ltr">{{ item.subFolderData | json }}</td>
                 <td>
                   <button (click)="goEdit(item.subFolderData.ClassMonth, item.id)"

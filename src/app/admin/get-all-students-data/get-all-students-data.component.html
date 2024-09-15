@@ -38,7 +38,8 @@
       (input)="search()" />
   </div>
 
-  <div class="container text-center mt-4" *ngIf="filteredData && filteredData.length > 0 else NoData">
+  <div class="container text-center mt-4" *ngIf="filteredData && filteredData.length > 0 else NoData"
+    style="overflow: auto;">
     <h3 *ngIf="selectUserType.value == 1">الطلاب الذين قاموا بوضع صورهم <span class="text-danger">وعددهم:
         {{filteredData.length}}</span></h3>
     <h3 *ngIf="selectUserType.value == 2">الطلاب الذين لم يقوموا بوضع صورهم <span class="text-danger">وعددهم:

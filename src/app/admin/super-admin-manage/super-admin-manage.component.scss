@@ -79,9 +79,38 @@ table {
   }
 }
 
+
+
+@media only screen and (max-width: 767px) {
+  /* Your mobile-specific styles here */
+  .subNav {
+   display: contents;
+   text-align: center;
+   .nav-item{
+     margin-bottom: 10px;
+   }
+  }
+
+  td :first-child{
+    margin-left: -5px ;
+  }
+
+  button{
+    margin: 5px 5px;
+  }
+
+  thead{
+    overflow-wrap: normal;
+  }
+}
+
+
+
 .subNav{
   place-content: center;
   border: none;
+
+
 
 li{
 border: solid 1px #6c757d;

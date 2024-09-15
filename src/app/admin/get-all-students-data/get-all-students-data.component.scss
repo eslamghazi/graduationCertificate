@@ -61,3 +61,21 @@
 .custom-pagination .ngx-pagination li.active a:hover {
   background-color: #0056b3 !important;
 }
+
+@media only screen and (max-width: 767px) {
+  /* Your mobile-specific styles here */
+
+
+
+  td :first-child{
+    margin-left: -5px ;
+  }
+
+  button{
+    margin: 5px 5px;
+  }
+
+  thead{
+    overflow-wrap: normal;
+  }
+}

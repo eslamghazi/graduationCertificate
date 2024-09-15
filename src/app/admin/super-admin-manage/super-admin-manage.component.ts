@@ -116,9 +116,6 @@ export class SuperAdminManageComponent implements OnInit {
     return flattenedData;
   }
 
-  aa(item: any) {
-    console.log(item);
-  }
   // Flatten the folder structure to handle root and subfolders
   flattenFolderStructure(data: any): any[] {
     const folderArray = [];
