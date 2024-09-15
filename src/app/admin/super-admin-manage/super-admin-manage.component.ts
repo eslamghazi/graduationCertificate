@@ -53,7 +53,7 @@ export class SuperAdminManageComponent implements OnInit {
     this.spinner.show();
 
     this.fireBaseAdminService
-      .getAllData('/Class2024Intership')
+      .getAllData('/Class2024Intership', 'object')
       .subscribe((result) => {
         this.foldersRealDatabase = this.flattenFolderStructure(result);
         console.log(result);

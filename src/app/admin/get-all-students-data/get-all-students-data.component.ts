@@ -55,6 +55,8 @@ export class GetAllStudentsDataComponent implements OnInit {
 
     this.fireBaseAdminService.getAllData(path).subscribe((result) => {
       this.data = result;
+      console.log(this.data);
+
       this.filteredData = result;
       this.spinner.hide();
     });
@@ -74,7 +76,7 @@ export class GetAllStudentsDataComponent implements OnInit {
   // Function to filter data based on the presence of the Image property
   filterDataWithImages() {
     this.spinner.show();
-    this.filteredData = this.data.filter((item) => item.Image); // Only include items with the Image property
+    this.filteredData = this.data?.filter((item) => item.Image); // Only include items with the Image property
     this.actualData = this.filteredData; // Only include items with the Image property
     this.currentPage = 1;
     this.spinner.hide();

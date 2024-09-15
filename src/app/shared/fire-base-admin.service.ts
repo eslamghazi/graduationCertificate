@@ -28,8 +28,10 @@ export class FireBaseAdminService {
     private http: HttpClient
   ) {}
 
-  getAllData(path = '/'): Observable<any> {
-    return this.firebaseDb.object(path).valueChanges();
+  getAllData(path = '/', need = 'list'): Observable<any> {
+    return need == 'list'
+      ? this.firebaseDb.list(path).valueChanges()
+      : this.firebaseDb.object(path).valueChanges();
   }
 
   async downloadFolderAsZip(path: any, zipNameWillBe: any) {
