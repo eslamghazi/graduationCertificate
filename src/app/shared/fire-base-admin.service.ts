@@ -201,6 +201,10 @@ export class FireBaseAdminService {
 
   // Function to check if an image URL is valid
   checkImageUrl(url: string) {
+    const regex = /^(http:\/\/|https:\/\/)/;
+    if (!regex.test(url)) {
+      return of(false);
+    }
     // Try to fetch the image. If status is 404 or error, image is broken
     return this.http.head(url, { observe: 'response' }).pipe(
       map((response) => response.status === 200),

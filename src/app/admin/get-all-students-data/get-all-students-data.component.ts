@@ -190,6 +190,8 @@ export class GetAllStudentsDataComponent implements OnInit {
     // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
+        console.log(item.Image);
+
         window.open(item.Image, '_blank');
       }
     });
