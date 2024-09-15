@@ -8,3 +8,10 @@ input::placeholder {
 
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
+
+ngb-modal-backdrop {
+  z-index: 999 !important;
+}
+ngb-modal-window {
+  z-index: 999 !important;
+}

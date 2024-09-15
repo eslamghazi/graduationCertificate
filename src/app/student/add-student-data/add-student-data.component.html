@@ -1,0 +1,65 @@
+<form class="form-signin text-center" [formGroup]="userForm" (submit)="onSubmit(userForm.value)">
+
+  <label for="image" class="h3 mb-4 text-info">اضافة طالب جديد غير موجود بقاعدة البيانات</label>
+
+  <div class="input-group mb-2 justify-content-center text-center">
+    <img class="rounded-lg" role="button" src={{defaultImage}} width="200" height="200" id="image"
+      (click)="imageUploader.click()">
+  </div>
+  <label *ngIf="!selectedImage" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️</label>
+
+  <div class="mb-3 text-right" hidden>
+    <label for="image">ارفع الصورة</label>
+    <div class="input-group">
+      <input class="form-control" type="file" id="image" #imageUploader (change)="onFileChange($event)"
+        accept="image/png, image/jpg, image/jpeg">
+    </div>
+  </div>
+
+  <div class="mb-3 text-right">
+    <label for="username">الإسم</label>
+    <div class="input-group">
+      <input type="text" class="form-control" id="Name" formControlName="Name" placeholder="الإسم">
+    </div>
+  </div>
+
+  <div class="mb-3 text-right">
+    <label for="PlaceOfBirth">محل الميلاد</label>
+    <div class="input-group">
+      <input type="text" class="form-control" id="PlaceOfBirth" formControlName="PlaceOfBirth"
+        placeholder="محل الميلاد">
+    </div>
+  </div>
+
+  <div class="text-right"
+    [ngClass]="NationalId.touched && NationalId.dirty && (NationalId.errors?.['required'] || NationalId.errors?.['pattern']) ? 'mb-5' : 'mb-3'">
+
+    <label for="id">الرقم القومي</label>
+    <div class="input-group">
+      <input (keyup)="typingId($event.target)" type="number" class="form-control" id="NationalId"
+        formControlName="NationalId" placeholder="الرقم القومي">
+    </div>
+    <ng-container *ngIf="NationalId.touched && NationalId.dirty" class="my-4">
+      <p class="h6 text-danger float-right" *ngIf="NationalId.errors?.['required']">يجب ملئ هذا الحقل</p>
+      <p class="h6 text-danger float-right" *ngIf="NationalId.errors?.['pattern']">الرجاء كتابة
+        الرقم القومي بشكل صحيح</p>
+    </ng-container>
+  </div>
+
+  <div class="mb-3 text-right">
+    <label for="DateOfBirth">تاريخ الميلاد</label>
+    <div class="input-group">
+      <input class="form-control" placeholder="yyyy-mm-dd" [value]="DateOfBirth.value"
+        (dateSelect)="onChangeDate($event)" ngbDatepicker #d="ngbDatepicker"
+        [minDate]="{ year: 1900, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 31 }" />
+
+      <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button"><img src="assets/svgs/calendar3.svg"
+          alt="calender" /></button>
+
+    </div>
+  </div>
+
+  <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+    [disabled]="!userForm.valid || !selectedImage || !selectedDate">ارسال</button>
+  <button class="btn btn-lg btn-danger btn-block mt-4" (click)="goBack()" type="button">العوده</button>
+</form>

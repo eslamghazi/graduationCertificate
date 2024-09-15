@@ -1,0 +1,80 @@
+/* Custom Pagination Styles */
+.custom-pagination .ngx-pagination {
+  display: flex !important;
+  justify-content: center !important;
+  list-style-type: none !important;
+  padding: 0 !important;
+}
+
+.custom-pagination .ngx-pagination li {
+  margin: 0 5px !important;
+}
+
+.custom-pagination .ngx-pagination li a {
+  display: inline-block !important;
+  padding: 8px 12px !important;
+  border: 1px solid #007bff !important;
+  border-radius: 4px !important;
+  color: #007bff !important;
+  text-decoration: none !important;
+  transition: background-color 0.3s, color 0.3s !important;
+}
+
+.custom-pagination .ngx-pagination li.pagination-previous.disabled {
+  display: inline-block !important;
+  padding: 8px 12px !important;
+  border: 1px solid #cacad4 !important;
+  border-radius: 4px !important;
+  text-decoration: none !important;
+}
+
+.custom-pagination .ngx-pagination li.pagination-next.disabled {
+  display: inline-block !important;
+  padding: 8px 12px !important;
+  border: 1px solid #cacad4 !important;
+  border-radius: 4px !important;
+  text-decoration: none !important;
+}
+
+.custom-pagination .ngx-pagination li.current {
+  padding: 8px 12px !important;
+  border-radius: 4px !important;
+  align-content: center !important;
+}
+
+.custom-pagination .ngx-pagination li a:hover {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.custom-pagination .ngx-pagination li.active a {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.custom-pagination .ngx-pagination li.disabled a {
+  color: #ccc !important;
+  border-color: #ccc !important;
+  pointer-events: none !important;
+}
+
+.custom-pagination .ngx-pagination li.active a:hover {
+  background-color: #0056b3 !important;
+}
+
+
+table {
+  .bg-primary {
+    background-color: #007bff !important;
+    color: white;
+  }
+
+  .bg-light {
+    background-color: #f8f9fa !important;
+  }
+
+  hr {
+    border-top: 1px solid #ccc;
+    margin: 10px 0;
+  }
+}

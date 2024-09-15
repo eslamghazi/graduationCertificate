@@ -1,24 +1,28 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { GetUserDataComponent } from './user/get-user-data/get-user-data.component';
 
 const routes: Routes = [
-  {path:'', redirectTo:"/getUserData", pathMatch:'full'},
-
-  {path:'getUserData',
-  loadChildren: () => import(`./user/user.module`).then(m => m.UserModule)
+  { path: '', redirectTo: '/student/getStudentData', pathMatch: 'full' },
+  {
+    path: '',
+    loadChildren: () =>
+      import(`./student/student.module`).then((m) => m.StudentModule),
   },
 
-  {path:'getAllStudentsData',
-  loadChildren: () => import(`./admin/admin.module`).then(m => m.AdminModule)
+  {
+    path: '',
+    loadChildren: () =>
+      import(`./admin/admin.module`).then((m) => m.AdminModule),
   },
 
-  { path: '**', pathMatch: 'full',
-  component: GetUserDataComponent },
+  {
+    path: '**',
+    redirectTo: '/student/getStudentData',
+  },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: false })],
-  exports: [RouterModule]
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

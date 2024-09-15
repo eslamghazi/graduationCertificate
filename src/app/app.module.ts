@@ -12,7 +12,6 @@ import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from './shared/shared.module';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [AppComponent],
@@ -29,7 +28,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     AngularFireDatabaseModule,
     NgxSpinnerModule.forRoot({ type: 'ball-square-clockwise-spin' }),
     SharedModule,
-    NgbModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

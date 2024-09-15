@@ -1,8 +1,12 @@
 <form class="form-signin text-center" [formGroup]="userForm" (submit)="onSubmit(userForm.value)">
+
+  <label for="image" class="h3 mb-4 text-info">تعديل بيانات الطالب ({{data?.NationalId}})</label>
+
   <div class="input-group mb-2 justify-content-center text-center">
-    <img class="rounded-lg" src={{defaultImage}} width="200" height="200" id="image" (click)="imageUploader.click()">
+    <img class="rounded-lg" role="button" src={{defaultImage}} width="200" height="200" id="image"
+      (click)="imageUploader.click()">
   </div>
-  <label for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️</label>
+  <label *ngIf="!data?.Image" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️</label>
 
   <div class="mb-3 text-right" hidden>
     <label for="image">ارفع الصورة</label>
@@ -39,7 +43,8 @@
     <label for="DateOfBirth">تاريخ الميلاد</label>
     <div class="input-group">
       <input class="form-control" readonly placeholder="yyyy-mm-dd" [value]="DateOfBirth.value"
-        (dateSelect)="onChangeDate($event)" ngbDatepicker #d="ngbDatepicker" />
+        (dateSelect)="onChangeDate($event)" ngbDatepicker #d="ngbDatepicker"
+        [minDate]="{ year: 1900, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 31 }" />
 
       <button class="btn btn-outline-secondary" disabled (click)="d.toggle()" type="button"><img
           src="assets/svgs/calendar3.svg" alt="calender" /></button>
@@ -48,6 +53,6 @@
   </div>
 
   <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
-    [disabled]="!userForm.valid || (!userForm.dirty && !selectedDate && !selectedImage)">ارسال</button>
-  <button class="btn btn-lg btn-danger btn-block mt-4" routerLink="/">العوده</button>
+    [disabled]="!userForm.valid || (!selectedImage && !userForm.dirty && !selectedDate)">ارسال</button>
+  <button class="btn btn-lg btn-danger btn-block mt-4" (click)="goBack()" type="button">العوده</button>
 </form>

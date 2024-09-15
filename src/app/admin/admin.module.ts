@@ -6,9 +6,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AdminRoutingModule } from './admin-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { SuperAdminManageComponent } from './super-admin-manage/super-admin-manage.component';
+import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
-  declarations: [GetAllStudentsDataComponent],
+  declarations: [GetAllStudentsDataComponent, SuperAdminManageComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -18,5 +20,6 @@ import { NgxPaginationModule } from 'ngx-pagination';
     SharedModule,
     NgxPaginationModule,
   ],
+  providers: [],
 })
 export class AdminModule {}

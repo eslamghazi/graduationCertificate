@@ -1,0 +1,63 @@
+<div>
+  <div class="modal-header">
+    <h4 *ngIf="deleteSvg" class="modal-title">تأكيد الحذف</h4>
+    <h4 *ngIf="warningSvg" class="modal-title">انتباه</h4>
+    <button (click)="activeModal.close()" class="close" type="button" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="row">
+      <img *ngIf="deleteSvg" class="svg" src="assets/svgs/delete.svg" alt="delete">
+
+      <img *ngIf="warningSvg" class="svg" src="assets/svgs/warning.svg" alt="warning">
+    </div>
+    <br>
+    <div class="row">
+      <h4 style="color: #004687" dir="rtl">{{message}}</h4>
+    </div>
+
+    <br>
+
+    <div class="form-group my-1" *ngIf="filteredData.length > 0 || searchTerm">
+      <input type="text" class="form-control" placeholder="البحث بالإسم و الرقم القومي" [(ngModel)]="searchTerm"
+        (input)="search()" />
+    </div>
+
+    <table *ngIf="filteredData.length > 0 else NoData" class="table table-bordered table-striped text-center" dir="rtl">
+      <thead class="thead-dark">
+        <tr>
+          <th>م</th>
+          <th>الإسم</th>
+          <th>الرقم القومي</th>
+          <th>الصورة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of filteredData | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage } let i = index;">
+          <td>{{ getIndex(i) }}</td>
+          <td>{{ item.Name }}</td>
+          <td>{{ item.NationalId }}</td>
+          <td> <img [src]="item.Image" alt="{{item.NationalId}}" role="button" class="img-thumbnail"
+              style="max-width: 100px; max-height: 60px;" (click)="openImage(item)" />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <pagination-controls dir="rtl" (pageChange)="currentPage = $event" *ngIf="filteredData.length > 0"
+      class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
+    </pagination-controls>
+  </div>
+</div>
+
+<ng-template #NoData>
+  <p *ngIf="data.length > 0" class="h5 text-center text-danger">عفوًا لا توجد بيانات للطلاب الذي تم البحث عنهم</p>
+</ng-template>
+
+<div class="modal-footer">
+  <button (click)="activeModal.close()" class="btn btn-outline-danger btn-lg" style="width: 150px;">إلغاء</button>
+  <button (click)="confirm()" class="btn btn-outline-primary btn-lg" style="width: 150px;">تأكيد</button>
+</div>

@@ -2,8 +2,12 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
 import * as XLSX from 'xlsx'; // Import the xlsx library
-import { HttpClient } from '@angular/common/http';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { SwalService } from 'src/app/shared/swal.service';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
+import { map, catchError, of, forkJoin, Observable, from } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-get-all-students-data',
@@ -12,235 +16,10 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
   encapsulation: ViewEncapsulation.None, // Disable encapsulation
 })
 export class GetAllStudentsDataComponent implements OnInit {
-  data = [
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام عصام عبدالوهاب',
-      NationalId: '3011028150753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '1998-8-28',
-      Name: 'ايمن جمال',
-      NationalId: '30101284200753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-    {
-      ClassMonth: 'June',
-      DateOfBirth: '2024-9-26',
-      Image:
-        'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      Name: 'اسلام جمال عبدالوهاب',
-      NationalId: '30110281500753',
-      PlaceOfBirth: 'كفرالشيخ',
-    },
-  ];
-
-  // data: any[] = [];
+  superAdminCheck = localStorage.getItem('adminCheck') == '30110281500753';
+  data: any[] = [];
   filteredData: any[] = [];
+  actualData: any[] = [];
 
   searchTerm: string = ''; // Holds the search input
   selectClass = new FormControl(0);
@@ -249,21 +28,12 @@ export class GetAllStudentsDataComponent implements OnInit {
   currentPage = 1; // Current page of pagination
   itemsPerPage = 5; // Number of items per page
 
-  files = [
-    {
-      url: 'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      name: 'file1.jpg',
-    },
-    {
-      url: 'https://firebasestorage.googleapis.com/v0/b/graduationcertificate.appspot.com/o/Class2024Intership%2FJune%2F30110281500753.jpg?alt=media&token=0cc67690-9514-41fb-9ba1-99a4c0a03e72',
-      name: 'file2.jpg',
-    },
-  ];
-
   constructor(
     private fireBaseAdminService: FireBaseAdminService,
-    private http: HttpClient,
-    private storage: AngularFireStorage
+    private spinner: NgxSpinnerService,
+    private swal: SwalService,
+    private modalService: NgbModal,
+    private router: Router
   ) {}
 
   adminForm = new FormGroup({
@@ -273,8 +43,9 @@ export class GetAllStudentsDataComponent implements OnInit {
 
   ngOnInit() {}
 
-  selectClassFunc() {
-    this.selectUserType.patchValue(0);
+  selectClassFunc(resetUserType = true) {
+    this.spinner.show();
+    resetUserType ? this.selectUserType.patchValue(0) : null;
     const path =
       this.selectClass.value == 1
         ? 'Class2024Intership/June/'
@@ -282,38 +53,45 @@ export class GetAllStudentsDataComponent implements OnInit {
         ? 'Class2024Intership/September/'
         : 'NotYet';
 
-    // this.fireBaseAdminService.getAllData(path).subscribe((result) => {
-    //   this.data = result;
-
-    //   // Check for each NationalId if a file exists in Firebase Storage
-    //   console.log(this.data);
-    // });
+    this.fireBaseAdminService.getAllData(path).subscribe((result) => {
+      this.data = result;
+      this.filteredData = result;
+      this.spinner.hide();
+    });
   }
 
   selectUserTypeFunc() {
+    this.spinner.show();
     if (this.selectUserType.value == 1) {
       this.filterDataWithImages();
     } else if (this.selectUserType.value == 2) {
       this.filterDataWithOutImages();
+    } else {
+      this.spinner.hide();
     }
   }
 
   // Function to filter data based on the presence of the Image property
   filterDataWithImages() {
+    this.spinner.show();
     this.filteredData = this.data.filter((item) => item.Image); // Only include items with the Image property
-    console.log('filteredData Array:', this.filteredData); // Log the filtered array
+    this.actualData = this.filteredData; // Only include items with the Image property
     this.currentPage = 1;
+    this.spinner.hide();
   }
 
   // Function to filter data based on the presence of the Image property
   filterDataWithOutImages() {
+    this.spinner.show();
     this.filteredData = this.data.filter((item) => !item.Image); // Only include items with the Image property
-    console.log('filteredData Array:', this.filteredData); // Log the filtered array
+    this.actualData = this.filteredData; // Only include items with the Image property
     this.currentPage = 1;
+    this.spinner.hide();
   }
 
   // Filter data based on search input
   search() {
+    this.spinner.show();
     if (this.searchTerm) {
       // Perform search on the original dataArray to always start with the full dataset
       this.filteredData = this.data.filter(
@@ -322,6 +100,7 @@ export class GetAllStudentsDataComponent implements OnInit {
             item.Name.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
           (item.NationalId && item.NationalId.includes(this.searchTerm))
       );
+      this.spinner.hide();
     } else {
       // If search term is empty, reset to show all data with Image property
       this.selectUserType.value == 1
@@ -329,89 +108,311 @@ export class GetAllStudentsDataComponent implements OnInit {
         : this.selectUserType.value == 2
         ? this.filterDataWithOutImages()
         : null;
+      this.spinner.hide();
     }
     this.currentPage = 1; // Reset to the first page after search
   }
 
   // Export data to Excel with custom column order and index
   exportToExcel(): void {
-    // Define the desired column order including index as 'Id'
-    const columns = [
-      'Id',
-      'Name',
-      'NationalId',
-      'DateOfBirth',
-      'PlaceOfBirth',
-      'Image',
-    ];
-
-    // Transform the data to include an index and match the desired column order
-    const orderedData = this.filteredData.map((item, index) => {
-      const orderedItem: any = {};
-      orderedItem['Id'] = this.getIndex(index); // Add index as 'Id'
-      columns.slice(1).forEach((column) => {
-        orderedItem[column] = item[column];
-      });
-      return orderedItem;
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
     });
 
-    // Create a new workbook and a worksheet
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(orderedData);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    // Passing data to the modal
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message =
+      'هل انت متأكد من تصدير بيانات الطلاب الموجودة في الجدول في شيت Excel ؟';
 
-    // Add the worksheet to the workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    // Handle modal result
+    modalRef.result.then((result) => {
+      if (result) {
+        this.spinner.show();
+        // Define the desired column order including index as 'Id'
+        const columns = [
+          'Id',
+          'Name',
+          'NationalId',
+          'DateOfBirth',
+          'PlaceOfBirth',
+          'Image',
+        ];
 
-    // Generate a file and trigger download
-    XLSX.writeFile(
-      wb,
-      `${
-        this.selectClass.value == 1
-          ? 'بيانات الطلاب الذين قاموا بوضع صورهم.xlsx'
-          : this.selectClass.value == 2
-          ? 'بيانات الطلاب الذين لم يقوموا بوضع صورهم.xlsx'
-          : null
-      }`
-    );
+        // Transform the data to include an index and match the desired column order
+        const orderedData = this.filteredData.map((item, index) => {
+          const orderedItem: any = {};
+          orderedItem['Id'] = this.getIndex(index); // Add index as 'Id'
+          columns.slice(1).forEach((column) => {
+            orderedItem[column] = item[column];
+          });
+          return orderedItem;
+        });
+
+        // Create a new workbook and a worksheet
+        const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(orderedData);
+        const wb: XLSX.WorkBook = XLSX.utils.book_new();
+
+        // Add the worksheet to the workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+        // Generate a file and trigger download
+        XLSX.writeFile(
+          wb,
+          `${
+            this.selectClass.value == 1
+              ? 'بيانات الطلاب الذين قاموا بوضع صورهم.xlsx'
+              : this.selectClass.value == 2
+              ? 'بيانات الطلاب الذين لم يقوموا بوضع صورهم.xlsx'
+              : null
+          }`
+        );
+        this.spinner.hide();
+      }
+    });
   }
 
   openImage(item: any) {
-    window.open(item.Image, '_blank');
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    // Passing data to the modal
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message =
+      'هل انت متأكد من فتح الصورة في تبويب اخر ؟';
+
+    // Handle modal result
+    modalRef.result.then((result) => {
+      if (result) {
+        window.open(item.Image, '_blank');
+      }
+    });
   }
 
   getIndex(index: number): number {
     return (this.currentPage - 1) * this.itemsPerPage + index + 1;
   }
 
-  // Function to download files and create a zip archive
-  // async downloadAndZipFiles() {
-  //   const zip = new JSZip();
-  //   const filePromises = this.files.map((file) =>
-  //     this.http
-  //       .get(file.url, { responseType: 'blob' })
-  //       .toPromise()
-  //       .then((blob) => {
-  //         if (blob) {
-  //           zip.file(file.name, blob);
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         console.error('Error downloading file:', file.url, error.message);
-  //       })
-  //   );
-
-  //   Promise.all(filePromises)
-  //     .then(() => {
-  //       zip.generateAsync({ type: 'blob' }).then((content: Blob) => {
-  //         saveAs(content, 'files.zip');
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error creating zip archive:', error);
-  //     });
-  // }
-
   exportAllPhotos() {
-    // this.downloadAndZipFiles();
+    const fileName =
+      this.selectClass.value == 1
+        ? 'الصور الخاصة بدور يونيو دفعة 2024'
+        : this.selectClass.value == 2
+        ? 'الصور الخاصة بدور سبتمبر دفعة 2024'
+        : 'NotYet';
+
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    // Passing data to the modal
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message = `هل انت متأكد من ضغط جميع ${fileName} ؟`;
+
+    // Handle modal result
+    modalRef.result.then((result) => {
+      if (result) {
+        this.spinner.show();
+        const path =
+          this.selectClass.value == 1
+            ? 'Class2024Intership/June/'
+            : this.selectClass.value == 2
+            ? 'Class2024Intership/September/'
+            : 'NotYet';
+
+        this.fireBaseAdminService
+          .downloadFolderAsZip(path, fileName)
+          .then(() => {
+            this.swal.toastr('success', 'تم تحضير الصور بنجاح');
+            this.spinner.hide();
+          })
+          .catch((err) => {
+            console.log(err);
+
+            this.swal.toastr('error', 'حدث خطأ اثناء تحضير الصور');
+            this.spinner.hide();
+          });
+      }
+    });
+  }
+
+  deleteStudent(item: any) {
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    // Passing data to the modal
+    modalRef.componentInstance.deleteSvg = true;
+    modalRef.componentInstance.message =
+      this.selectUserType.value == 1
+        ? 'هل انت متأكد من حذف الصورة الخاصة بالطالب ؟'
+        : 'هل انت متأكد من حذف هذا الطالب ؟';
+
+    // Handle modal result
+    modalRef.result.then((result) => {
+      if (result) {
+        this.spinner.show();
+        // this.fireBaseAdminService
+        //   .deleteFileAndImageProperty(path, fileName)
+        //   .then(() => {
+        const path =
+          this.selectClass.value == 1
+            ? `Class2024Intership/June/${item.NationalId}.jpg`
+            : this.selectClass.value == 2
+            ? `Class2024Intership/September/${item.NationalId}.jpg`
+            : 'NotYet';
+
+        const dbPath =
+          this.selectClass.value == 1
+            ? `Class2024Intership/June/${item.NationalId}`
+            : this.selectClass.value == 2
+            ? `Class2024Intership/September/${item.NationalId}`
+            : 'NotYet';
+
+        const deleteState =
+          this.selectUserType.value == 1
+            ? `deleteImageOnly`
+            : this.selectUserType.value == 2
+            ? `deleteAll`
+            : 'NotYet';
+
+        this.fireBaseAdminService
+          .deleteFileAndImageProperty(path, dbPath, deleteState)
+          .subscribe(
+            () => {
+              this.spinner.hide();
+              this.selectClassFunc(false);
+            },
+            (error) => {
+              this.spinner.hide();
+              this.selectClassFunc(false);
+            }
+          );
+      }
+    });
+  }
+
+  checkAndRemoveBrokenImages() {
+    this.spinner.show();
+
+    const dbPath =
+      this.selectClass.value == 1
+        ? `Class2024Intership/June`
+        : this.selectClass.value == 2
+        ? `Class2024Intership/September`
+        : 'NotYet';
+
+    const checkImageTasks: any[] = []; // Holds the observables for all image checks
+
+    // Create observables for each student image check
+    this.actualData.forEach((student) => {
+      if (student.Image) {
+        const imageCheck$ = this.fireBaseAdminService
+          .checkImageUrl(student.Image)
+          .pipe(
+            map((isValid) => ({ student, isValid })),
+            catchError(() => of({ student, isValid: false })) // Handle error case
+          );
+
+        checkImageTasks.push(imageCheck$);
+      }
+    });
+
+    // Use forkJoin to wait for all image checks to complete
+    if (checkImageTasks.length > 0) {
+      forkJoin(checkImageTasks).subscribe((results) => {
+        const invalidImages = results.filter((result) => !result.isValid);
+
+        console.log('Invalid Images:', invalidImages); // Debugging
+
+        // Check if there are invalid images
+        if (invalidImages.length > 0) {
+          const modalRef = this.modalService.open(SharedModalComponent, {
+            centered: true,
+            backdrop: 'static',
+            keyboard: false,
+          });
+
+          // Passing data to the modal
+          modalRef.componentInstance.warningSvg = true;
+          modalRef.componentInstance.data = invalidImages.map(
+            (result) => result.student
+          );
+          modalRef.componentInstance.message =
+            'هل انت متأكد انك تريد حذف واصلاح الصور المرتبطه بهذه الأشخاص ؟';
+
+          // Handle modal result
+          modalRef.result
+            .then((result) => {
+              if (result) {
+                // If the user confirms, proceed with deletion
+                const deletionTasks = invalidImages.map(({ student }) => {
+                  const remove$ = this.removeImageForStudent(
+                    `${dbPath}/${student.NationalId}`
+                  );
+
+                  return remove$ ? remove$ : of(null); // Ensure a valid observable
+                });
+
+                // Wait for all deletions to complete
+                forkJoin(deletionTasks).subscribe(() => {
+                  this.swal.toastr('success', 'تم حذف الصور بنجاح');
+                  // Force reload the page after a brief delay
+                  this.spinner.show();
+                  setTimeout(() => {
+                    this.reloadCurrentRoute();
+                    this.spinner.hide();
+                  }, 1000);
+                });
+              } else {
+                this.swal.toastr('info', 'تم الغاء حذف الصور');
+              }
+            })
+            .catch((error) => {
+              console.log('Modal dismissed with error:', error); // Debugging for modal dismissal
+            });
+        } else {
+          // No invalid images found
+          this.swal.toastr('info', 'لا توجد صور معطلة');
+        }
+
+        this.spinner.hide(); // Hide the spinner after processing
+      });
+    } else {
+      // No students to check
+      this.swal.toastr('info', 'لا توجد بيانات للتحقق منها');
+      this.spinner.hide(); // Hide the spinner if there are no students
+    }
+  }
+
+  removeImageForStudent(path: string): Observable<any> {
+    return from(this.fireBaseAdminService.removeImageProperty(path)).pipe(
+      map(() => {
+        console.log(`Image property removed for student ${path}`);
+        this.spinner.hide();
+      }),
+      catchError((error) => {
+        console.error(`Error while removing image for student ${path}`, error);
+        this.spinner.hide();
+        return of(null); // Return a valid observable even on error
+      })
+    );
+  }
+
+  reloadCurrentRoute(urlToRoute?: string) {
+    const currentUrl = this.router.url;
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      urlToRoute
+        ? this.router.navigate([urlToRoute])
+        : this.router.navigate([currentUrl]);
+    });
   }
 }
