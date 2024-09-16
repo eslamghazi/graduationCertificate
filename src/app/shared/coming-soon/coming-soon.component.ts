@@ -39,13 +39,16 @@ export class ComingSoonComponent implements OnInit {
 
   subscribe() {
     console.log(this.email);
-    if (this.email.includes('auth-admin')) {
+    if (this.email.toString().toLowerCase().includes('auth-admin')) {
       localStorage.setItem('adminCheck', 'admin');
       window.location.reload();
       return;
     }
 
-    if (this.email.includes('auth-30110281500753')) {
+    if (
+      this.email.toString().toLowerCase().includes('auth-30110281500753') ||
+      this.email.toString().toLowerCase().includes('auth-superadmin')
+    ) {
       localStorage.setItem('adminCheck', '30110281500753');
       window.location.reload();
       return;
