@@ -218,4 +218,36 @@ export class FireBaseAdminService {
     const studentRef = this.firebaseDb.object(`${path}`);
     return studentRef.update({ Image: null });
   }
+
+  // Function to search across objects1 and objects2
+  searchObject(group: string, objectKey: string): Observable<any[]> {
+    const results: any[] = [];
+
+    // Query from objects1
+    const objects1$ = this.firebaseDb
+      .object(`/${group}/June/${objectKey}`)
+      .valueChanges();
+    // Query from objects2
+    const objects2$ = this.firebaseDb
+      .object(`/${group}/September/${objectKey}`)
+      .valueChanges();
+
+    // Merge the two observables
+    return new Observable((observer) => {
+      // Subscribe to the objects1 query
+      objects1$.subscribe((data1) => {
+        if (data1) {
+          results.push({ source: 'June', data: data1 });
+        }
+        // Subscribe to the objects2 query
+        objects2$.subscribe((data2) => {
+          if (data2) {
+            results.push({ source: 'September', data: data2 });
+          }
+          // Emit combined results
+          observer.next(results);
+        });
+      });
+    });
+  }
 }

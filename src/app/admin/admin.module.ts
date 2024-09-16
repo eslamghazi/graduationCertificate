@@ -12,9 +12,11 @@ import {
   NgbModule,
   NgbNavModule,
 } from '@ng-bootstrap/ng-bootstrap';
+import { SearchStudentComponent } from './search-student/search-student.component';
+import { InvalidImagesComponent } from './invalid-images/invalid-images.component';
 
 @NgModule({
-  declarations: [GetAllStudentsDataComponent, SuperAdminManageComponent],
+  declarations: [GetAllStudentsDataComponent, SuperAdminManageComponent, SearchStudentComponent, InvalidImagesComponent],
   imports: [
     CommonModule,
     FormsModule,

@@ -11,6 +11,8 @@
         <a class="dropdown-item" routerLink="/student/addStudentData/2">امتياز 2024 (دور سبتمبر)</a>
       </div>
     </div>
+    <button type="button" dir="rtl" class="btn btn-outline-success btn-lg btn-block mt-3" aria-haspopup="true"
+      aria-expanded="false" (click)="searchStudent()">البحث عن طالب بقاعدة البيانات</button>
   </div>
 
   <div class="form-group my-3">
@@ -83,8 +85,14 @@
             لم يقم الطالب بوضع صورة بعد !
           </td>
           <td>
-            <button (click)="deleteStudent(item)" class="btn btn-outline-danger btn-sm"><img src="assets/svgs/trash.svg"
-                alt="delete" width="20"></button>
+            <button (click)="goEdit(item.ClassMonth, item.NationalId)" class="btn btn-outline-warning btn-sm">
+              <img src="assets/svgs/edit.svg" alt="edit" width="40">
+            </button>
+            <button *ngIf="selectUserType.value == 1" (click)="deleteStudent(item,'deleteImage')"
+              class="btn btn-outline-danger btn-sm mr-3"><img src="assets/svgs/deletePhoto.svg" alt="delete"
+                width="40"></button>
+            <button (click)="deleteStudent(item,'deleteStudent')" class="btn btn-outline-danger btn-sm mr-3"><img
+                src="assets/svgs/trash.svg" alt="delete" width="40"></button>
           </td>
         </tr>
       </tbody>

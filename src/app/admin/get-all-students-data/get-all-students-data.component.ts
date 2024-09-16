@@ -4,10 +4,12 @@ import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
 import * as XLSX from 'xlsx'; // Import the xlsx library
 import { NgxSpinnerService } from 'ngx-spinner';
 import { SwalService } from 'src/app/shared/swal.service';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
 import { map, catchError, of, forkJoin, Observable, from } from 'rxjs';
 import { Router } from '@angular/router';
+import { SearchStudentComponent } from '../search-student/search-student.component';
+import { InvalidImagesComponent } from '../invalid-images/invalid-images.component';
 
 @Component({
   selector: 'app-get-all-students-data',
@@ -55,9 +57,8 @@ export class GetAllStudentsDataComponent implements OnInit {
 
     this.fireBaseAdminService.getAllData(path).subscribe((result) => {
       this.data = result;
-      console.log(this.data);
-
       this.filteredData = result;
+      this.actualData = result;
       this.spinner.hide();
     });
   }
@@ -250,7 +251,7 @@ export class GetAllStudentsDataComponent implements OnInit {
     });
   }
 
-  deleteStudent(item: any) {
+  deleteStudent(item: any, target?: any) {
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
@@ -292,19 +293,47 @@ export class GetAllStudentsDataComponent implements OnInit {
             ? `deleteAll`
             : 'NotYet';
 
+        if (target == 'deleteStudent') {
+          this.fireBaseAdminService
+            .removeImagePropertyFromDatabase(dbPath, 'deleteAll')
+            .then(() => {
+              this.spinner.hide();
+              this.swal.toastr('success', 'تم حذف الطالب بنجاح');
+              this.selectClassFunc(true);
+            })
+            .catch((err) => {
+              this.spinner.hide();
+              this.swal.toastr('error', 'حدث خطأ اثناء حذف الطالب');
+              this.selectClassFunc(true);
+            });
+          return;
+        }
         this.fireBaseAdminService
           .deleteFileAndImageProperty(path, dbPath, deleteState)
           .subscribe(
             () => {
               this.spinner.hide();
-              this.selectClassFunc(false);
+              this.swal.toastr('success', 'تم حذف الصورة الخاصة بالطالب بنجاح');
+              this.selectClassFunc(true);
             },
             (error) => {
               this.spinner.hide();
-              this.selectClassFunc(false);
+              this.swal.toastr(
+                'error',
+                'حدث خطأ اثناء حذف الصورة الخاصة بالطالب'
+              );
+              this.selectClassFunc(true);
             }
           );
       }
+    });
+  }
+
+  searchStudent() {
+    const modalRef = this.modalService.open(SearchStudentComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
     });
   }
 
@@ -343,19 +372,16 @@ export class GetAllStudentsDataComponent implements OnInit {
 
         // Check if there are invalid images
         if (invalidImages.length > 0) {
-          const modalRef = this.modalService.open(SharedModalComponent, {
+          const modalRef = this.modalService.open(InvalidImagesComponent, {
             centered: true,
             backdrop: 'static',
             keyboard: false,
           });
 
           // Passing data to the modal
-          modalRef.componentInstance.warningSvg = true;
           modalRef.componentInstance.data = invalidImages.map(
             (result) => result.student
           );
-          modalRef.componentInstance.message =
-            'هل انت متأكد انك تريد حذف واصلاح الصور المرتبطه بهذه الأشخاص ؟';
 
           // Handle modal result
           modalRef.result
@@ -373,15 +399,8 @@ export class GetAllStudentsDataComponent implements OnInit {
                 // Wait for all deletions to complete
                 forkJoin(deletionTasks).subscribe(() => {
                   this.swal.toastr('success', 'تم حذف الصور بنجاح');
-                  // Force reload the page after a brief delay
-                  this.spinner.show();
-                  setTimeout(() => {
-                    this.reloadCurrentRoute();
-                    this.spinner.hide();
-                  }, 1000);
+                  this.selectUserType.patchValue(0);
                 });
-              } else {
-                this.swal.toastr('info', 'تم الغاء حذف الصور');
               }
             })
             .catch((error) => {
@@ -415,12 +434,30 @@ export class GetAllStudentsDataComponent implements OnInit {
     );
   }
 
-  reloadCurrentRoute(urlToRoute?: string) {
-    const currentUrl = this.router.url;
-    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-      urlToRoute
-        ? this.router.navigate([urlToRoute])
-        : this.router.navigate([currentUrl]);
+  goEdit(ClassMonth: any, id: any) {
+    console.log(ClassMonth);
+
+    const classMonth =
+      ClassMonth == 'June' ? '1' : ClassMonth == 'September' ? '2' : null;
+
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    // Passing data to the modal
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message =
+      'هل انت متأكد من الذهاب لقائمة تعديل الطالب';
+
+    // Handle modal result
+    modalRef.result.then((result) => {
+      if (result) {
+        this.router.navigateByUrl(
+          `/student/editStudentData/${classMonth}/${id}`
+        );
+      }
     });
   }
 }
