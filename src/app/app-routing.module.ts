@@ -8,13 +8,11 @@ const routes: Routes = [
     loadChildren: () =>
       import(`./student/student.module`).then((m) => m.StudentModule),
   },
-
   {
     path: '',
     loadChildren: () =>
       import(`./admin/admin.module`).then((m) => m.AdminModule),
   },
-
   {
     path: '**',
     redirectTo: '/student/getStudentData',

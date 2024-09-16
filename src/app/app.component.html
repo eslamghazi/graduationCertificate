@@ -1,4 +1,4 @@
-<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#0066cc" type="ball-square-clockwise-spin"
+<!-- <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#0066cc" type="ball-square-clockwise-spin"
   [fullScreen]="true">
   <p style="color: white"> جارى التحميل ... </p>
 </ngx-spinner>
@@ -10,5 +10,21 @@
 <div class="container my-4">
   <router-outlet></router-outlet>
 </div>
+<app-footer></app-footer> -->
 
-<app-footer></app-footer>
+<ngx-spinner *ngIf="auth" bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#0066cc" type="ball-square-clockwise-spin"
+  [fullScreen]="true">
+  <p style="color: white"> جارى التحميل ... </p>
+</ngx-spinner>
+
+
+<app-nav-bar *ngIf="auth"></app-nav-bar>
+<p *ngIf="auth" class="h3 my-3 text-center text-danger">ارجوا الدعاء للوالدة بالشفاء العاجل</p>
+
+<div *ngIf="auth" class="container my-4">
+  <router-outlet></router-outlet>
+</div>
+<app-footer *ngIf="auth"></app-footer>
+
+
+<app-coming-soon *ngIf="!auth"></app-coming-soon>

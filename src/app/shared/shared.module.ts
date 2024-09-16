@@ -14,9 +14,15 @@ import {
 import { SharedModalComponent } from './shared-modal/shared-modal.component';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { ComingSoonComponent } from './coming-soon/coming-soon.component';
 
 @NgModule({
-  declarations: [NavBarComponent, FooterComponent, SharedModalComponent],
+  declarations: [
+    NavBarComponent,
+    FooterComponent,
+    SharedModalComponent,
+    ComingSoonComponent,
+  ],
   imports: [CommonModule, NgxPaginationModule, RouterModule, FormsModule],
   providers: [
     {
@@ -30,6 +36,11 @@ import { NgbActiveModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
     NgbActiveModal,
     NgbNavModule,
   ],
-  exports: [NavBarComponent, FooterComponent, SharedModalComponent],
+  exports: [
+    NavBarComponent,
+    FooterComponent,
+    SharedModalComponent,
+    ComingSoonComponent,
+  ],
 })
 export class SharedModule {}
