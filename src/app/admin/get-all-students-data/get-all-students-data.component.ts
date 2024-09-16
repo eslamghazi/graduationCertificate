@@ -77,6 +77,7 @@ export class GetAllStudentsDataComponent implements OnInit {
   filterDataWithImages() {
     this.spinner.show();
     this.filteredData = this.data?.filter((item) => item.Image); // Only include items with the Image property
+    // this.data = this.filteredData; // Only include items with the Image property
     this.actualData = this.filteredData; // Only include items with the Image property
     this.currentPage = 1;
     this.spinner.hide();
@@ -86,6 +87,7 @@ export class GetAllStudentsDataComponent implements OnInit {
   filterDataWithOutImages() {
     this.spinner.show();
     this.filteredData = this.data.filter((item) => !item.Image); // Only include items with the Image property
+    // this.data = this.filteredData; // Only include items with the Image property
     this.actualData = this.filteredData; // Only include items with the Image property
     this.currentPage = 1;
     this.spinner.hide();
@@ -96,13 +98,15 @@ export class GetAllStudentsDataComponent implements OnInit {
     this.spinner.show();
     if (this.searchTerm) {
       // Perform search on the original dataArray to always start with the full dataset
-      this.filteredData = this.data.filter(
+      this.filteredData = this.actualData.filter(
         (item) =>
           (item.Name &&
             item.Name.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-          (item.NationalId && item.NationalId.includes(this.searchTerm))
+          (item.NationalId &&
+            item.NationalId.toString().includes(this.searchTerm))
       );
       this.spinner.hide();
+      console.log(this.filteredData);
     } else {
       // If search term is empty, reset to show all data with Image property
       this.selectUserType.value == 1
