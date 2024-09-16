@@ -47,14 +47,15 @@
             <td style="text-wrap: nowrap;">{{ item.data.NationalId }}</td>
             <td>{{ item.data.PlaceOfBirth }}</td>
             <td style="text-wrap: nowrap;">{{ item.data.DateOfBirth }}</td>
-            <td>{{ item.source == "June" ? "يونيو" : "سبتمبر" }}</td>
+            <td>{{ item.source.split("/")[1] == "June" ? "يونيو" : "سبتمبر" }}</td>
             <td> <img *ngIf="hasImage(item)" [src]="item.data.Image" alt="{{item.data.NationalId}}" role="button"
                 class="img-thumbnail" style="max-width: 100px; max-height: 60px;" (click)="openImage(item)" />
 
               <p *ngIf="!hasImage(item)">لا توجد صورة للطالب !</p>
             </td>
             <td class="actions">
-              <button (click)="goEdit(item.source, item.data.NationalId)" class="btn btn-outline-warning btn-sm">
+              <button (click)="goEdit(item.source.split('/')[1], item.data.NationalId)"
+                class="btn btn-outline-warning btn-sm">
                 <img src="assets/svgs/edit.svg" alt="edit" width="40">
               </button>
               <button *ngIf="hasImage(item)" (click)="deleteStudent(item,'deleteImage')"

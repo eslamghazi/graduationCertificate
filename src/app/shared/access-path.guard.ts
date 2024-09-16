@@ -83,10 +83,15 @@ export class AccessEditStudentData implements CanActivate {
     let id = route.paramMap.get('id');
     let classNumber: any = route.paramMap.get('class');
 
-    const folderPath = classNumber == 1 ? 'Class2024Intership' : 'NotYet';
+    const folderPath =
+      classNumber == 1
+        ? 'Class2024Intership/June'
+        : classNumber == 2
+        ? 'Class2024Intership/September'
+        : 'NotYet';
 
     let dataFromSeptember = await this.fireBaseEditService.getDataByPathPromise(
-      `${folderPath}/September/${id}`
+      `${folderPath}/${id}`
     );
 
     if (dataFromSeptember) {
@@ -94,7 +99,7 @@ export class AccessEditStudentData implements CanActivate {
       return true;
     } else {
       let dataFromJune = await this.fireBaseEditService.getDataByPathPromise(
-        `${folderPath}/June/${id}`
+        `${folderPath}/${id}`
       );
 
       if (dataFromJune) {

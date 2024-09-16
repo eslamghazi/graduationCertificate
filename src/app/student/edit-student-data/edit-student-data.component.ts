@@ -14,6 +14,7 @@ import { SwalService } from 'src/app/shared/swal.service';
   styleUrls: ['./edit-student-data.component.scss'],
 })
 export class EditStudentDataComponent implements OnInit {
+  authCheck = localStorage.getItem('adminCheck');
   defaultImage = 'assets/Images/DefaultImage.jpg';
   selectedImage: any = null;
   selectedDate: any = null;
@@ -82,10 +83,15 @@ export class EditStudentDataComponent implements OnInit {
 
   searchData(id: any) {
     this.spinner.show();
-    const folderPath = this.class == 1 ? 'Class2024Intership' : 'NotYet';
+    const folderPath =
+      this.class == 1
+        ? 'Class2024Intership/June'
+        : this.class == 2
+        ? 'Class2024Intership/September'
+        : 'NotYet';
 
     this.fireBaseEditService
-      .getDataByPath(`${folderPath}/September/${id}`)
+      .getDataByPath(`${folderPath}/${id}`)
       .subscribe((data) => {
         if (data) {
           this.data = data;
@@ -93,7 +99,7 @@ export class EditStudentDataComponent implements OnInit {
           this.spinner.hide();
         } else {
           this.fireBaseEditService
-            .getDataByPath(`${folderPath}/June/${id}`)
+            .getDataByPath(`${folderPath}/${id}`)
             .subscribe((data) => {
               if (data) {
                 this.data = data;

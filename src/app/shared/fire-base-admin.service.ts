@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/compat/database';
 import {
   catchError,
+  combineLatest,
   concatMap,
   forkJoin,
   from,
@@ -220,34 +221,31 @@ export class FireBaseAdminService {
   }
 
   // Function to search across objects1 and objects2
-  searchObject(group: string, objectKey: string): Observable<any[]> {
-    const results: any[] = [];
+  searchObject(groups: string[], objectKey: string): Observable<any[]> {
+    const observables: Observable<any>[] = groups.map((group) =>
+      this.firebaseDb
+        .object(`/${group}/${objectKey}`)
+        .valueChanges()
+        .pipe(
+          map((data) => ({ source: group, data })), // Attach group info to data
+          catchError(() => of(null)) // Ensure any error doesn't break the chain
+        )
+    );
 
-    // Query from objects1
-    const objects1$ = this.firebaseDb
-      .object(`/${group}/June/${objectKey}`)
-      .valueChanges();
-    // Query from objects2
-    const objects2$ = this.firebaseDb
-      .object(`/${group}/September/${objectKey}`)
-      .valueChanges();
-
-    // Merge the two observables
     return new Observable((observer) => {
-      // Subscribe to the objects1 query
-      objects1$.subscribe((data1) => {
-        if (data1) {
-          results.push({ source: 'June', data: data1 });
+      combineLatest(observables).subscribe(
+        (resultsArray) => {
+          // Filter out any null or invalid results
+          const validResults = resultsArray.filter(
+            (result) => result && result.data
+          );
+          observer.next(validResults); // Emit valid results only
+          observer.complete();
+        },
+        (error) => {
+          observer.error(error); // Handle any errors from the observables
         }
-        // Subscribe to the objects2 query
-        objects2$.subscribe((data2) => {
-          if (data2) {
-            results.push({ source: 'September', data: data2 });
-          }
-          // Emit combined results
-          observer.next(results);
-        });
-      });
+      );
     });
   }
 }

@@ -40,10 +40,14 @@ export class SearchStudentComponent implements OnInit {
 
   studentSearch() {
     this.clickSearch = false;
+    let dataBasegroups = [
+      'Class2024Intership/June',
+      'Class2024Intership/September',
+    ];
     if (this.searchTerm) {
       this.spinner.show();
       this.fireBaseAdminService
-        .searchObject('Class2024Intership', this.searchTerm)
+        .searchObject(dataBasegroups, this.searchTerm)
         .subscribe((result) => {
           console.log('first', result);
           this.data = result;
@@ -134,16 +138,16 @@ export class SearchStudentComponent implements OnInit {
         this.spinner.show();
 
         const path =
-          item.source == 'June'
+          item.source.split('/')[1] == 'June'
             ? `Class2024Intership/June/${item.data.NationalId}.jpg`
-            : item.source == 'September'
+            : item.source.split('/')[1] == 'September'
             ? `Class2024Intership/September/${item.data.NationalId}.jpg`
             : 'NotYet';
 
         const dbPath =
-          item.source == 'June'
+          item.source.split('/')[1] == 'June'
             ? `Class2024Intership/June/${item.data.NationalId}`
-            : item.source == 'September'
+            : item.source.split('/')[1] == 'September'
             ? `Class2024Intership/September/${item.data.NationalId}`
             : 'NotYet';
 

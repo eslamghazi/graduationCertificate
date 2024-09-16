@@ -34,7 +34,7 @@
   <div class="mb-3 text-right">
     <label for="id">الرقم القومي</label>
     <div class="input-group">
-      <input type="number" readonly class="form-control" id="NationalId" formControlName="NationalId"
+      <input type="number" [readonly]="!authCheck" class="form-control" id="NationalId" formControlName="NationalId"
         placeholder="الرقم القومي">
     </div>
   </div>
@@ -42,11 +42,11 @@
   <div class="mb-3 text-right">
     <label for="DateOfBirth">تاريخ الميلاد</label>
     <div class="input-group">
-      <input class="form-control" readonly placeholder="yyyy-mm-dd" [value]="DateOfBirth.value"
+      <input class="form-control" [readonly]="!authCheck" placeholder="yyyy-mm-dd" [value]="DateOfBirth.value"
         (dateSelect)="onChangeDate($event)" ngbDatepicker #d="ngbDatepicker"
         [minDate]="{ year: 1900, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 31 }" />
 
-      <button class="btn btn-outline-secondary" disabled (click)="d.toggle()" type="button"><img
+      <button class="btn btn-outline-secondary" [disabled]="!authCheck" (click)="d.toggle()" type="button"><img
           src="assets/svgs/calendar3.svg" alt="calender" /></button>
 
     </div>
