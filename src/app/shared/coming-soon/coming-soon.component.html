@@ -1,3 +1,18 @@
-<iframe id="livePreviewFrame"
-  src="https://website300651.nicepage.io/Page-1.html?version=1c45137f-90f2-450e-b93c-f9e8366cbada" width="1057"
-  height="1000" style="width:100%;"></iframe>
+<div class="container-fluid coming-soon-container d-flex align-items-center justify-content-center">
+  <div class="overlay"></div>
+
+  <div class="content text-center">
+    <h1 class="display-4">We're Coming Soon</h1>
+    <p class="lead">Our new website is under construction. Stay tuned for something amazing!</p>
+
+    <!-- Countdown Timer -->
+    <div id="countdown" class="countdown mb-4">{{ countdownText }}</div>
+
+    <!-- Email Subscription (Bootstrap form) -->
+    <div class="email-subscription input-group mt-3 w-50 mx-auto">
+      <input [(ngModel)]="email" type="text" class="form-control email-input" placeholder="Enter your email"
+        aria-label="Email">
+      <button (click)="subscribe()" class="btn btn-primary subscribe-btn">Subscribe</button>
+    </div>
+  </div>
+</div>

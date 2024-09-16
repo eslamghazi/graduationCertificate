@@ -10,7 +10,11 @@ import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import { AddStudentDataComponent } from './add-student-data/add-student-data.component';
 
 @NgModule({
-  declarations: [GetStudentDataComponent, EditStudentDataComponent, AddStudentDataComponent],
+  declarations: [
+    GetStudentDataComponent,
+    EditStudentDataComponent,
+    AddStudentDataComponent,
+  ],
   imports: [
     CommonModule,
     FormsModule,

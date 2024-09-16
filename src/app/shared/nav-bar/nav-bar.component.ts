@@ -16,4 +16,11 @@ export class NavBarComponent implements OnInit {
   goToMainPage() {
     this.router.navigateByUrl('/student/getStudentData');
   }
+
+  logout() {
+    if (localStorage.getItem('adminCheck')) {
+      localStorage.removeItem('adminCheck');
+      window.location.reload();
+    }
+  }
 }
