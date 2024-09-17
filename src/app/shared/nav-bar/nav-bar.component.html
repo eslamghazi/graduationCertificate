@@ -28,6 +28,12 @@
           الصلاحيات</a>
       </li>
 
+      <li *ngIf="superAdminAuth" class="nav-item h5">
+        <a class="nav-link text-warning" (click)="changeComingSoon()" role="button">
+          {{comingSoon ? "الغاء coming soon" : "تفعيل coming soon"}}
+        </a>
+      </li>
+
     </ul>
   </div>
 </nav>
