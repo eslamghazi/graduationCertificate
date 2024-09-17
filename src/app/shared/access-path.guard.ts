@@ -24,7 +24,7 @@ export class accessSuperAdminManage implements CanActivate {
     state: RouterStateSnapshot
   ): Promise<boolean | UrlTree> {
     this.spinner.show();
-    let adminCheck = localStorage.getItem('adminCheck') == '30110281500753';
+    let adminCheck = localStorage.getItem('adminCheck') == 'superadmin';
     if (adminCheck) {
       this.spinner.hide();
       return true;

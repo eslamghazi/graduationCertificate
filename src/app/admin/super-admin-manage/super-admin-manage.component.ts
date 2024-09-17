@@ -1,3 +1,4 @@
+import { FireBaseAuthService } from './../../shared/fire-base-auth.service';
 import { Router } from '@angular/router';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -36,19 +37,23 @@ export class SuperAdminManageComponent implements OnInit {
   ngOnInit() {
     this.loadFolders();
   }
+
   onTabChange(event: any) {
     if (event.nextId == 1) {
       this.active = 1;
       this.loadFolders();
       this.currentPage = 1;
       this.itemsPerPage = 1;
-    } else {
+    } else if (event.nextId == 2) {
       this.active = 2;
       this.getFoldersFromRealtimeDatabase();
       this.currentPage = 1;
       this.itemsPerPage = 5;
+    } else {
+      this.active = 3;
     }
   }
+
   getFoldersFromRealtimeDatabase() {
     this.spinner.show();
 

@@ -14,7 +14,7 @@ const routes: Routes = [
     component: GetStudentDataComponent,
   },
   {
-    path: 'student/addStudentData/:class',
+    path: 'student/addStudentData',
     component: AddStudentDataComponent,
     canActivate: [AccessGetAllStudentsData],
   },

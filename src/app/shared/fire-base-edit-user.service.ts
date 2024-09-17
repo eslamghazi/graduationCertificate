@@ -124,10 +124,6 @@ export class FireBaseEditUserService {
     }
   }
 
-  async insertIntoDb(path: string, value: any) {
-    await this.firebaseDb.database.ref(`${path}`).set(value);
-  }
-
   private async checkEntryExists(entryPath: string): Promise<boolean> {
     this.spinner.show();
     if (!entryPath.trim()) {

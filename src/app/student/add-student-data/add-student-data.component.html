@@ -23,14 +23,6 @@
     </div>
   </div>
 
-  <div class="mb-3 text-right">
-    <label for="PlaceOfBirth">محل الميلاد</label>
-    <div class="input-group">
-      <input type="text" class="form-control" id="PlaceOfBirth" formControlName="PlaceOfBirth"
-        placeholder="محل الميلاد">
-    </div>
-  </div>
-
   <div class="text-right"
     [ngClass]="NationalId.touched && NationalId.dirty && (NationalId.errors?.['required'] || NationalId.errors?.['pattern']) ? 'mb-5' : 'mb-3'">
 
@@ -59,7 +51,27 @@
     </div>
   </div>
 
+  <div class="mb-3 text-right">
+    <label for="PlaceOfBirth">محل الميلاد</label>
+    <div class="input-group">
+      <input type="text" class="form-control" id="PlaceOfBirth" formControlName="PlaceOfBirth"
+        placeholder="محل الميلاد">
+    </div>
+  </div>
+
+  <div class="mb-3 text-right">
+    <label for="PlaceOfBirth">اختر دور الطالب</label>
+    <div class="input-group">
+      <select class="form-control text-right" id="exampleFormControlSelect1" formControlName="ClassMonth">
+        <option value="0">اختر دور الطالب</option>
+        <option value="1">يونيو</option>
+        <option value="2">سبتمبر</option>
+      </select>
+    </div>
+  </div>
+
+
   <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
-    [disabled]="!userForm.valid || !selectedDate">ارسال</button>
+    [disabled]="!userForm.valid || !selectedDate || !ClassMonth.value || ClassMonth.value == 0">ارسال</button>
   <button class="btn btn-lg btn-danger btn-block mt-4" (click)="goBack()" type="button">العوده</button>
 </form>

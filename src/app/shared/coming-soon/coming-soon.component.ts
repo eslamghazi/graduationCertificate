@@ -1,4 +1,6 @@
+import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
 import { Component, OnInit } from '@angular/core';
+import { FireBaseAuthService } from '../fire-base-auth.service';
 
 @Component({
   selector: 'app-coming-soon',
@@ -9,7 +11,7 @@ export class ComingSoonComponent implements OnInit {
   countdownText: string = '';
   email: string = '';
 
-  constructor() {}
+  constructor(private firebaseAuthService: FireBaseAuthService) {}
   ngOnInit(): void {
     this.startCountdown(new Date('2024-12-31T00:00:00').getTime());
   }
@@ -39,19 +41,16 @@ export class ComingSoonComponent implements OnInit {
 
   subscribe() {
     console.log(this.email);
-    if (this.email.toString().toLowerCase().includes('auth-admin')) {
-      localStorage.setItem('adminCheck', 'admin');
-      window.location.reload();
-      return;
-    }
-
-    if (
-      this.email.toString().toLowerCase().includes('auth-30110281500753') ||
-      this.email.toString().toLowerCase().includes('auth-superadmin')
-    ) {
-      localStorage.setItem('adminCheck', '30110281500753');
-      window.location.reload();
-      return;
+    if (this.email) {
+      this.firebaseAuthService
+        .getDataByPath(`/auth/${this.email}`)
+        .subscribe((data) => {
+          if (data) {
+            localStorage.setItem('adminCheck', data.Auth);
+            window.location.reload();
+          }
+          console.log(data);
+        });
     }
   }
 }

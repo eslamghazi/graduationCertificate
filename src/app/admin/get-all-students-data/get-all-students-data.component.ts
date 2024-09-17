@@ -18,7 +18,7 @@ import { InvalidImagesComponent } from '../invalid-images/invalid-images.compone
   encapsulation: ViewEncapsulation.None, // Disable encapsulation
 })
 export class GetAllStudentsDataComponent implements OnInit {
-  superAdminCheck = localStorage.getItem('adminCheck') == '30110281500753';
+  superAdminCheck = localStorage.getItem('adminCheck') == 'superadmin';
   data: any[] = [];
   filteredData: any[] = [];
   actualData: any[] = [];

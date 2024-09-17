@@ -1,6 +1,7 @@
 import { FireBaseEditUserService } from 'src/app/shared/fire-base-edit-user.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { FireBaseAuthService } from '../fire-base-auth.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -8,13 +9,9 @@ import { Router } from '@angular/router';
   styleUrls: ['./nav-bar.component.scss'],
 })
 export class NavBarComponent implements OnInit {
-  superAdminAuth = localStorage.getItem('adminCheck') == '30110281500753';
-  comingSoon = localStorage.getItem('comingSoon');
+  superAdminAuth = localStorage.getItem('adminCheck') == 'superadmin';
 
-  constructor(
-    private router: Router,
-    private firebaseEditUserService: FireBaseEditUserService
-  ) {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {}
 
@@ -25,17 +22,6 @@ export class NavBarComponent implements OnInit {
   logout() {
     if (localStorage.getItem('adminCheck')) {
       localStorage.removeItem('adminCheck');
-      window.location.reload();
-    }
-  }
-
-  changeComingSoon() {
-    if (this.comingSoon) {
-      this.firebaseEditUserService.insertIntoDb('comingSoon', false);
-      localStorage.removeItem('comingSoon');
-      window.location.reload();
-    } else {
-      this.firebaseEditUserService.insertIntoDb('comingSoon', true);
       window.location.reload();
     }
   }

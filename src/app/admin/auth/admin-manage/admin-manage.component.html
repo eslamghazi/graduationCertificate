@@ -1,0 +1,70 @@
+<div *ngIf="admins.length > 0 else NoData">
+
+  <button type="button" dir="rtl" class="btn btn-outline-primary btn-lg btn-block mt-3" aria-haspopup="true"
+    aria-expanded="false" (click)="addEditAdmin('addAdmin')">اضافة ادمن جديد</button>
+
+  <h1 class="h3 my-3 font-weight-normal text-center text-info">صلاحيات الأدمن <span class="text-danger">وعددهم
+      {{admins.length}}</span></h1>
+
+  <!-- Search input -->
+  <div class="form-group my-3 mt-5">
+    <input (keyup)="search()" type="text" class="form-control" placeholder="ابحث عن الإسم أو الرقم قومي"
+      [(ngModel)]="searchTerm" />
+  </div>
+  <div style="overflow: auto;">
+    <table *ngIf="filteredAdmins.length > 0 else NoData"
+      class="table table-bordered table-striped text-center align-content-center" dir="rtl">
+      <thead class="thead-dark">
+        <tr>
+          <th>م</th>
+          <th>الإسم</th>
+          <th>الرقم القومي</th>
+          <th>الصلاحية</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of filteredAdmins | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage } let i = index;">
+          <td>{{ i+1 }}</td>
+          <td>{{ item.data.Name }}</td>
+          <td>{{ item.data.Auth == "admin" ? "ادمن" : item.data.Auth == "sudoadmin" ? "سودو ادمن" : "سوبر ادمن" }}</td>
+          <td style="text-wrap: nowrap;">{{ item.data.NationalId }}</td>
+          <td>
+            <button (click)="addEditAdmin('editAdmin', item)" class="btn btn-outline-warning btn-sm">
+              <img src="assets/svgs/edit.svg" alt="edit" width="40">
+            </button>
+
+            <button (click)="deleteAdmin(item)" class="btn btn-outline-danger btn-sm mr-3"><img
+                src="assets/svgs/trash.svg" alt="d6+elete" width="40"></button>
+          </td>
+        </tr>
+      </tbody>
+      <!-- Separator Between Folder Groups -->
+      <tr>
+        <td colspan="5">
+          <hr />
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="5">
+          <button type="button" dir="rtl" class="btn btn-outline-danger btn-lg btn-block mt-3" aria-haspopup="true"
+            aria-expanded="false" (click)="changeComingSoon()">
+            {{comingSoonStatus ? "إلغاء Coming Soon" : "تفعيل Coming Soon"}}
+          </button>
+
+        </td>
+      </tr>
+    </table>
+
+  </div>
+  <!-- Pagination controls -->
+  <pagination-controls dir="rtl" (pageChange)="currentPage = $event"
+    class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
+  </pagination-controls>
+</div>
+
+<ng-template #NoData>
+  <p class="h3 my-3 text-center text-danger">لا يوجد ادمن في قاعدة البيانات</p>
+</ng-template>

@@ -14,9 +14,18 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import { SearchStudentComponent } from './search-student/search-student.component';
 import { InvalidImagesComponent } from './invalid-images/invalid-images.component';
+import { AdminManageComponent } from './auth/admin-manage/admin-manage.component';
+import { AddEditAdminComponent } from './auth/add-edit-admin/add-edit-admin.component';
 
 @NgModule({
-  declarations: [GetAllStudentsDataComponent, SuperAdminManageComponent, SearchStudentComponent, InvalidImagesComponent],
+  declarations: [
+    GetAllStudentsDataComponent,
+    SuperAdminManageComponent,
+    SearchStudentComponent,
+    InvalidImagesComponent,
+    AdminManageComponent,
+    AddEditAdminComponent,
+  ],
   imports: [
     CommonModule,
     FormsModule,

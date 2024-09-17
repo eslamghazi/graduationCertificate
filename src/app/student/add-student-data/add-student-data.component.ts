@@ -18,12 +18,11 @@ export class AddStudentDataComponent implements OnInit {
   selectedImage: any = null;
   selectedDate: any = null;
 
-  class: any;
-
   NationalId = new FormControl(null, [Validators.required]);
   Name = new FormControl(null, [Validators.required]);
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
+  ClassMonth = new FormControl(0, [Validators.required]);
   Image = new FormControl(null);
 
   constructor(
@@ -41,17 +40,11 @@ export class AddStudentDataComponent implements OnInit {
     Name: this.Name,
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
+    ClassMonth: this.ClassMonth,
     Image: this.Image,
   });
 
-  ngOnInit(): void {
-    let givenClass = this.activatedRoute.snapshot.paramMap.get('class');
-    givenClass == '1'
-      ? (this.class = 'June')
-      : givenClass == '2'
-      ? (this.class = 'September')
-      : null;
-  }
+  ngOnInit(): void {}
 
   onChangeDate(event: any) {
     this.spinner.show();
@@ -177,9 +170,17 @@ export class AddStudentDataComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        var filePath = `Class2024Intership/${this.class}/${this.NationalId.value}.jpg`;
-        var dataPath = `Class2024Intership/${this.class}/${this.NationalId.value}`;
-        console.log(this.class);
+
+        const ClassMonth =
+          (this.ClassMonth.value as any) == '1'
+            ? 'June'
+            : (this.ClassMonth.value as any) == '2'
+            ? 'September'
+            : null;
+
+        var filePath = `Class2024Intership/${ClassMonth}/${this.NationalId.value}.jpg`;
+        var dataPath = `Class2024Intership/${ClassMonth}/${this.NationalId.value}`;
+        console.log(ClassMonth);
 
         if (this.selectedImage) {
           this.fireBaseEditService.uploadToStorage(
@@ -187,7 +188,7 @@ export class AddStudentDataComponent implements OnInit {
             this.selectedImage,
             {
               ...formValues,
-              ClassMonth: this.class,
+              ClassMonth: ClassMonth,
             }
           );
           return;
@@ -197,7 +198,7 @@ export class AddStudentDataComponent implements OnInit {
             (this.userForm.dirty || this.selectedDate)
           ) {
             this.fireBaseEditService.insertImageDetails(
-              { ...formValues, ClassMonth: this.class },
+              { ...formValues, ClassMonth: ClassMonth },
               dataPath
             );
           }
