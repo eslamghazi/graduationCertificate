@@ -178,6 +178,9 @@ export class AddStudentDataComponent implements OnInit {
       if (result) {
         this.spinner.show();
         var filePath = `Class2024Intership/${this.class}/${this.NationalId.value}.jpg`;
+        var dataPath = `Class2024Intership/${this.class}/${this.NationalId.value}`;
+        var className =
+          this.class == 1 ? 'June' : this.class == 2 ? 'September' : null;
         if (this.selectedImage) {
           this.fireBaseEditService.uploadToStorage(
             filePath,
@@ -188,6 +191,16 @@ export class AddStudentDataComponent implements OnInit {
             }
           );
           return;
+        } else {
+          if (
+            !this.selectedImage &&
+            (this.userForm.dirty || this.selectedDate)
+          ) {
+            this.fireBaseEditService.insertImageDetails(
+              { ...formValues, ClassMonth: className },
+              dataPath
+            );
+          }
         }
       }
     });
