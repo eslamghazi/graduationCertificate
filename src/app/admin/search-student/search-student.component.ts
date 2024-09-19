@@ -41,8 +41,8 @@ export class SearchStudentComponent implements OnInit {
   studentSearch() {
     this.clickSearch = false;
     let dataBasegroups = [
-      'Class2024Intership/June',
-      'Class2024Intership/September',
+      'Class2024Internship/June',
+      'Class2024Internship/September',
     ];
     if (this.searchTerm) {
       this.spinner.show();
@@ -139,16 +139,16 @@ export class SearchStudentComponent implements OnInit {
 
         const path =
           item.source.split('/')[1] == 'June'
-            ? `Class2024Intership/June/${item.data.NationalId}.jpg`
+            ? `Class2024Internship/June/${item.data.NationalId}.jpg`
             : item.source.split('/')[1] == 'September'
-            ? `Class2024Intership/September/${item.data.NationalId}.jpg`
+            ? `Class2024Internship/September/${item.data.NationalId}.jpg`
             : 'NotYet';
 
         const dbPath =
           item.source.split('/')[1] == 'June'
-            ? `Class2024Intership/June/${item.data.NationalId}`
+            ? `Class2024Internship/June/${item.data.NationalId}`
             : item.source.split('/')[1] == 'September'
-            ? `Class2024Intership/September/${item.data.NationalId}`
+            ? `Class2024Internship/September/${item.data.NationalId}`
             : 'NotYet';
 
         const deleteState =

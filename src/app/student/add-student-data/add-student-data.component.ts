@@ -178,8 +178,8 @@ export class AddStudentDataComponent implements OnInit {
             ? 'September'
             : null;
 
-        var filePath = `Class2024Intership/${ClassMonth}/${this.NationalId.value}.jpg`;
-        var dataPath = `Class2024Intership/${ClassMonth}/${this.NationalId.value}`;
+        var filePath = `Class2024Internship/${ClassMonth}/${this.NationalId.value}.jpg`;
+        var dataPath = `Class2024Internship/${ClassMonth}/${this.NationalId.value}`;
         console.log(ClassMonth);
 
         if (this.selectedImage) {

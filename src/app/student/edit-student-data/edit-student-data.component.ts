@@ -59,7 +59,7 @@ export class EditStudentDataComponent implements OnInit {
   }
 
   // async searchFile(id: any) {
-  //   const folderPath = this.class == 1 ? 'Class2024Intership' : 'NotYet';
+  //   const folderPath = this.class == 1 ? 'Class2024Internship' : 'NotYet';
   //   const fileName = `${id}.jpg`;
 
   //   await this.fireBaseEditService
@@ -85,9 +85,9 @@ export class EditStudentDataComponent implements OnInit {
     this.spinner.show();
     const folderPath =
       this.class == 1
-        ? 'Class2024Intership/June'
+        ? 'Class2024Internship/June'
         : this.class == 2
-        ? 'Class2024Intership/September'
+        ? 'Class2024Internship/September'
         : 'NotYet';
 
     this.fireBaseEditService
@@ -260,8 +260,8 @@ export class EditStudentDataComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        var dataPath = `Class2024Intership/${this.data.ClassMonth}/${this.NationalId.value}`;
-        var filePath = `Class2024Intership/${this.data.ClassMonth}/${this.NationalId.value}.jpg`;
+        var dataPath = `Class2024Internship/${this.data.ClassMonth}/${this.NationalId.value}`;
+        var filePath = `Class2024Internship/${this.data.ClassMonth}/${this.NationalId.value}.jpg`;
         if (this.selectedImage) {
           this.fireBaseEditService.uploadToStorage(
             filePath,

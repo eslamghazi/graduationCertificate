@@ -65,7 +65,7 @@ export class GetStudentDataComponent {
         }
 
         const folderPath =
-          this.selectClass.value == 1 ? 'Class2024Intership' : 'NotYet';
+          this.selectClass.value == 1 ? 'Class2024Internship' : 'NotYet';
 
         this.fireBaseUserService
           .getDataByPath(`${folderPath}/September/${this.NationalId.value}`)

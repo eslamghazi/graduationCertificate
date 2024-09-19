@@ -13,6 +13,7 @@ import { InvalidImagesComponent } from './invalid-images/invalid-images.componen
 import { AdminManageComponent } from './auth/admin-manage/admin-manage.component';
 import { AddEditAdminComponent } from './auth/add-edit-admin/add-edit-admin.component';
 import { UploadExcelComponent } from './upload-excel/upload-excel.component';
+import { SettingsComponent } from '../settings/settings/settings.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { UploadExcelComponent } from './upload-excel/upload-excel.component';
     AdminManageComponent,
     AddEditAdminComponent,
     UploadExcelComponent,
+    SettingsComponent,
   ],
   imports: [
     CommonModule,

@@ -13,9 +13,10 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from './shared/shared.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AddEditSettingsComponent } from './settings/add-edit-settings/add-edit-settings.component';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, AddEditSettingsComponent],
   imports: [
     CommonModule,
     BrowserModule,

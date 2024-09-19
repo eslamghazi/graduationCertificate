@@ -86,9 +86,9 @@ export class AccessEditStudentData implements CanActivate {
 
     const folderPath =
       classNumber == 1
-        ? 'Class2024Intership/June'
+        ? 'Class2024Internship/June'
         : classNumber == 2
-        ? 'Class2024Intership/September'
+        ? 'Class2024Internship/September'
         : 'NotYet';
 
     let dataFromSeptember = await this.fireBaseEditService.getDataByPathPromise(

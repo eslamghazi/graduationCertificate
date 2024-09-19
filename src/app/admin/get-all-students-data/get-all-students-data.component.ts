@@ -51,9 +51,9 @@ export class GetAllStudentsDataComponent implements OnInit {
     resetUserType ? this.selectUserType.patchValue(0) : null;
     const path =
       this.selectClass.value == 1
-        ? 'Class2024Intership/June/'
+        ? 'Class2024Internship/June/'
         : this.selectClass.value == 2
-        ? 'Class2024Intership/September/'
+        ? 'Class2024Internship/September/'
         : 'NotYet';
 
     this.fireBaseAdminService.getAllData(path).subscribe((result) => {
@@ -231,9 +231,9 @@ export class GetAllStudentsDataComponent implements OnInit {
         this.spinner.show();
         const path =
           this.selectClass.value == 1
-            ? 'Class2024Intership/June/'
+            ? 'Class2024Internship/June/'
             : this.selectClass.value == 2
-            ? 'Class2024Intership/September/'
+            ? 'Class2024Internship/September/'
             : 'NotYet';
 
         this.fireBaseAdminService
@@ -275,16 +275,16 @@ export class GetAllStudentsDataComponent implements OnInit {
         //   .then(() => {
         const path =
           this.selectClass.value == 1
-            ? `Class2024Intership/June/${item.NationalId}.jpg`
+            ? `Class2024Internship/June/${item.NationalId}.jpg`
             : this.selectClass.value == 2
-            ? `Class2024Intership/September/${item.NationalId}.jpg`
+            ? `Class2024Internship/September/${item.NationalId}.jpg`
             : 'NotYet';
 
         const dbPath =
           this.selectClass.value == 1
-            ? `Class2024Intership/June/${item.NationalId}`
+            ? `Class2024Internship/June/${item.NationalId}`
             : this.selectClass.value == 2
-            ? `Class2024Intership/September/${item.NationalId}`
+            ? `Class2024Internship/September/${item.NationalId}`
             : 'NotYet';
 
         const deleteState =
@@ -343,9 +343,9 @@ export class GetAllStudentsDataComponent implements OnInit {
 
     const dbPath =
       this.selectClass.value == 1
-        ? `Class2024Intership/June`
+        ? `Class2024Internship/June`
         : this.selectClass.value == 2
-        ? `Class2024Intership/September`
+        ? `Class2024Internship/September`
         : 'NotYet';
 
     const checkImageTasks: any[] = []; // Holds the observables for all image checks

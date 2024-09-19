@@ -6,6 +6,7 @@ import {
   AccessGetAllStudentsData,
   accessSuperAdminManage,
 } from '../shared/access-path.guard';
+import { SettingsComponent } from '../settings/settings/settings.component';
 
 const routes: Routes = [
   {
@@ -16,6 +17,11 @@ const routes: Routes = [
   {
     path: 'admin/superAdminManage',
     component: SuperAdminManageComponent,
+    canActivate: [accessSuperAdminManage],
+  },
+  {
+    path: 'admin/settings',
+    component: SettingsComponent,
     canActivate: [accessSuperAdminManage],
   },
 ];

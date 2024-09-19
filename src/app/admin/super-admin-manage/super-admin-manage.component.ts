@@ -62,7 +62,7 @@ export class SuperAdminManageComponent implements OnInit {
     this.spinner.show();
 
     this.fireBaseAdminService
-      .getAllData('/Class2024Intership', 'object')
+      .getAllData('/Class2024Internship', 'object')
       .subscribe((result) => {
         this.foldersRealDatabase = this.flattenFolderStructure(result);
         console.log(result);
@@ -331,9 +331,9 @@ export class SuperAdminManageComponent implements OnInit {
       if (result) {
         this.spinner.show();
         // const fileName =
-        //   path == 'Class2024Intership/June/'
+        //   path == 'Class2024Internship/June/'
         //     ? 'الصور الخاصة بدور يونيو دفعة 2024'
-        //     : path == 'Class2024Intership/September/'
+        //     : path == 'Class2024Internship/September/'
         //     ? 'الصور الخاصة بدور سبتمبر دفعة 2024'
         //     : 'NotYet';
 
