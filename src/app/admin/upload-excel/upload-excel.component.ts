@@ -14,11 +14,11 @@ export class UploadExcelComponent implements OnInit {
   data: any; // This will store the final structured data
   firebaseData: any;
 
-  flatData: any[] = []; // This will store the flattened data for display in a single table
+  flatData: any; // This will store the flattened data for display in a single table
 
-  model: string = '';
+  model: string = 'upload';
 
-  filteredData: any[] = []; // This will store the filtered data for rendering
+  filteredData: any; // This will store the filtered data for rendering
   currentPage = 1; // Current page of pagination
   itemsPerPage = 5; // Number of items per page
   searchTerm: string = ''; // Holds the search input
@@ -31,7 +31,16 @@ export class UploadExcelComponent implements OnInit {
     private swal: SwalService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    console.log(this.model);
+    this.data = null;
+    this.firebaseData = null;
+    this.flatData = null;
+    this.filteredData = [];
+    this.currentPage = 1;
+    this.itemsPerPage = 5;
+    this.searchTerm = '';
+  }
 
   // Function to handle file input
   onFileChange(event: any): void {
@@ -93,37 +102,90 @@ export class UploadExcelComponent implements OnInit {
     // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
-        // Combine June and September (or other months) into Class2024Intership object
-        const classData = this.constructClassData(this.data);
+        const subscription = this.firebaseAdminService
+          .getAllData('/Class2024Intership', 'object')
+          .subscribe(async (firebaseData: any) => {
+            if (firebaseData) {
+              if (this.model == 'upload') {
+                this.firebaseData = {
+                  Class2024Intership: firebaseData,
+                };
+                this.data = this.mergeData(this.firebaseData, this.data);
 
-        if (this.model == 'upload') {
-          // Push the entire Class2024Intership object to Firebase
-          this.pushClassDataToFirebase(classData);
-        } else {
-          // Step 1: Get the existing data from Firebase
-          this.firebaseAdminService
-            .getAllData('/Class2024Intership', 'object')
-            .subscribe((firebaseData: any) => {
-              this.firebaseData = firebaseData; // Store the Firebase data locally
-              console.log('firebaseDatafirebaseDatafirebaseData', firebaseData);
+                const classData = this.constructClassData(this.data);
 
-              // Step 2: Remove matching entries from Firebase
-              this.removeMatchingEntries({
-                Class2024Intership: this.firebaseData,
-              });
+                await this.pushClassDataToFirebase(classData);
+              } else {
+                this.firebaseData = firebaseData;
+                this.removeMatchingEntries({
+                  Class2024Intership: this.firebaseData,
+                });
 
-              this.pushClassDataToFirebase(this.firebaseData);
-            });
-        }
+                await this.pushClassDataToFirebase(this.firebaseData);
+              }
+
+              // Unsubscribe after the first execution
+              subscription.unsubscribe();
+            } else {
+              const classData = this.constructClassData(this.data);
+
+              await this.pushClassDataToFirebase(classData);
+            }
+          });
       }
     });
-    console.log(this.data);
+  }
+
+  mergeData(obj1: any, obj2: any): any {
+    const mergedResult: any = {
+      Class2024Intership: {},
+    };
+
+    // Helper function to merge two months
+    function mergeMonthData(monthData1: any, monthData2: any): any {
+      const mergedMonth: any = { ...monthData1 }; // Start with data from obj1
+
+      // Merge data from obj2
+      for (const nationalId in monthData2) {
+        // If a NationalId exists in both, obj2's data will override
+        mergedMonth[nationalId] = { ...monthData2[nationalId] };
+      }
+
+      return mergedMonth;
+    }
+
+    // Iterate over the months in obj1
+    for (const month in obj1.Class2024Intership) {
+      // If the month exists in both obj1 and obj2, merge them
+      if (obj2.Class2024Intership[month]) {
+        mergedResult.Class2024Intership[month] = mergeMonthData(
+          obj1.Class2024Intership[month],
+          obj2.Class2024Intership[month]
+        );
+      } else {
+        // If the month only exists in obj1, copy it
+        mergedResult.Class2024Intership[month] = {
+          ...obj1.Class2024Intership[month],
+        };
+      }
+    }
+
+    // Iterate over the months in obj2 that are not in obj1 and add them
+    for (const month in obj2.Class2024Intership) {
+      if (!mergedResult.Class2024Intership[month]) {
+        mergedResult.Class2024Intership[month] = {
+          ...obj2.Class2024Intership[month],
+        };
+      }
+    }
+
+    return mergedResult;
   }
 
   // Function to check all images and store results
   search() {
     const query = this.searchTerm.toLowerCase(); // Make search case-insensitive
-    this.filteredData = this.flatData.filter((entry) => {
+    this.filteredData = this.flatData.filter((entry: any) => {
       if (entry.isMonthBreak) {
         return true; // Always include the month break rows
       }
@@ -174,6 +236,7 @@ export class UploadExcelComponent implements OnInit {
         cleanedData.Class2024Intership[month][nationalId] = entry;
       });
     });
+
     this.spinner.hide();
     return cleanedData;
   }
@@ -181,7 +244,6 @@ export class UploadExcelComponent implements OnInit {
   removeMatchingEntries(data: any): void {
     Object.keys(this.data.Class2024Intership || {}).forEach((month) => {
       const excelEntries = this.data.Class2024Intership[month];
-
       // Loop through the Excel data for this month
       Object.keys(excelEntries || {}).forEach((nationalId) => {
         // Check if the NationalId exists in the Firebase data for the same month
@@ -196,13 +258,25 @@ export class UploadExcelComponent implements OnInit {
       });
     });
   }
-  // Function to push the entire Class2024Intership object to Firebase
-  pushClassDataToFirebase(classData: any): void {
-    console.log('classDataclassData', classData);
 
+  restructureData(originalData: any) {
+    // Check if the input data has the 'Class2024Intership' wrapper
+    if (originalData.Class2024Intership) {
+      // Extract and return the nested data directly
+      return originalData.Class2024Intership;
+    } else {
+      // Return the input if the structure is already correct
+      return originalData;
+    }
+  }
+
+  // Function to push the entire Class2024Intership object to Firebase
+  async pushClassDataToFirebase(classData: any): Promise<void> {
     this.spinner.show();
-    this.firebaseAdminService
-      .pushClassData(classData)
+    const restructuredData = this.restructureData(classData);
+
+    await this.firebaseAdminService
+      .pushClassData(restructuredData, '/Class2024Intership')
       .then(() => {
         this.spinner.hide();
         this.model == 'upload'

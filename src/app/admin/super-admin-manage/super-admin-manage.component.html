@@ -106,11 +106,11 @@
         <button class="btn btn-outline-info btn-sm mr-3"><img src="assets/svgs/excludeExcel.svg" alt="delete" width="60"
             (click)="uploadExcel('remove')"></button>
 
-        <button class="btn btn-outline-info btn-sm mr-3"><img src="assets/svgs/appendExcel.svg" alt="delete" width="60"
+        <button class="btn btn-outline-info btn-sm mr-3"><img src="assets/svgs/appendExcel.svg" alt="upload" width="60"
             (click)="uploadExcel('upload')"></button>
 
-        <a href="assets/Graduation-Certificate-Sample.xlsx" download="مسودة لشيت الرفع"
-          class="btn btn-outline-info my-4"><img src="assets/svgs/excel.svg" width="60" alt="excel"></a>
+        <button (click)="downloadDefaultExcel()" class="btn btn-outline-info my-4"><img src="assets/svgs/excel.svg"
+            width="60" alt="excel"></button>
 
       </div>
 

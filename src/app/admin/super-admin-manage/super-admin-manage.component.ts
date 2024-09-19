@@ -1,6 +1,6 @@
 import { Router } from '@angular/router';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
@@ -14,7 +14,8 @@ import { UploadExcelComponent } from '../upload-excel/upload-excel.component';
   encapsulation: ViewEncapsulation.None,
 })
 export class SuperAdminManageComponent implements OnInit {
-  superAdminCheck = localStorage.getItem('adminCheck') == 'superadmin';
+  superAdminCheck =
+    localStorage.getItem('adminCheck')?.split('-')[0] == 'superadmin';
 
   active = 1;
 
@@ -33,6 +34,7 @@ export class SuperAdminManageComponent implements OnInit {
     private spinner: NgxSpinnerService,
     private swal: SwalService,
     private modalService: NgbModal,
+    private activeModal: NgbActiveModal,
     private route: Router
   ) {}
 
@@ -362,6 +364,34 @@ export class SuperAdminManageComponent implements OnInit {
     // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
+        modalRef.componentInstance.model = null;
+      }
+    });
+  }
+
+  downloadDefaultExcel() {
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    // Passing data to the modal
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message =
+      'هل تريد تحميل شيت الرفع (excel) الافتراضي؟';
+
+    // Handle modal result
+    modalRef.result.then((result) => {
+      if (result) {
+        const downloadLink = document.createElement('a');
+        downloadLink.setAttribute('download', 'مسودة لشيت الرفع.xlsx');
+        downloadLink.href = 'assets/Graduation-Certificate-Sample.xlsx';
+        document.body.appendChild(downloadLink); // Append the link to the DOM
+        downloadLink.click(); // Programmatically trigger the click
+        document.body.removeChild(downloadLink); // Remove link after download
+
+        this.activeModal.dismiss();
       }
     });
   }

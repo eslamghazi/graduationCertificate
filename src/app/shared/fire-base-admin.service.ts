@@ -317,14 +317,13 @@ export class FireBaseAdminService {
   }
 
   // Push the entire Class2024Intership object to Firebase
-  pushClassData(classData: any, object: any = '/'): Promise<void> {
-    return this.firebaseDb
-      .object(object)
-      .set(classData)
-      .then(() => console.log('Class2024Intership data pushed successfully'))
-      .catch((error) =>
-        console.error('Error pushing Class2024Intership data:', error)
-      );
+  async pushClassData(classData: any, object: any = '/'): Promise<void> {
+    try {
+      await this.firebaseDb.object(object).set(classData);
+      return console.log('Class2024Intership data pushed successfully');
+    } catch (error) {
+      return console.error('Error pushing Class2024Intership data:', error);
+    }
   }
 
   // Remove a specific entry from Firebase
