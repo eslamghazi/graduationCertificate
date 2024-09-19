@@ -9,7 +9,8 @@ import { FireBaseAuthService } from '../fire-base-auth.service';
   styleUrls: ['./nav-bar.component.scss'],
 })
 export class NavBarComponent implements OnInit {
-  superAdminAuth = localStorage.getItem('adminCheck') == 'superadmin';
+  superAdminAuth =
+    localStorage.getItem('adminCheck')?.split('-')[0] == 'superadmin';
 
   constructor(private router: Router) {}
 

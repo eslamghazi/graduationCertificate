@@ -13,8 +13,6 @@ import { AddEditAdminComponent } from '../add-edit-admin/add-edit-admin.componen
   styleUrls: ['./admin-manage.component.scss'],
 })
 export class AdminManageComponent implements OnInit {
-  getAuthDataSubscription: Subscription | any;
-
   admins: any[] = [];
   filteredAdmins: any[] = [];
 
@@ -37,18 +35,18 @@ export class AdminManageComponent implements OnInit {
 
   getAuthData() {
     this.spinner.show();
-    this.getAuthDataSubscription = this.firebaseAuthService
-      .getAuthData('/auth')
-      .subscribe((result) => {
-        this.admins = result.filter((auth) => auth.key != 'comingSoon');
-        this.comingSoonStatus = result.filter(
-          (auth) => auth.key == 'comingSoon'
-        )[0].data;
-        this.filteredAdmins = this.admins;
-        console.log(this.comingSoonStatus);
-        console.log(this.admins);
-        this.spinner.hide();
-      });
+    this.firebaseAuthService.getAuthData('/auth').subscribe((result) => {
+      this.admins = result.filter(
+        (auth) => auth.key != 'comingSoon' && auth.key != 'Classes'
+      );
+      this.comingSoonStatus = result.filter(
+        (auth) => auth.key == 'comingSoon'
+      )[0]?.data;
+      this.filteredAdmins = this.admins;
+      console.log(this.comingSoonStatus);
+      console.log(this.admins);
+      this.spinner.hide();
+    });
   }
 
   deleteAdmin(item: any) {

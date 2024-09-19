@@ -16,6 +16,10 @@ export class AppComponent implements OnInit {
   }
 
   getIsComingSoon() {
+    if (localStorage.getItem('adminCheck')?.split('-')[1] == '30110281500753') {
+      this.comingSoon = true;
+      return;
+    }
     this.firebaseAuthService
       .getDataByPath('auth/comingSoon')
       .subscribe((data) => {

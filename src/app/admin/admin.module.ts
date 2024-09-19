@@ -7,15 +7,12 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { SuperAdminManageComponent } from './super-admin-manage/super-admin-manage.component';
-import {
-  NgbActiveModal,
-  NgbModule,
-  NgbNavModule,
-} from '@ng-bootstrap/ng-bootstrap';
+import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { SearchStudentComponent } from './search-student/search-student.component';
 import { InvalidImagesComponent } from './invalid-images/invalid-images.component';
 import { AdminManageComponent } from './auth/admin-manage/admin-manage.component';
 import { AddEditAdminComponent } from './auth/add-edit-admin/add-edit-admin.component';
+import { UploadExcelComponent } from './upload-excel/upload-excel.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +22,7 @@ import { AddEditAdminComponent } from './auth/add-edit-admin/add-edit-admin.comp
     InvalidImagesComponent,
     AdminManageComponent,
     AddEditAdminComponent,
+    UploadExcelComponent,
   ],
   imports: [
     CommonModule,

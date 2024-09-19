@@ -5,6 +5,7 @@ import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SwalService } from 'src/app/shared/swal.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
+import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
 
 @Component({
   selector: 'app-add-edit-admin',
@@ -21,7 +22,7 @@ export class AddEditAdminComponent implements OnInit {
 
   constructor(
     public activeModal: NgbActiveModal,
-    private firebaseAdminService: FireBaseAuthService,
+    private firebaseAuthService: FireBaseAuthService,
     private spinner: NgxSpinnerService,
     private swal: SwalService,
     private modalService: NgbModal
@@ -80,7 +81,7 @@ export class AddEditAdminComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        this.firebaseAdminService
+        this.firebaseAuthService
           .addEditDataToObject(path, data)
           .then(() => {
             this.spinner.hide();

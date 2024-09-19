@@ -1,11 +1,11 @@
-import { FireBaseAuthService } from './../../shared/fire-base-auth.service';
 import { Router } from '@angular/router';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
 import { SwalService } from 'src/app/shared/swal.service';
+import { UploadExcelComponent } from '../upload-excel/upload-excel.component';
 
 @Component({
   selector: 'app-super-admin-manage',
@@ -14,6 +14,8 @@ import { SwalService } from 'src/app/shared/swal.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class SuperAdminManageComponent implements OnInit {
+  superAdminCheck = localStorage.getItem('adminCheck') == 'superadmin';
+
   active = 1;
 
   foldersRealDatabase: any[] = [];
@@ -343,6 +345,23 @@ export class SuperAdminManageComponent implements OnInit {
             this.swal.toastr('error', 'حدث خطأ اثناء تحضير الصور');
             this.spinner.hide();
           });
+      }
+    });
+  }
+
+  uploadExcel(model: string) {
+    const modalRef = this.modalService.open(UploadExcelComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    // Passing data to the modal
+    modalRef.componentInstance.model = model;
+
+    // Handle modal result
+    modalRef.result.then((result) => {
+      if (result) {
       }
     });
   }

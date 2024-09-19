@@ -4,10 +4,8 @@ import {
   catchError,
   combineLatest,
   concatMap,
-  forkJoin,
   from,
   map,
-  mergeMap,
   Observable,
   of,
 } from 'rxjs';
@@ -16,6 +14,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { SwalService } from './swal.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { HttpClient } from '@angular/common/http';
+import * as XLSX from 'xlsx';
 
 @Injectable({
   providedIn: 'root',
@@ -247,5 +246,91 @@ export class FireBaseAdminService {
         }
       );
     });
+  }
+
+  // Function to read and process the Excel file
+  public processExcelFile(file: File): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const reader: FileReader = new FileReader();
+
+      reader.onload = (e: any) => {
+        const binaryData: string = e.target.result;
+        const workbook: XLSX.WorkBook = XLSX.read(binaryData, {
+          type: 'binary',
+        });
+
+        // Get the first sheet
+        const sheetName: string = workbook.SheetNames[0];
+        const sheet: XLSX.WorkSheet = workbook.Sheets[sheetName];
+
+        // Convert sheet to JSON
+        const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        // Transform and structure the data
+        const structuredData = this.transformData(rawData);
+        resolve(structuredData);
+      };
+
+      reader.onerror = (error) => reject(error);
+
+      reader.readAsBinaryString(file);
+    });
+  }
+
+  // Function to transform raw Excel data into the desired structure
+  private transformData(rawData: any[]): any {
+    const result: any = {
+      Class2024Intership: {},
+    };
+
+    // Iterate through the rows, skipping the header (rawData[0])
+    for (let i = 1; i < rawData.length; i++) {
+      const row = rawData[i];
+
+      // Map the columns according to your Excel structure
+      const id = row[0]; // Name
+      const name = row[1]; // Name
+      const nationalId = row[2]; // NationalId
+      const dateOfBirth = row[3]; // Date of Birth
+      const placeOfBirth = row[4]; // Place of Birth
+      const classMonth = row[5]; // ClassMonth (e.g., June, July, etc.)
+      // const image = row[6]; // Image
+
+      // Initialize the month if it doesn't exist
+      if (!result.Class2024Intership[classMonth]) {
+        result.Class2024Intership[classMonth] = {};
+      }
+
+      // Add the entry under the month using NationalId as the key
+      result.Class2024Intership[classMonth][nationalId] = {
+        id: id,
+        Name: name,
+        NationalId: nationalId,
+        DateOfBirth: dateOfBirth,
+        PlaceOfBirth: placeOfBirth,
+        ClassMonth: classMonth,
+        // Image: image
+      };
+    }
+
+    return result; // Return the structured data
+  }
+
+  // Push the entire Class2024Intership object to Firebase
+  pushClassData(classData: any, object: any = '/'): Promise<void> {
+    return this.firebaseDb
+      .object(object)
+      .set(classData)
+      .then(() => console.log('Class2024Intership data pushed successfully'))
+      .catch((error) =>
+        console.error('Error pushing Class2024Intership data:', error)
+      );
+  }
+
+  // Remove a specific entry from Firebase
+  removeEntry(month: string, nationalId: string): Promise<void> {
+    return this.firebaseDb
+      .object(`Class2024Intership/${month}/${nationalId}`)
+      .remove();
   }
 }

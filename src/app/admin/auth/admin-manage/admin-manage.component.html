@@ -1,8 +1,7 @@
+<button type="button" dir="rtl" class="btn btn-outline-primary btn-lg btn-block mt-3" aria-haspopup="true"
+  aria-expanded="false" (click)="addEditAdmin('addAdmin')">اضافة ادمن جديد</button>
+
 <div *ngIf="admins.length > 0 else NoData">
-
-  <button type="button" dir="rtl" class="btn btn-outline-primary btn-lg btn-block mt-3" aria-haspopup="true"
-    aria-expanded="false" (click)="addEditAdmin('addAdmin')">اضافة ادمن جديد</button>
-
   <h1 class="h3 my-3 font-weight-normal text-center text-info">صلاحيات الأدمن <span class="text-danger">وعددهم
       {{admins.length}}</span></h1>
 

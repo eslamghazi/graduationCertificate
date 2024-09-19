@@ -1,0 +1,86 @@
+<div>
+  <div class="modal-header">
+    <h4 class="modal-title">{{model == "upload" ? "رفع شيت اكسل للإضافة" : "رفع شيت اكسل للحذف"}}</h4>
+    <button (click)="closeModal()" class="close" type="button" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body text-center">
+
+    <div class="input-group mb-2 justify-content-center text-center">
+      <img class="rounded-lg" role="button" src="assets/svgs/upload.svg" width="200" height="200" id="image"
+        (click)="imageUploader.click()">
+    </div>
+    <label *ngIf="!this.data" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع شيت
+      الأكسل☝️☝️☝️</label>
+
+    <div class="input-group mb-3" hidden>
+      <div class="custom-file">
+        <label class="custom-file-label" for="inputGroupFile02">اختر شيت اكسل</label>
+        <input #imageUploader accept=".xlsx, .xls" (change)="onFileChange($event)" type="file" class="custom-file-input"
+          id="inputGroupFile02">
+      </div>
+    </div>
+
+
+    <div class="input-group my-1" *ngIf="filteredData.length > 0">
+      <input type="text" class="form-control" placeholder="البحث بالإسم او الرقم القومي" [(ngModel)]="searchTerm"
+        (input)="search()" />
+    </div>
+
+    <div style="overflow: auto;" *ngIf="filteredData.length > 0 else NoData">
+
+      <table class="table table-bordered table-striped text-center" dir="rtl">
+        <thead class="thead-dark">
+          <tr>
+            <th>م</th>
+            <th>الإسم</th>
+            <th>الرقم القومي</th>
+            <th>تاريخ الميلاد</th>
+            <th>محل الميلاد</th>
+            <th>الدور</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let entry of filteredData | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage } let i = index;">
+            <!-- Check if it's a month break -->
+            <ng-container *ngIf="entry.isMonthBreak; else dataRow">
+              <td colspan="6" class="month-separator">
+                <strong>{{ entry.month }} Class</strong>
+              </td>
+            </ng-container>
+            <!-- Normal data row -->
+            <ng-template #dataRow>
+              <td>{{ entry.id }}</td>
+              <td>{{ entry.Name }}</td>
+              <td>{{ entry.NationalId }}</td>
+              <td>{{ entry.DateOfBirth }}</td>
+              <td>{{ entry.PlaceOfBirth }}</td>
+              <td>{{ entry.ClassMonth }}</td>
+              <!-- <td><img [src]="entry.Image || 'assets/default-image.jpg'" alt="No Image" width="50" height="50" /></td> -->
+            </ng-template>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <pagination-controls dir="rtl" (pageChange)="currentPage = $event" *ngIf="data"
+      class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
+    </pagination-controls>
+  </div>
+
+  <ng-template #NoData>
+    <p *ngIf="data" class="h5 mt-3 text-center text-danger">عفوًا لا توجد بيانات</p>
+  </ng-template>
+
+</div>
+
+<div class="modal-footer">
+  <button (click)="closeModal()" class="btn btn-outline-danger btn-lg" style="width: 150px;">إلغاء</button>
+  <button (click)="confirm()" *ngIf="data" class="btn btn-lg" [ngClass]="model == 'upload' ? 'btn-outline-primary'
+    : 'btn-outline-danger'" style=" width: 150px;">
+    {{model == "upload" ? "رفع البيانات" : "حذف البيانات"}}
+  </button>
+</div>

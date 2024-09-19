@@ -1,9 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/compat/database';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { NgxSpinnerService } from 'ngx-spinner';
-import { SwalService } from './swal.service';
 import { map, Observable } from 'rxjs';
 
 @Injectable({
