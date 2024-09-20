@@ -1,7 +1,91 @@
-<div class="input-group mb-3">
-  <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username"
-    aria-describedby="basic-addon2">
-  <div class="input-group-append">
-    <span class="input-group-text" id="basic-addon2"></span>
+<form [formGroup]="settingsForm">
+
+
+  <div class="text-right">
+    <div class="h5 text-info">
+      <label for="basic-url">الفرقة</label>
+    </div>
+    <div class="input-group input-group-lg mb-3">
+      <div class="input-group-prepend" role="button">
+        <img src="assets/svgs/trash.svg" (click)="delete('deleteClass')" width="64" alt="delete"
+          class="input-group-text" for="inputGroupSelect02">
+        <img src="assets/svgs/add.svg" (click)="add('addClass')" width="64" alt="add" class="input-group-text"
+          for="inputGroupSelect02">
+        <img src="assets/svgs/edit.svg" (click)="edit('editClass')" width="64" alt="edit" class="input-group-text"
+          for="inputGroupSelect02">
+      </div>
+      <select class="custom-select" id="inputGroupSelect02" formControlName="class" (change)="changeClass()">
+        <option value="0">اختر</option>
+        <option *ngFor="let class of classes" [value]="class.value.Id">{{class.value.Name}}</option>
+      </select>
+    </div>
   </div>
-</div>
+
+  <div class="text-right">
+    <div class="h5 text-info">
+      <label for="basic-url">الأدوار</label>
+    </div>
+    <div class="input-group input-group-lg mb-3">
+      <div class="input-group-prepend" role="button">
+        <img src="assets/svgs/trash.svg" (click)="delete('deleteSubClass')" width="64" alt="delete"
+          class="input-group-text" for="inputGroupSelect02">
+        <img src="assets/svgs/add.svg" (click)="add('addSubClass')" width="64" alt="add" class="input-group-text"
+          for="inputGroupSelect02">
+        <img src="assets/svgs/edit.svg" (click)="edit('editSubClass')" width="64" alt="edit" class="input-group-text"
+          for="inputGroupSelect02">
+      </div>
+      <select class="custom-select" id="inputGroupSelect02" formControlName="subClass">
+        <option value="0">اختر</option>
+        <option *ngFor="let subClass of subClasses" [value]="subClass.value.Id">{{subClass.value.Name}}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="text-right">
+    <div class="h5 text-info">
+      <label for="basic-url">الخيارات</label>
+    </div>
+    <div class="input-group input-group-lg mb-3">
+      <div class="input-group-prepend" role="button">
+        <img src="assets/svgs/trash.svg" (click)="delete('deleteOption')" width="64" alt="delete"
+          class="input-group-text" for="inputGroupSelect02">
+        <img src="assets/svgs/add.svg" (click)="add('addOption')" width="64" alt="add" class="input-group-text"
+          for="inputGroupSelect02">
+        <img src="assets/svgs/edit.svg" (click)="edit('editOption')" width="64" alt="edit" class="input-group-text"
+          for="inputGroupSelect02">
+      </div>
+      <select class="custom-select" id="inputGroupSelect02" formControlName="option">
+        <option value="0">اختر</option>
+        <option *ngFor="let option of options" [value]="option.value.Id">{{option.value.Name}}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="text-right">
+    <div class="h5 text-info">
+      <label for="basic-url">الفرقة الحالية</label>
+    </div>
+    <div class="input-group input-group-lg mb-3">
+      <div class="input-group-prepend" role="button">
+        <img src="assets/svgs/checkMark.svg" (click)="changeDefaultClass()" width="64" alt="checkMark"
+          class="input-group-text" for="inputGroupSelect02">
+      </div>
+      <select class="custom-select" id="inputGroupSelect02" formControlName="defaultClass">
+        <option value="0">اختر</option>
+        <option *ngFor="let class of classes" [value]="class.value.Id">{{class.value.Name}}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="footer">
+    <!-- <button [disabled]="!settingsForm.valid" (click)="confirm()"
+      class="btn btn-outline-primary btn-lg btn-block">تأكيد</button> -->
+
+    <button type="button" dir="rtl" class="btn btn-outline-danger btn-lg btn-block mt-3" aria-haspopup="true"
+      aria-expanded="false" (click)="changeComingSoon()">
+      {{comingSoonStatus ? "ايقاف Coming Soon" : "تفعيل Coming Soon"}}
+    </button>
+
+  </div>
+
+</form>

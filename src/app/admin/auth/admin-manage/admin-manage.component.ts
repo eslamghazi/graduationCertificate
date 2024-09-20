@@ -16,7 +16,6 @@ export class AdminManageComponent implements OnInit {
   admins: any[] = [];
   filteredAdmins: any[] = [];
 
-  comingSoonStatus = false;
 
   searchTerm: string = '';
   itemsPerPage: any = 5;
@@ -27,7 +26,7 @@ export class AdminManageComponent implements OnInit {
     private spinner: NgxSpinnerService,
     private swal: SwalService,
     private modalService: NgbModal
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.getAuthData();
@@ -39,11 +38,7 @@ export class AdminManageComponent implements OnInit {
       this.admins = result.filter(
         (auth) => auth.key != 'comingSoon' && auth.key != 'Classes'
       );
-      this.comingSoonStatus = result.filter(
-        (auth) => auth.key == 'comingSoon'
-      )[0]?.data;
       this.filteredAdmins = this.admins;
-      console.log(this.comingSoonStatus);
       console.log(this.admins);
       this.spinner.hide();
     });
@@ -125,30 +120,5 @@ export class AdminManageComponent implements OnInit {
     this.currentPage = 1; // Reset to the first page after search
   }
 
-  changeComingSoon() {
-    const modalRef = this.modalService.open(SharedModalComponent, {
-      centered: true,
-      backdrop: 'static',
-      keyboard: false,
-    });
 
-    // Passing data to the modal
-    modalRef.componentInstance.warningSvg = true;
-    modalRef.componentInstance.message = this.comingSoonStatus
-      ? 'هل انت متأكد من ايقاف واجهة Coming Soon ؟'
-      : 'هل انت متأكد من تفعيل واجهة Coming Soon ؟';
-
-    // Handle modal result
-    modalRef.result.then((result) => {
-      if (result) {
-        if (this.comingSoonStatus) {
-          this.firebaseAuthService.insertIntoDb('auth/comingSoon', false);
-          window.location.reload();
-        } else {
-          this.firebaseAuthService.insertIntoDb('auth/comingSoon', true);
-          window.location.reload();
-        }
-      }
-    });
-  }
 }

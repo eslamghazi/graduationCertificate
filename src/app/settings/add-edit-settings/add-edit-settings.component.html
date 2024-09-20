@@ -1,1 +1,32 @@
-<p>add-edit-settings works!</p>
+<div>
+  <div class="modal-header">
+    <h4 class="modal-title">{{header}}</h4>
+    <button (click)="activeModal.close()" class="close" type="button" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <form [formGroup]="addEditForm">
+      <div class="input-group my-3">
+        <input type="text" class="form-control" formControlName="Id">
+        <div class="input-group-append">
+          <span class="input-group-text">Id</span>
+        </div>
+      </div>
+
+      <div class="input-group my-3">
+        <input type="text" class="form-control" formControlName="Name">
+        <div class="input-group-append">
+          <span class="input-group-text">Name</span>
+        </div>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<div class="modal-footer">
+  <button (click)="activeModal.close()" class="btn btn-outline-danger btn-lg" style="width: 150px;">إلغاء</button>
+  <button (click)="confirm()" class="btn btn-outline-primary btn-lg" style="width: 150px;">{{footer}}</button>
+</div>

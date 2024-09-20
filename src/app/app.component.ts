@@ -10,9 +10,10 @@ export class AppComponent implements OnInit {
   auth = localStorage.getItem('adminCheck');
   comingSoon = false;
 
-  constructor(private firebaseAuthService: FireBaseAuthService) {}
+  constructor(private firebaseAuthService: FireBaseAuthService) { }
   ngOnInit(): void {
     this.getIsComingSoon();
+    this.getDefaultClass();
   }
 
   getIsComingSoon() {
@@ -27,5 +28,15 @@ export class AppComponent implements OnInit {
           this.comingSoon = data;
         }
       });
+  }
+
+  getDefaultClass() {
+    if (this.auth) {
+      this.firebaseAuthService.getDataByPath('auth/Classes/DefaultClass').subscribe((data) => {
+        if (data) {
+          localStorage.setItem('defaultClass', data);
+        }
+      })
+    }
   }
 }

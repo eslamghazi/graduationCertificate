@@ -12,9 +12,9 @@ export class NavBarComponent implements OnInit {
   superAdminAuth =
     localStorage.getItem('adminCheck')?.split('-')[0] == 'superadmin';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   goToMainPage() {
     this.router.navigateByUrl('/student/getStudentData');
