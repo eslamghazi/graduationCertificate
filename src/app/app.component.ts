@@ -34,6 +34,9 @@ export class AppComponent implements OnInit {
     if (this.auth) {
       this.firebaseAuthService.getDataByPath('auth/Classes/DefaultClass').subscribe((data) => {
         if (data) {
+          console.log(data);
+
+          localStorage.removeItem('defaultClass');
           localStorage.setItem('defaultClass', data);
         }
       })

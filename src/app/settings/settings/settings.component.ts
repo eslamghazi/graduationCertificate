@@ -14,7 +14,7 @@ import { AddEditSettingsComponent } from '../add-edit-settings/add-edit-settings
   styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
-  currentClass = localStorage.getItem("currentClass")
+  currentClass = localStorage.getItem("defaultClass")
   comingSoonStatus = false;
 
   allClassesData: any
@@ -27,7 +27,7 @@ export class SettingsComponent implements OnInit {
   class = new FormControl("0");
   subClass = new FormControl("0");
   option = new FormControl("0");
-  defaultClass = new FormControl(null);
+  defaultClass = new FormControl("0");
 
   constructor(private settingsService: SettingsService, private firebaseAuthService: FireBaseAuthService,
     private spinner: NgxSpinnerService,
@@ -50,7 +50,7 @@ export class SettingsComponent implements OnInit {
   getSettingsData() {
     this.spinner.show()
     this.classes = []
-    this.defaultClass.patchValue(null)
+    this.defaultClass.patchValue("0")
     this.settingsService.getDataByPath("auth/Classes").subscribe((data) => {
       this.allClassesData = data
       for (const key in data) {
@@ -59,16 +59,20 @@ export class SettingsComponent implements OnInit {
           if (key == this.currentClass) {
           }
         } else {
-          this.defaultClass.patchValue(data[key])
+          this.defaultClass.patchValue(data[key] ?? "0")
           console.log(this.defaultClass.value);
 
         }
       }
-      if (!this.allClassesData[this.currentClass as any]) localStorage.removeItem("currentClass")
+      console.log(!this.allClassesData[this.currentClass as any]);
+
+      if (!this.allClassesData[this.currentClass as any]) localStorage.removeItem("defaultClass")
+      if (!this.allClassesData[this.defaultClass.value as any]) this.defaultClass.patchValue("0")
       console.log(this.classes);
 
-      this.getSubClasses(data[this.currentClass as any ?? this.classes[0].key])
-      this.getOptions(data[this.currentClass as any ?? this.classes[0].key])
+
+      this.getSubClasses(data[this.currentClass as any ?? this.classes[0]?.key])
+      this.getOptions(data[this.currentClass as any ?? this.classes[0]?.key])
       this.spinner.hide()
     })
   }
@@ -77,7 +81,7 @@ export class SettingsComponent implements OnInit {
     this.spinner.show()
 
     this.subClasses = []
-    for (const key in Class.SubClasses) {
+    for (const key in Class?.SubClasses) {
       this.subClasses.push({ key: key, value: Class.SubClasses[key] });
     }
 
@@ -87,7 +91,7 @@ export class SettingsComponent implements OnInit {
   getOptions(Class: any) {
     this.spinner.show()
     this.options = []
-    for (const key in Class.Options) {
+    for (const key in Class?.Options) {
       this.options.push({ key: key, value: Class.Options[key] });
     }
 
@@ -389,24 +393,6 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  // confirm() {
-  //   const modalRef = this.modalService.open(SharedModalComponent, {
-  //     centered: true,
-  //     backdrop: 'static',
-  //     keyboard: false,
-  //   });
-
-  //   // Passing data to the modal
-  //   modalRef.componentInstance.warningSvg = true;
-  //   modalRef.componentInstance.message = "تأكيد";
-
-  //   // Handle modal result
-  //   modalRef.result.then((result) => {
-  //     if (result) {
-  //     }
-  //   });
-  // }
-
   changeClass() {
     if (this.class.value == "0") {
       return
@@ -419,6 +405,11 @@ export class SettingsComponent implements OnInit {
   }
 
   changeDefaultClass() {
+
+    if (this.defaultClass.value == "0") {
+      return;
+    }
+
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
