@@ -22,7 +22,7 @@ const routes: Routes = [
   {
     path: 'admin/settings',
     component: SettingsComponent,
-    canActivate: [accessSuperAdminManage],
+    canActivate: [AccessGetAllStudentsData],
   },
 ];
 
@@ -30,4 +30,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class AdminRoutingModule {}
+export class AdminRoutingModule { }

@@ -14,8 +14,12 @@ import { AddEditSettingsComponent } from '../add-edit-settings/add-edit-settings
   styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
-  comingSoonStatus = false;
+  superAdminCheck =
+    localStorage.getItem('adminCheck')?.split('-')[0] == 'superadmin';
+
   authPrevilige = localStorage.getItem('adminCheck')?.split('-')[1]
+
+  comingSoonStatus = false;
 
   allClassesData: any
 
