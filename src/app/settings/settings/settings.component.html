@@ -67,6 +67,22 @@
     </div>
     <div class="input-group input-group-lg mb-3">
       <div class="input-group-prepend" role="button">
+        <img src="assets/svgs/checkMark.svg" (click)="changeCurrentClass()" width="64" alt="checkMark"
+          class="input-group-text" for="inputGroupSelect02">
+      </div>
+      <select class="custom-select" id="inputGroupSelect02" formControlName="currentClass">
+        <option value="0">اختر</option>
+        <option *ngFor="let class of classes" [value]="class.value.Id">{{class.value.Name}}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="text-right">
+    <div class="h5 text-info">
+      <label for="basic-url">الفرقة الإفتراضية</label>
+    </div>
+    <div class="input-group input-group-lg mb-3">
+      <div class="input-group-prepend" role="button">
         <img src="assets/svgs/checkMark.svg" (click)="changeDefaultClass()" width="64" alt="checkMark"
           class="input-group-text" for="inputGroupSelect02">
       </div>

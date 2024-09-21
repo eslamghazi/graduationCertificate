@@ -19,6 +19,7 @@
           <th>الإسم</th>
           <th>الرقم القومي</th>
           <th>الصلاحية</th>
+          <th>الفرقة</th>
           <th>الإجراءات</th>
         </tr>
       </thead>
@@ -27,8 +28,9 @@
           *ngFor="let item of filteredAdmins | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage } let i = index;">
           <td>{{ i+1 }}</td>
           <td>{{ item.data.Name }}</td>
-          <td>{{ item.data.Auth == "admin" ? "ادمن" : item.data.Auth == "sudoadmin" ? "سودو ادمن" : "سوبر ادمن" }}</td>
           <td style="text-wrap: nowrap;">{{ item.data.NationalId }}</td>
+          <td>{{ item.data.Auth == "admin" ? "ادمن" : item.data.Auth == "sudoadmin" ? "سودو ادمن" : "سوبر ادمن" }}</td>
+          <td>{{ item.data.Class }}</td>
           <td>
             <button (click)="addEditAdmin('editAdmin', item)" class="btn btn-outline-warning btn-sm">
               <img src="assets/svgs/edit.svg" alt="edit" width="40">

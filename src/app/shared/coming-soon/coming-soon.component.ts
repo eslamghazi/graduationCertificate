@@ -10,7 +10,7 @@ export class ComingSoonComponent implements OnInit {
   countdownText: string = '';
   email: string = '';
 
-  constructor(private firebaseAuthService: FireBaseAuthService) {}
+  constructor(private firebaseAuthService: FireBaseAuthService) { }
   ngOnInit(): void {
     this.startCountdown(new Date('2024-12-31T00:00:00').getTime());
   }
@@ -55,7 +55,6 @@ export class ComingSoonComponent implements OnInit {
             );
             window.location.reload();
           }
-          console.log(data);
         });
     }
   }

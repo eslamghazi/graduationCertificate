@@ -14,8 +14,8 @@ import { AddEditSettingsComponent } from '../add-edit-settings/add-edit-settings
   styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
-  currentClass = localStorage.getItem("defaultClass")
   comingSoonStatus = false;
+  authPrevilige = localStorage.getItem('adminCheck')?.split('-')[1]
 
   allClassesData: any
 
@@ -27,7 +27,8 @@ export class SettingsComponent implements OnInit {
   class = new FormControl("0");
   subClass = new FormControl("0");
   option = new FormControl("0");
-  defaultClass = new FormControl("0");
+  currentClass = new FormControl(localStorage.getItem("currentClass"));
+  defaultClass = new FormControl(null);
 
   constructor(private settingsService: SettingsService, private firebaseAuthService: FireBaseAuthService,
     private spinner: NgxSpinnerService,
@@ -44,35 +45,26 @@ export class SettingsComponent implements OnInit {
     class: this.class,
     subClass: this.subClass,
     option: this.option,
+    currentClass: this.currentClass,
     defaultClass: this.defaultClass,
   });
 
   getSettingsData() {
     this.spinner.show()
     this.classes = []
-    this.defaultClass.patchValue("0")
+    this.class.patchValue("0")
     this.settingsService.getDataByPath("auth/Classes").subscribe((data) => {
       this.allClassesData = data
       for (const key in data) {
         if (key != "DefaultClass") {
           this.classes.push({ key: key, value: data[key] });
-          if (key == this.currentClass) {
-          }
         } else {
-          this.defaultClass.patchValue(data[key] ?? "0")
-          console.log(this.defaultClass.value);
-
+          this.defaultClass.setValue(data[key] as any)
         }
       }
-      console.log(!this.allClassesData[this.currentClass as any]);
 
-      if (!this.allClassesData[this.currentClass as any]) localStorage.removeItem("defaultClass")
-      if (!this.allClassesData[this.defaultClass.value as any]) this.defaultClass.patchValue("0")
-      console.log(this.classes);
-
-
-      this.getSubClasses(data[this.currentClass as any ?? this.classes[0]?.key])
-      this.getOptions(data[this.currentClass as any ?? this.classes[0]?.key])
+      this.getSubClasses(data[this.defaultClass.value as any ?? this.classes[0]?.key])
+      this.getOptions(data[this.defaultClass.value as any ?? this.classes[0]?.key])
       this.spinner.hide()
     })
   }
@@ -90,6 +82,7 @@ export class SettingsComponent implements OnInit {
 
   getOptions(Class: any) {
     this.spinner.show()
+
     this.options = []
     for (const key in Class?.Options) {
       this.options.push({ key: key, value: Class.Options[key] });
@@ -328,6 +321,10 @@ export class SettingsComponent implements OnInit {
     ) {
       return;
     }
+    if (this.allClassesData.DefaultClass == this.class.value) {
+      this.swal.toastr('info', 'لا يمكن حذف هذه الفرقة نظرًا لانها الفرقة الإفتراضية');
+      return;
+    }
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
@@ -343,6 +340,7 @@ export class SettingsComponent implements OnInit {
       if (result) {
         if (target == "deleteClass") {
           this.spinner.show();
+
           this.firebaseAuthService.removeImagePropertyFromDatabase(`auth/Classes/${this.class.value}`, 'deleteAll')
             .then(() => {
               this.spinner.hide();
@@ -395,8 +393,11 @@ export class SettingsComponent implements OnInit {
 
   changeClass() {
     if (this.class.value == "0") {
+      this.subClasses = []
+      this.options = []
       return
     }
+
     let currentClass = this.classes.find((x) => x.key == this.class.value)?.value
     console.log(currentClass);
 
@@ -418,25 +419,58 @@ export class SettingsComponent implements OnInit {
 
     // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message = "هل انت متأكد من تغيير الفرقة الإفتراضية ؟";
+
+    // Handle modal result
+    modalRef.result.then((result) => {
+      if (result) {
+        this.spinner.show();
+
+        this.firebaseAuthService.insertIntoDb(`auth/Classes/DefaultClass`, this.defaultClass.value)
+          .then(() => {
+            this.spinner.hide();
+            this.swal.toastr('success', 'تم تعديل الفرقة الإفتراضية بنجاح');
+            window.location.reload()
+
+          })
+          .catch((error) => {
+            this.spinner.hide();
+            this.swal.toastr('error', 'حدث خطأ أثناء تعديل الفرقة الإفتراضية');
+            console.log(error);
+          })
+      }
+    });
+  }
+
+  changeCurrentClass() {
+    if (this.currentClass.value == "0") {
+      return
+    }
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    // Passing data to the modal
+    modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message = "هل انت متأكد من تغيير الفرقة الحالية ؟";
 
     // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        this.firebaseAuthService.insertIntoDb(`auth/Classes/DefaultClass`, this.defaultClass.value)
+        this.firebaseAuthService.insertIntoDb(`auth/${this.authPrevilige}/Class`, this.currentClass.value)
           .then(() => {
             this.spinner.hide();
             this.swal.toastr('success', 'تم تعديل الفرقة الحالية بنجاح');
             window.location.reload()
-
           })
           .catch((error) => {
             this.spinner.hide();
             this.swal.toastr('error', 'حدث خطأ أثناء تعديل الفرقة الحالية');
             console.log(error);
           })
-
       }
     });
   }

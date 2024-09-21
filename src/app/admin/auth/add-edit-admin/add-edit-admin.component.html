@@ -38,6 +38,15 @@
         </select>
       </div>
 
+      <div class="input-group my-3">
+
+        <select class="custom-select" id="inputGroupSelect01" formControlName="class">
+          <option value="0">اختر فرقة للتعيين</option>
+          <option *ngFor="let class of classes" [value]="class.value.Id">{{class.value.Name}}</option>
+
+        </select>
+      </div>
+
       <br>
     </form>
   </div>
