@@ -14,9 +14,12 @@ import { SwalService } from 'src/app/shared/swal.service';
   styleUrls: ['./add-student-data.component.scss'],
 })
 export class AddStudentDataComponent implements OnInit {
+  currentCLass = localStorage.getItem('currentClass');
   defaultImage = 'assets/Images/DefaultImage.jpg';
   selectedImage: any = null;
   selectedDate: any = null;
+
+  class: any
 
   NationalId = new FormControl(null, [Validators.required]);
   Name = new FormControl(null, [Validators.required]);
@@ -33,7 +36,7 @@ export class AddStudentDataComponent implements OnInit {
     private router: Router,
     private swal: SwalService,
     private imageCompress: NgxImageCompressService
-  ) {}
+  ) { }
 
   userForm = new FormGroup({
     NationalId: this.NationalId,
@@ -44,7 +47,9 @@ export class AddStudentDataComponent implements OnInit {
     Image: this.Image,
   });
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.class = this.activatedRoute.snapshot.paramMap.get('class');
+  }
 
   onChangeDate(event: any) {
     this.spinner.show();
@@ -175,11 +180,11 @@ export class AddStudentDataComponent implements OnInit {
           (this.ClassMonth.value as any) == '1'
             ? 'June'
             : (this.ClassMonth.value as any) == '2'
-            ? 'September'
-            : null;
+              ? 'September'
+              : null;
 
-        var filePath = `Class2024Internship/${ClassMonth}/${this.NationalId.value}.jpg`;
-        var dataPath = `Class2024Internship/${ClassMonth}/${this.NationalId.value}`;
+        var filePath = `${this.class}/${ClassMonth}/${this.NationalId.value}.jpg`;
+        var dataPath = `${this.class}/${ClassMonth}/${this.NationalId.value}`;
         console.log(ClassMonth);
 
         if (this.selectedImage) {

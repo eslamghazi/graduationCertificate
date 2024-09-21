@@ -20,13 +20,14 @@ import * as XLSX from 'xlsx';
   providedIn: 'root',
 })
 export class FireBaseAdminService {
+  private currentClass = localStorage.getItem('currentClass');
   constructor(
     private firebaseDb: AngularFireDatabase,
     private storage: AngularFireStorage,
     private spinner: NgxSpinnerService,
     private swal: SwalService,
     private http: HttpClient
-  ) {}
+  ) { }
 
   getAllData(path = '/', need = 'list'): Observable<any> {
     return need == 'list'
@@ -280,7 +281,7 @@ export class FireBaseAdminService {
   // Function to transform raw Excel data into the desired structure
   private transformData(rawData: any[]): any {
     const result: any = {
-      Class2024Internship: {},
+      [this.currentClass as any]: {},
     };
 
     // Iterate through the rows, skipping the header (rawData[0])
@@ -297,12 +298,12 @@ export class FireBaseAdminService {
       // const image = row[6]; // Image
 
       // Initialize the month if it doesn't exist
-      if (!result.Class2024Internship[classMonth]) {
-        result.Class2024Internship[classMonth] = {};
+      if (!result[this.currentClass as any][classMonth]) {
+        result[this.currentClass as any][classMonth] = {};
       }
 
       // Add the entry under the month using NationalId as the key
-      result.Class2024Internship[classMonth][nationalId] = {
+      result[this.currentClass as any][classMonth][nationalId] = {
         id: id,
         Name: name,
         NationalId: nationalId,
@@ -316,20 +317,20 @@ export class FireBaseAdminService {
     return result; // Return the structured data
   }
 
-  // Push the entire Class2024Internship object to Firebase
+  // Push the entire (this.currentClass) object to Firebase
   async pushClassData(classData: any, object: any = '/'): Promise<void> {
     try {
       await this.firebaseDb.object(object).set(classData);
-      return console.log('Class2024Internship data pushed successfully');
+      return console.log(`${this.currentClass} data pushed successfully`);
     } catch (error) {
-      return console.error('Error pushing Class2024Internship data:', error);
+      return console.error(`Error pushing ${this.currentClass} data:`, error);
     }
   }
 
   // Remove a specific entry from Firebase
   removeEntry(month: string, nationalId: string): Promise<void> {
     return this.firebaseDb
-      .object(`Class2024Internship/${month}/${nationalId}`)
+      .object(`${this.currentClass}/${month}/${nationalId}`)
       .remove();
   }
 }

@@ -1,14 +1,22 @@
 <form class="form-signin" [formGroup]="userForm">
 
-  <div class="form-group my-5">
-    <h1 class="h3 my-5 font-weight-normal text-center text-info">اختر دفعتك</h1>
-    <select class="form-control" formControlName="selectClass">
+  <div class="form-group my-2">
+    <h1 class="h3 my-3 font-weight-normal text-center text-info">اختر دفعتك</h1>
+    <select class="form-control" formControlName="selectClass" (change)="changeClass()">
       <option value="0" selected>الرجاء اختيار دفعتك</option>
-      <option value="1">امتياز 2024</option>
+      <option *ngFor="let class of Classes" [value]="class.value.Id">{{class.value.Name}}</option>
     </select>
   </div>
 
-  <div *ngIf="selectClass.value && selectClass.value != 0">
+  <div class="form-group my-2" *ngIf="selectClass.value && selectClass.value != '0'">
+    <h1 class="h3 my-3 font-weight-normal text-center text-info">اختر دورك</h1>
+    <select class="form-control" formControlName="selectSubClass">
+      <option value="0" selected>الرجاء اختيار دورك</option>
+      <option *ngFor="let subClass of SubClasses" [value]="subClass.value.Id">{{subClass.value.Name}}</option>
+    </select>
+  </div>
+
+  <div *ngIf="selectSubClass.value && selectSubClass.value != '0'">
     <div class="form-label-group">
       <h1 class="h3 my-5 font-weight-normal text-center text-info">ادخل رقمك القومي</h1>
       <input (keyup)="typingId($event.target)" type="number" id="id" class="form-control" placeholder="ادخل رقمك القومي"

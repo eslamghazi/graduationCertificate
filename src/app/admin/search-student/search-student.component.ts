@@ -12,6 +12,9 @@ import { SwalService } from 'src/app/shared/swal.service';
   styleUrls: ['./search-student.component.scss'],
 })
 export class SearchStudentComponent implements OnInit {
+  currentClass = localStorage.getItem('currentClass')
+  subClasses: any[] = [];
+
   data: any[] = [];
 
   clickSearch = false;
@@ -30,9 +33,22 @@ export class SearchStudentComponent implements OnInit {
     private fireBaseAdminService: FireBaseAdminService,
     private router: Router,
     private modalService: NgbModal
-  ) {}
+  ) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.getSubClasses();
+  }
+
+  getSubClasses() {
+    this.spinner.show();
+    this.fireBaseAdminService.getAllData(`/auth/Classes/${this.currentClass}`, "object").subscribe((data) => {
+      for (let key in data.SubClasses) {
+        this.subClasses.push({ key: key, value: data.SubClasses[key] });
+      }
+      this.spinner.hide();
+
+    })
+  }
 
   getIndex(index: number): number {
     return (this.currentPage - 1) * this.itemsPerPage + index + 1;
@@ -40,10 +56,14 @@ export class SearchStudentComponent implements OnInit {
 
   studentSearch() {
     this.clickSearch = false;
-    let dataBasegroups = [
-      'Class2024Internship/June',
-      'Class2024Internship/September',
-    ];
+    console.log(this.subClasses);
+    let dataBasegroups: any[] = [];
+
+    this.subClasses.forEach(element => {
+      dataBasegroups.push(`${this.currentClass}/${element.value.Id}`)
+    })
+
+
     if (this.searchTerm) {
       this.spinner.show();
       this.fireBaseAdminService
@@ -91,10 +111,6 @@ export class SearchStudentComponent implements OnInit {
   }
 
   goEdit(ClassMonth: any, id: any) {
-    console.log(ClassMonth);
-
-    const classMonth =
-      ClassMonth == 'June' ? '1' : ClassMonth == 'September' ? '2' : null;
 
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
@@ -112,13 +128,15 @@ export class SearchStudentComponent implements OnInit {
       if (result) {
         this.activeModal.dismiss();
         this.router.navigateByUrl(
-          `/student/editStudentData/${classMonth}/${id}`
+          `/student/editStudentData/${this.currentClass}/${ClassMonth}/${id}`
         );
       }
     });
   }
 
   deleteStudent(item: any, target?: any) {
+    console.log(item);
+
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
@@ -137,26 +155,9 @@ export class SearchStudentComponent implements OnInit {
       if (result) {
         this.spinner.show();
 
-        const path =
-          item.source.split('/')[1] == 'June'
-            ? `Class2024Internship/June/${item.data.NationalId}.jpg`
-            : item.source.split('/')[1] == 'September'
-            ? `Class2024Internship/September/${item.data.NationalId}.jpg`
-            : 'NotYet';
+        const path = `${item.source}/${item.data.NationalId}.jpg`
 
-        const dbPath =
-          item.source.split('/')[1] == 'June'
-            ? `Class2024Internship/June/${item.data.NationalId}`
-            : item.source.split('/')[1] == 'September'
-            ? `Class2024Internship/September/${item.data.NationalId}`
-            : 'NotYet';
-
-        const deleteState =
-          target == 'deleteImage'
-            ? `deleteImageOnly`
-            : target == 'deleteStudent'
-            ? `deleteAll`
-            : 'NotYet';
+        const dbPath = `${item.source}/${item.data.NationalId}`
 
         if (target == 'deleteStudent') {
           this.fireBaseAdminService
@@ -173,7 +174,7 @@ export class SearchStudentComponent implements OnInit {
           return;
         }
         this.fireBaseAdminService
-          .deleteFileAndImageProperty(path, dbPath, deleteState)
+          .deleteFileAndImageProperty(path, dbPath, "deleteImageOnly")
           .subscribe(
             () => {
               this.spinner.hide();

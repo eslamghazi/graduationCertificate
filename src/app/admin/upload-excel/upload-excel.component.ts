@@ -11,6 +11,7 @@ import { SwalService } from 'src/app/shared/swal.service';
   styleUrls: ['./upload-excel.component.scss'],
 })
 export class UploadExcelComponent implements OnInit {
+  currentClass = localStorage.getItem('currentClass');
   data: any; // This will store the final structured data
   firebaseData: any;
 
@@ -29,7 +30,7 @@ export class UploadExcelComponent implements OnInit {
     private modalService: NgbModal,
     private spinner: NgxSpinnerService,
     private swal: SwalService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     console.log(this.model);
@@ -69,7 +70,7 @@ export class UploadExcelComponent implements OnInit {
   // Helper function to flatten the data into a single array with month breaks
   flattenData(structuredData: any): any[] {
     const result: any[] = [];
-    const months = Object.keys(structuredData.Class2024Internship);
+    const months = Object.keys(structuredData[this.currentClass as any]);
 
     months.forEach((month) => {
       // Add a month separator row (can be flagged with `isMonthBreak` for display purposes)
@@ -77,10 +78,10 @@ export class UploadExcelComponent implements OnInit {
 
       // Add each entry for the current month
       const nationalIds = Object.keys(
-        structuredData.Class2024Internship[month]
+        structuredData[this.currentClass as any][month]
       );
       nationalIds.forEach((nationalId) => {
-        result.push(structuredData.Class2024Internship[month][nationalId]);
+        result.push(structuredData[this.currentClass as any][month][nationalId]);
       });
     });
 
@@ -105,12 +106,12 @@ export class UploadExcelComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         const subscription = this.firebaseAdminService
-          .getAllData('/Class2024Internship', 'object')
+          .getAllData(`/${this.currentClass}`, 'object')
           .subscribe(async (firebaseData: any) => {
             if (firebaseData) {
               if (this.model == 'upload') {
                 this.firebaseData = {
-                  Class2024Internship: firebaseData,
+                  [this.currentClass as any]: firebaseData,
                 };
                 this.data = this.mergeData(this.firebaseData, this.data);
 
@@ -120,7 +121,7 @@ export class UploadExcelComponent implements OnInit {
               } else {
                 this.firebaseData = firebaseData;
                 this.removeMatchingEntries({
-                  Class2024Internship: this.firebaseData,
+                  [this.currentClass as any]: this.firebaseData,
                 });
 
                 await this.pushClassDataToFirebase(this.firebaseData);
@@ -140,7 +141,7 @@ export class UploadExcelComponent implements OnInit {
 
   mergeData(obj1: any, obj2: any): any {
     const mergedResult: any = {
-      Class2024Internship: {},
+      [this.currentClass as any]: {},
     };
 
     // Helper function to merge two months
@@ -157,26 +158,26 @@ export class UploadExcelComponent implements OnInit {
     }
 
     // Iterate over the months in obj1
-    for (const month in obj1.Class2024Internship) {
+    for (const month in obj1[this.currentClass as any]) {
       // If the month exists in both obj1 and obj2, merge them
-      if (obj2.Class2024Internship[month]) {
-        mergedResult.Class2024Internship[month] = mergeMonthData(
-          obj1.Class2024Internship[month],
-          obj2.Class2024Internship[month]
+      if (obj2[this.currentClass as any][month]) {
+        mergedResult[this.currentClass as any][month] = mergeMonthData(
+          obj1[this.currentClass as any][month],
+          obj2[this.currentClass as any][month]
         );
       } else {
         // If the month only exists in obj1, copy it
-        mergedResult.Class2024Internship[month] = {
-          ...obj1.Class2024Internship[month],
+        mergedResult[this.currentClass as any][month] = {
+          ...obj1[this.currentClass as any][month],
         };
       }
     }
 
     // Iterate over the months in obj2 that are not in obj1 and add them
-    for (const month in obj2.Class2024Internship) {
-      if (!mergedResult.Class2024Internship[month]) {
-        mergedResult.Class2024Internship[month] = {
-          ...obj2.Class2024Internship[month],
+    for (const month in obj2[this.currentClass as any]) {
+      if (!mergedResult[this.currentClass as any][month]) {
+        mergedResult[this.currentClass as any][month] = {
+          ...obj2[this.currentClass as any][month],
         };
       }
     }
@@ -223,19 +224,19 @@ export class UploadExcelComponent implements OnInit {
     });
   }
 
-  // Construct the Class2024Internship object dynamically with all months from structured data
+  // Construct the (this.currentClass) object dynamically with all months from structured data
   constructClassData(data: any): any {
     this.spinner.show();
-    const cleanedData: any = { Class2024Internship: {} };
+    const cleanedData: any = { [this.currentClass as any]: {} };
 
-    const months = Object.keys(data.Class2024Internship);
+    const months = Object.keys(data[this.currentClass as any]);
     months.forEach((month) => {
-      cleanedData.Class2024Internship[month] = {};
-      const nationalIds = Object.keys(data.Class2024Internship[month]);
+      cleanedData[this.currentClass as any][month] = {};
+      const nationalIds = Object.keys(data[this.currentClass as any][month]);
       nationalIds.forEach((nationalId) => {
-        const entry = { ...this.data.Class2024Internship[month][nationalId] }; // Copy the entry
+        const entry = { ...this.data[this.currentClass as any][month][nationalId] }; // Copy the entry
         delete entry.id; // Remove the 'id' field
-        cleanedData.Class2024Internship[month][nationalId] = entry;
+        cleanedData[this.currentClass as any][month][nationalId] = entry;
       });
     });
 
@@ -244,17 +245,17 @@ export class UploadExcelComponent implements OnInit {
   }
   // Function to remove entries from Firebase that match the Excel data by NationalId
   removeMatchingEntries(data: any): void {
-    Object.keys(this.data.Class2024Internship || {}).forEach((month) => {
-      const excelEntries = this.data.Class2024Internship[month];
+    Object.keys(this.data[this.currentClass as any] || {}).forEach((month) => {
+      const excelEntries = this.data[this.currentClass as any][month];
       // Loop through the Excel data for this month
       Object.keys(excelEntries || {}).forEach((nationalId) => {
         // Check if the NationalId exists in the Firebase data for the same month
         if (
-          data.Class2024Internship[month] &&
-          data.Class2024Internship[month][nationalId]
+          data[this.currentClass as any][month] &&
+          data[this.currentClass as any][month][nationalId]
         ) {
           // Remove the matching entry from Firebase data
-          delete data.Class2024Internship[month][nationalId];
+          delete data[this.currentClass as any][month][nationalId];
           console.log(`Removed NationalId ${nationalId} from month ${month}`);
         }
       });
@@ -262,23 +263,23 @@ export class UploadExcelComponent implements OnInit {
   }
 
   restructureData(originalData: any) {
-    // Check if the input data has the 'Class2024Internship' wrapper
-    if (originalData.Class2024Internship) {
+    // Check if the input data has the (this.currentClass) wrapper
+    if (originalData[this.currentClass as any]) {
       // Extract and return the nested data directly
-      return originalData.Class2024Internship;
+      return originalData[this.currentClass as any];
     } else {
       // Return the input if the structure is already correct
       return originalData;
     }
   }
 
-  // Function to push the entire Class2024Internship object to Firebase
+  // Function to push the entire (this.currentClass) object to Firebase
   async pushClassDataToFirebase(classData: any): Promise<void> {
     this.spinner.show();
     const restructuredData = this.restructureData(classData);
 
     await this.firebaseAdminService
-      .pushClassData(restructuredData, '/Class2024Internship')
+      .pushClassData(restructuredData, `/${this.currentClass}`)
       .then(() => {
         this.spinner.hide();
         this.model == 'upload'

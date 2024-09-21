@@ -14,12 +14,12 @@ const routes: Routes = [
     component: GetStudentDataComponent,
   },
   {
-    path: 'student/addStudentData',
+    path: 'student/addStudentData/:class',
     component: AddStudentDataComponent,
     canActivate: [AccessGetAllStudentsData],
   },
   {
-    path: 'student/editStudentData/:class/:id',
+    path: 'student/editStudentData/:class/:subClass/:id',
     component: EditStudentDataComponent,
     canActivate: [AccessEditStudentData],
   },
@@ -29,4 +29,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class StudentRoutingModule {}
+export class StudentRoutingModule { }

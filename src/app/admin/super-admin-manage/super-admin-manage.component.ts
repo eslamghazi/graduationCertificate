@@ -14,6 +14,8 @@ import { UploadExcelComponent } from '../upload-excel/upload-excel.component';
   encapsulation: ViewEncapsulation.None,
 })
 export class SuperAdminManageComponent implements OnInit {
+  currentClass = localStorage.getItem('currentClass');
+
   superAdminCheck =
     localStorage.getItem('adminCheck')?.split('-')[0] == 'superadmin';
 
@@ -36,7 +38,7 @@ export class SuperAdminManageComponent implements OnInit {
     private modalService: NgbModal,
     private activeModal: NgbActiveModal,
     private route: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadFolders();
@@ -62,7 +64,7 @@ export class SuperAdminManageComponent implements OnInit {
     this.spinner.show();
 
     this.fireBaseAdminService
-      .getAllData('/Class2024Internship', 'object')
+      .getAllData(`/${this.currentClass}`, 'object')
       .subscribe((result) => {
         this.foldersRealDatabase = this.flattenFolderStructure(result);
         console.log(result);
@@ -72,8 +74,6 @@ export class SuperAdminManageComponent implements OnInit {
   }
 
   goEdit(ClassMonth: any, id: any) {
-    const classMonth =
-      ClassMonth == 'June' ? '1' : ClassMonth == 'September' ? '2' : null;
 
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
@@ -90,7 +90,7 @@ export class SuperAdminManageComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.route.navigateByUrl(
-          `/student/editStudentData/${classMonth}/${id}`
+          `/student/editStudentData/${this.currentClass}/${ClassMonth}/${id}`
         );
       }
     });
@@ -213,6 +213,7 @@ export class SuperAdminManageComponent implements OnInit {
   }
 
   deleteFolder(path: any, comingFrom?: any) {
+
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
@@ -330,12 +331,6 @@ export class SuperAdminManageComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        // const fileName =
-        //   path == 'Class2024Internship/June/'
-        //     ? 'الصور الخاصة بدور يونيو دفعة 2024'
-        //     : path == 'Class2024Internship/September/'
-        //     ? 'الصور الخاصة بدور سبتمبر دفعة 2024'
-        //     : 'NotYet';
 
         this.fireBaseAdminService
           .downloadFolderAsZip(path, fileName)

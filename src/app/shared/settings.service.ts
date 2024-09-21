@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class SettingsService {
-
+  private currentClass = localStorage.getItem('currentClass')
   constructor(private firebaseDb: AngularFireDatabase) { }
 
   getDataByPath(path: string): Observable<any> {
@@ -16,9 +16,9 @@ export class SettingsService {
   async pushClassData(classData: any, object: any = '/'): Promise<void> {
     try {
       await this.firebaseDb.object(object).set(classData);
-      return console.log('Class2024Internship data pushed successfully');
+      return console.log(`${this.currentClass} data pushed successfully`);
     } catch (error) {
-      return console.error('Error pushing Class2024Internship data:', error);
+      return console.error(`Error pushing ${this.currentClass} data:`, error);
     }
   }
 }

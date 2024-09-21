@@ -18,7 +18,7 @@ export class accessSuperAdminManage implements CanActivate {
     private router: Router,
     private spinner: NgxSpinnerService,
     private swal: SwalService
-  ) {}
+  ) { }
   async canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
@@ -46,7 +46,7 @@ export class AccessGetAllStudentsData implements CanActivate {
     private router: Router,
     private spinner: NgxSpinnerService,
     private swal: SwalService
-  ) {}
+  ) { }
   async canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
@@ -74,7 +74,7 @@ export class AccessEditStudentData implements CanActivate {
     private spinner: NgxSpinnerService,
     private swal: SwalService,
     private fireBaseEditService: FireBaseEditUserService
-  ) {}
+  ) { }
   async canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
@@ -83,35 +83,21 @@ export class AccessEditStudentData implements CanActivate {
 
     let id = route.paramMap.get('id');
     let classNumber: any = route.paramMap.get('class');
+    let subClassNumber: any = route.paramMap.get('subClass');
 
-    const folderPath =
-      classNumber == 1
-        ? 'Class2024Internship/June'
-        : classNumber == 2
-        ? 'Class2024Internship/September'
-        : 'NotYet';
 
-    let dataFromSeptember = await this.fireBaseEditService.getDataByPathPromise(
-      `${folderPath}/${id}`
+    let data = await this.fireBaseEditService.getDataByPathPromise(
+      `${classNumber}/${subClassNumber}/${id}`
     );
 
-    if (dataFromSeptember) {
+    if (data) {
       this.spinner.hide();
       return true;
     } else {
-      let dataFromJune = await this.fireBaseEditService.getDataByPathPromise(
-        `${folderPath}/${id}`
-      );
-
-      if (dataFromJune) {
-        this.spinner.hide();
-        return true;
-      } else {
-        this.router.navigate(['/student/getStudentData']);
-        this.spinner.hide();
-        this.swal.toastr('error', 'عفوًا هذا الرقم القومي غير مسجل لدينا');
-        return false;
-      }
+      this.router.navigate(['/student/getStudentData']);
+      this.spinner.hide();
+      this.swal.toastr('error', 'عفوًا هذا الرقم القومي غير مسجل لدينا');
+      return false;
     }
   }
 }

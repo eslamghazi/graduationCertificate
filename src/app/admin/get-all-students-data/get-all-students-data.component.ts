@@ -18,15 +18,20 @@ import { InvalidImagesComponent } from '../invalid-images/invalid-images.compone
   encapsulation: ViewEncapsulation.None, // Disable encapsulation
 })
 export class GetAllStudentsDataComponent implements OnInit {
+  currentClass = localStorage.getItem('currentClass')
+  SubClasses: any[] = [];
+  Options: any[] = [];
+
   superAdminCheck =
     localStorage.getItem('adminCheck')?.split('-')[0] == 'superadmin';
+
   data: any[] = [];
   filteredData: any[] = [];
   actualData: any[] = [];
 
   searchTerm: string = ''; // Holds the search input
-  selectClass = new FormControl(0);
-  selectUserType = new FormControl(0);
+  selectClass = new FormControl("0");
+  selectUserType = new FormControl("0");
 
   currentPage = 1; // Current page of pagination
   itemsPerPage = 5; // Number of items per page
@@ -37,38 +42,51 @@ export class GetAllStudentsDataComponent implements OnInit {
     private swal: SwalService,
     private modalService: NgbModal,
     private router: Router
-  ) {}
+  ) { }
 
   adminForm = new FormGroup({
     selectClass: this.selectClass,
     selectUserType: this.selectUserType,
   });
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.getSubClassesOptions();
+  }
 
+  getSubClassesOptions() {
+    this.spinner.show();
+    this.fireBaseAdminService.getAllData(`/auth/Classes/${this.currentClass}`, "object").subscribe((data) => {
+      for (let key in data.SubClasses) {
+        this.SubClasses.push({ key: key, value: data.SubClasses[key] });
+      }
+      for (let key in data.Options) {
+        this.Options.push({ key: key, value: data.Options[key] });
+      }
+      this.spinner.hide();
+      console.log(this.SubClasses);
+      console.log(this.Options);
+
+    })
+  }
   selectClassFunc(resetUserType = true) {
     this.spinner.show();
-    resetUserType ? this.selectUserType.patchValue(0) : null;
-    const path =
-      this.selectClass.value == 1
-        ? 'Class2024Internship/June/'
-        : this.selectClass.value == 2
-        ? 'Class2024Internship/September/'
-        : 'NotYet';
+    resetUserType ? this.selectUserType.patchValue("0") : null;
 
-    this.fireBaseAdminService.getAllData(path).subscribe((result) => {
+    this.fireBaseAdminService.getAllData(`${this.currentClass}/${this.selectClass.value}/`).subscribe((result) => {
       this.data = result;
       this.filteredData = result;
       this.actualData = result;
+      console.log(result);
+
       this.spinner.hide();
     });
   }
 
   selectUserTypeFunc() {
     this.spinner.show();
-    if (this.selectUserType.value == 1) {
+    if (this.selectUserType.value == "UploadedImages") {
       this.filterDataWithImages();
-    } else if (this.selectUserType.value == 2) {
+    } else if (this.selectUserType.value == "NotUpload") {
       this.filterDataWithOutImages();
     } else {
       this.spinner.hide();
@@ -111,11 +129,11 @@ export class GetAllStudentsDataComponent implements OnInit {
       console.log(this.filteredData);
     } else {
       // If search term is empty, reset to show all data with Image property
-      this.selectUserType.value == 1
+      this.selectUserType.value == 'UploadedImages'
         ? this.filterDataWithImages()
-        : this.selectUserType.value == 2
-        ? this.filterDataWithOutImages()
-        : null;
+        : this.selectUserType.value == 'NotUpload'
+          ? this.filterDataWithOutImages()
+          : null;
       this.spinner.hide();
     }
     this.currentPage = 1; // Reset to the first page after search
@@ -168,10 +186,9 @@ export class GetAllStudentsDataComponent implements OnInit {
         // Generate a file and trigger download
         XLSX.writeFile(
           wb,
-          `${
-            this.selectClass.value == 1
-              ? 'بيانات الطلاب الذين قاموا بوضع صورهم.xlsx'
-              : this.selectClass.value == 2
+          `${this.selectUserType.value == 'UploadedImages'
+            ? 'بيانات الطلاب الذين قاموا بوضع صورهم.xlsx'
+            : this.selectUserType.value == 'NotUpload'
               ? 'بيانات الطلاب الذين لم يقوموا بوضع صورهم.xlsx'
               : null
           }`
@@ -209,11 +226,11 @@ export class GetAllStudentsDataComponent implements OnInit {
 
   exportAllPhotos() {
     const fileName =
-      this.selectClass.value == 1
+      this.selectClass.value == 'June'
         ? 'الصور الخاصة بدور يونيو دفعة 2024'
-        : this.selectClass.value == 2
-        ? 'الصور الخاصة بدور سبتمبر دفعة 2024'
-        : 'NotYet';
+        : this.selectClass.value == 'September'
+          ? 'الصور الخاصة بدور سبتمبر دفعة 2024'
+          : 'NotYet';
 
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
@@ -224,17 +241,11 @@ export class GetAllStudentsDataComponent implements OnInit {
     // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message = `هل انت متأكد من ضغط جميع ${fileName} ؟`;
-
     // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        const path =
-          this.selectClass.value == 1
-            ? 'Class2024Internship/June/'
-            : this.selectClass.value == 2
-            ? 'Class2024Internship/September/'
-            : 'NotYet';
+        const path = `${this.currentClass}/${this.selectClass.value}/`;
 
         this.fireBaseAdminService
           .downloadFolderAsZip(path, fileName)
@@ -262,7 +273,7 @@ export class GetAllStudentsDataComponent implements OnInit {
     // Passing data to the modal
     modalRef.componentInstance.deleteSvg = true;
     modalRef.componentInstance.message =
-      this.selectUserType.value == 1
+      this.selectUserType.value == 'UploadedImages'
         ? 'هل انت متأكد من حذف الصورة الخاصة بالطالب ؟'
         : 'هل انت متأكد من حذف هذا الطالب ؟';
 
@@ -273,26 +284,11 @@ export class GetAllStudentsDataComponent implements OnInit {
         // this.fireBaseAdminService
         //   .deleteFileAndImageProperty(path, fileName)
         //   .then(() => {
-        const path =
-          this.selectClass.value == 1
-            ? `Class2024Internship/June/${item.NationalId}.jpg`
-            : this.selectClass.value == 2
-            ? `Class2024Internship/September/${item.NationalId}.jpg`
-            : 'NotYet';
+
+        const path = `${this.currentClass}/${this.selectClass.value}/${item.NationalId}.jpg`
 
         const dbPath =
-          this.selectClass.value == 1
-            ? `Class2024Internship/June/${item.NationalId}`
-            : this.selectClass.value == 2
-            ? `Class2024Internship/September/${item.NationalId}`
-            : 'NotYet';
-
-        const deleteState =
-          this.selectUserType.value == 1
-            ? `deleteImageOnly`
-            : this.selectUserType.value == 2
-            ? `deleteAll`
-            : 'NotYet';
+          `${this.currentClass}/${this.selectClass.value}/${item.NationalId}`
 
         if (target == 'deleteStudent') {
           this.fireBaseAdminService
@@ -308,24 +304,25 @@ export class GetAllStudentsDataComponent implements OnInit {
               this.selectClassFunc(true);
             });
           return;
+        } else {
+          this.fireBaseAdminService
+            .deleteFileAndImageProperty(path, dbPath, "deleteImageOnly")
+            .subscribe(
+              () => {
+                this.spinner.hide();
+                this.swal.toastr('success', 'تم حذف الصورة الخاصة بالطالب بنجاح');
+                this.selectClassFunc(true);
+              },
+              (error) => {
+                this.spinner.hide();
+                this.swal.toastr(
+                  'error',
+                  'حدث خطأ اثناء حذف الصورة الخاصة بالطالب'
+                );
+                this.selectClassFunc(true);
+              }
+            );
         }
-        this.fireBaseAdminService
-          .deleteFileAndImageProperty(path, dbPath, deleteState)
-          .subscribe(
-            () => {
-              this.spinner.hide();
-              this.swal.toastr('success', 'تم حذف الصورة الخاصة بالطالب بنجاح');
-              this.selectClassFunc(true);
-            },
-            (error) => {
-              this.spinner.hide();
-              this.swal.toastr(
-                'error',
-                'حدث خطأ اثناء حذف الصورة الخاصة بالطالب'
-              );
-              this.selectClassFunc(true);
-            }
-          );
       }
     });
   }
@@ -342,11 +339,7 @@ export class GetAllStudentsDataComponent implements OnInit {
     this.spinner.show();
 
     const dbPath =
-      this.selectClass.value == 1
-        ? `Class2024Internship/June`
-        : this.selectClass.value == 2
-        ? `Class2024Internship/September`
-        : 'NotYet';
+      `${this.currentClass}/${this.selectClass.value}`
 
     const checkImageTasks: any[] = []; // Holds the observables for all image checks
 
@@ -400,7 +393,7 @@ export class GetAllStudentsDataComponent implements OnInit {
                 // Wait for all deletions to complete
                 forkJoin(deletionTasks).subscribe(() => {
                   this.swal.toastr('success', 'تم حذف الصور بنجاح');
-                  this.selectUserType.patchValue(0);
+                  this.selectUserType.patchValue("0");
                 });
               }
             })
@@ -436,10 +429,6 @@ export class GetAllStudentsDataComponent implements OnInit {
   }
 
   goEdit(ClassMonth: any, id: any) {
-    console.log(ClassMonth);
-
-    const classMonth =
-      ClassMonth == 'June' ? '1' : ClassMonth == 'September' ? '2' : null;
 
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
@@ -456,7 +445,7 @@ export class GetAllStudentsDataComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.router.navigateByUrl(
-          `/student/editStudentData/${classMonth}/${id}`
+          `/student/editStudentData/${this.currentClass}/${ClassMonth}/${id}`
         );
       }
     });

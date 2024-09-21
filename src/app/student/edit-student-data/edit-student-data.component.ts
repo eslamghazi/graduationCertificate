@@ -21,6 +21,7 @@ export class EditStudentDataComponent implements OnInit {
 
   id: any;
   class: any;
+  subClass: any;
 
   data: any;
 
@@ -38,7 +39,7 @@ export class EditStudentDataComponent implements OnInit {
     private router: Router,
     private swal: SwalService,
     private imageCompress: NgxImageCompressService
-  ) {}
+  ) { }
 
   userForm = new FormGroup({
     NationalId: this.NationalId,
@@ -50,6 +51,7 @@ export class EditStudentDataComponent implements OnInit {
 
   ngOnInit(): void {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
+    this.subClass = this.activatedRoute.snapshot.paramMap.get('subClass');
     this.class = this.activatedRoute.snapshot.paramMap.get('class');
 
     if (this.id && this.class) {
@@ -83,30 +85,14 @@ export class EditStudentDataComponent implements OnInit {
 
   searchData(id: any) {
     this.spinner.show();
-    const folderPath =
-      this.class == 1
-        ? 'Class2024Internship/June'
-        : this.class == 2
-        ? 'Class2024Internship/September'
-        : 'NotYet';
 
     this.fireBaseEditService
-      .getDataByPath(`${folderPath}/${id}`)
+      .getDataByPath(`${this.class}/${this.subClass}/${id}`)
       .subscribe((data) => {
         if (data) {
           this.data = data;
           this.patchValues();
           this.spinner.hide();
-        } else {
-          this.fireBaseEditService
-            .getDataByPath(`${folderPath}/${id}`)
-            .subscribe((data) => {
-              if (data) {
-                this.data = data;
-                this.patchValues();
-                this.spinner.hide();
-              }
-            });
         }
       });
   }
@@ -235,6 +221,7 @@ export class EditStudentDataComponent implements OnInit {
     let isImageValid = await this.fireBaseEditService
       .checkImageUrl(this.data.Image)
       .toPromise();
+
     this.spinner.hide();
 
     if (
@@ -260,8 +247,8 @@ export class EditStudentDataComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        var dataPath = `Class2024Internship/${this.data.ClassMonth}/${this.NationalId.value}`;
-        var filePath = `Class2024Internship/${this.data.ClassMonth}/${this.NationalId.value}.jpg`;
+        var dataPath = `${this.class}/${this.data.ClassMonth}/${this.NationalId.value}`;
+        var filePath = `${this.class}/${this.data.ClassMonth}/${this.NationalId.value}.jpg`;
         if (this.selectedImage) {
           this.fireBaseEditService.uploadToStorage(
             filePath,
