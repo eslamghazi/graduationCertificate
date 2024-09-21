@@ -56,7 +56,6 @@ export class SearchStudentComponent implements OnInit {
 
   studentSearch() {
     this.clickSearch = false;
-    console.log(this.subClasses);
     let dataBasegroups: any[] = [];
 
     this.subClasses.forEach(element => {
@@ -69,7 +68,6 @@ export class SearchStudentComponent implements OnInit {
       this.fireBaseAdminService
         .searchObject(dataBasegroups, this.searchTerm)
         .subscribe((result) => {
-          console.log('first', result);
           this.data = result;
           this.filteredData = result;
           this.checkAllImages(result);
@@ -135,8 +133,6 @@ export class SearchStudentComponent implements OnInit {
   }
 
   deleteStudent(item: any, target?: any) {
-    console.log(item);
-
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',

@@ -39,14 +39,12 @@ export class AdminManageComponent implements OnInit {
         (auth) => auth.key != 'comingSoon' && auth.key != 'Classes'
       );
       this.filteredAdmins = this.admins;
-      console.log(this.admins);
       this.spinner.hide();
     });
   }
 
   deleteAdmin(item: any) {
     const path = `/auth/${item.data.NationalId}`;
-    console.log(item);
 
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
@@ -79,7 +77,6 @@ export class AdminManageComponent implements OnInit {
   }
 
   addEditAdmin(target: any, item?: any) {
-    console.log(item);
 
     const modalRef = this.modalService.open(AddEditAdminComponent, {
       centered: true,
@@ -113,7 +110,6 @@ export class AdminManageComponent implements OnInit {
             item.data.NationalId.toString().includes(this.searchTerm))
       );
       this.spinner.hide();
-      console.log(this.filteredAdmins);
     } else {
       this.getAuthData();
     }

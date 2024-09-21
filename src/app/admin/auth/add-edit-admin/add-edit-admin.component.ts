@@ -54,7 +54,6 @@ export class AddEditAdminComponent implements OnInit {
       });
     }
     this.getClassesData()
-    console.log(this.classes);
 
   }
 
@@ -117,7 +116,6 @@ export class AddEditAdminComponent implements OnInit {
   }
 
   typingId(event: any) {
-    console.log(event.value);
 
     if (event.value) {
       if (!(event.value.length == 14)) {

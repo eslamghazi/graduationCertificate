@@ -33,7 +33,6 @@ export class UploadExcelComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log(this.model);
     this.data = null;
     this.firebaseData = null;
     this.flatData = null;
@@ -60,7 +59,6 @@ export class UploadExcelComponent implements OnInit {
         this.data = structuredData;
         this.flatData = this.flattenData(this.data); // Flatten the data for rendering in a single table
         this.filteredData = this.flatData; // Flatten the data for rendering in a single table
-        console.log(this.flatData); // Display the flattened data
       })
       .catch((error) => {
         console.error('Error processing Excel file:', error);

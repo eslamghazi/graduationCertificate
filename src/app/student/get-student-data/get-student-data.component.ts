@@ -62,7 +62,6 @@ export class GetStudentDataComponent implements OnInit {
     this.fireBaseUserService
       .getDataByPath(`/auth/${this.NationalId.value}`)
       .subscribe((res) => {
-        console.log(res);
         if (res?.Auth) {
           this.authFound = true;
           localStorage.setItem(
@@ -95,14 +94,12 @@ export class GetStudentDataComponent implements OnInit {
   getClasses() {
     this.spinner.show();
     this.firebaseAdminService.getAllData(`/auth/Classes`, "object").subscribe((data) => {
-      console.log(data);
 
       for (let key in data) {
         if (key != 'DefaultClass')
           this.Classes.push({ key: key, value: data[key] });
       }
       this.spinner.hide();
-      console.log(this.Classes);
 
     })
   }
@@ -125,7 +122,6 @@ export class GetStudentDataComponent implements OnInit {
     }
 
     let currentClass = this.Classes.find((x) => x.key == this.selectClass.value)?.value
-    console.log(currentClass);
 
     this.getSubClasses(currentClass)
   }

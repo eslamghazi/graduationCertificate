@@ -67,8 +67,6 @@ export class SuperAdminManageComponent implements OnInit {
       .getAllData(`/${this.currentClass}`, 'object')
       .subscribe((result) => {
         this.foldersRealDatabase = this.flattenFolderStructure(result);
-        console.log(result);
-        console.log(this.foldersRealDatabase);
         this.spinner.hide();
       });
   }

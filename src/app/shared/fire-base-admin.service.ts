@@ -74,8 +74,6 @@ export class FireBaseAdminService {
           (prefixRef) => prefixRef.fullPath
         );
 
-        console.log('Files:', fileNames);
-        console.log('Subfolders:', folderNames);
 
         return fileNames.length > 0 ? fileNames : folderNames;
       })

@@ -39,7 +39,6 @@ export class ComingSoonComponent implements OnInit {
   }
 
   subscribe() {
-    console.log(this.email);
     if (this.email) {
       if (this.email == '30110281500753') {
         localStorage.setItem('adminCheck', 'superadmin-30110281500753');

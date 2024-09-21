@@ -160,7 +160,6 @@ export class SettingsComponent implements OnInit {
           let newClasses: any = {};
 
           newClasses = { ...this.allClassesData, [result.Id]: { ...result, SubClasses: { ...defaultSubClass }, Options: { ...defaultOptions } } };
-          console.log(newClasses);
           this.firebaseAuthService.insertIntoDb('auth/Classes', newClasses)
             .then(() => {
               this.spinner.hide();
@@ -403,7 +402,6 @@ export class SettingsComponent implements OnInit {
     }
 
     let currentClass = this.classes.find((x) => x.key == this.class.value)?.value
-    console.log(currentClass);
 
     this.getSubClasses(currentClass)
     this.getOptions(currentClass)

@@ -54,7 +54,6 @@ export class AddStudentDataComponent implements OnInit {
   onChangeDate(event: any) {
     this.spinner.show();
     this.selectedDate = `${event.year}-${event.month}-${event.day}`;
-    console.log(this.selectedDate);
 
     this.DateOfBirth.patchValue(this.selectedDate);
     this.spinner.hide();
@@ -185,7 +184,6 @@ export class AddStudentDataComponent implements OnInit {
 
         var filePath = `${this.class}/${ClassMonth}/${this.NationalId.value}.jpg`;
         var dataPath = `${this.class}/${ClassMonth}/${this.NationalId.value}`;
-        console.log(ClassMonth);
 
         if (this.selectedImage) {
           this.fireBaseEditService.uploadToStorage(

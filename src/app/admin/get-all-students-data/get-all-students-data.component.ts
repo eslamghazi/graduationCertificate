@@ -69,8 +69,6 @@ export class GetAllStudentsDataComponent implements OnInit {
         this.Options.push({ key: key, value: data.Options[key] });
       }
       this.spinner.hide();
-      console.log(this.SubClasses);
-      console.log(this.Options);
 
     })
   }
@@ -82,7 +80,6 @@ export class GetAllStudentsDataComponent implements OnInit {
       this.data = result;
       this.filteredData = result;
       this.actualData = result;
-      console.log(result);
 
       this.spinner.hide();
     });
@@ -132,7 +129,6 @@ export class GetAllStudentsDataComponent implements OnInit {
             item.NationalId.toString().includes(this.searchTerm))
       );
       this.spinner.hide();
-      console.log(this.filteredData);
     } else {
       // If search term is empty, reset to show all data with Image property
       this.selectUserType.value == 'UploadedImages'
@@ -219,7 +215,6 @@ export class GetAllStudentsDataComponent implements OnInit {
     // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
-        console.log(item.Image);
 
         window.open(item.Image, '_blank');
       }
@@ -368,7 +363,6 @@ export class GetAllStudentsDataComponent implements OnInit {
       forkJoin(checkImageTasks).subscribe((results) => {
         const invalidImages = results.filter((result) => !result.isValid);
 
-        console.log('Invalid Images:', invalidImages); // Debugging
 
         // Check if there are invalid images
         if (invalidImages.length > 0) {
@@ -423,7 +417,6 @@ export class GetAllStudentsDataComponent implements OnInit {
   removeImageForStudent(path: string): Observable<any> {
     return from(this.fireBaseAdminService.removeImageProperty(path)).pipe(
       map(() => {
-        console.log(`Image property removed for student ${path}`);
         this.spinner.hide();
       }),
       catchError((error) => {
