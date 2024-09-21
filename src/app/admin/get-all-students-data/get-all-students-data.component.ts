@@ -6,7 +6,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { SwalService } from 'src/app/shared/swal.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
-import { map, catchError, of, forkJoin, Observable, from } from 'rxjs';
+import { map, catchError, of, forkJoin, Observable, from, timeout } from 'rxjs';
 import { Router } from '@angular/router';
 import { SearchStudentComponent } from '../search-student/search-student.component';
 import { InvalidImagesComponent } from '../invalid-images/invalid-images.component';
@@ -50,7 +50,13 @@ export class GetAllStudentsDataComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.getSubClassesOptions();
+    setTimeout(() => {
+      this.spinner.show();
+      if (this.currentClass) {
+        this.getSubClassesOptions();
+      }
+      this.spinner.hide();
+    }, 1000)
   }
 
   getSubClassesOptions() {
