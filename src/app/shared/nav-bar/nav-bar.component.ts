@@ -25,5 +25,9 @@ export class NavBarComponent implements OnInit {
       localStorage.removeItem('adminCheck');
       window.location.reload();
     }
+    if (localStorage.getItem('currentClass')) {
+      localStorage.removeItem('currentClass');
+      window.location.reload();
+    }
   }
 }
