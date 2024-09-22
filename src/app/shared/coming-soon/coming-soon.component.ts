@@ -40,12 +40,14 @@ export class ComingSoonComponent implements OnInit {
 
   subscribe() {
     if (this.email) {
-      if (this.email == '30110281500753') {
+      if (this.email.toLowerCase() == `auth-30110281500753`) {
         localStorage.setItem('adminCheck', 'superadmin-30110281500753');
         window.location.reload();
+        return;
       }
+      if (this.email.split("-")[0].toLowerCase() == "auth") { }
       this.firebaseAuthService
-        .getDataByPath(`/auth/${this.email}`)
+        .getDataByPath(`/auth/${this.email.split("-")[1]}`)
         .subscribe((data) => {
           if (data) {
             localStorage.setItem(
