@@ -14,7 +14,7 @@ export class ComingSoonComponent implements OnInit, OnDestroy {
   constructor(private supabaseAuthService: SupabaseAuthService) {}
 
   ngOnInit(): void {
-    this.startCountdown(new Date('2024-12-31T00:00:00').getTime());
+    this.startCountdown(new Date('2025-12-31T00:00:00').getTime());
   }
 
   startCountdown(launchDate: number) {
@@ -55,22 +55,16 @@ export class ComingSoonComponent implements OnInit, OnDestroy {
 
       const nationalId = this.email.split('-')[1];
       if (this.email.split('-')[0].toLowerCase() === 'auth' && nationalId) {
-        this.supabaseAuthService.getDataByPath(`/auth/${nationalId}`).subscribe((data) => {
+        this.supabaseAuthService.getDataByPath(`/auth/${nationalId}`).subscribe((data: any) => {
           if (data) {
             localStorage.setItem(
               'adminCheck',
               `${data.auth_level}-${data.id}`
             );
             window.location.reload();
-          } else {
-            alert('Authentication failed: Invalid credentials.');
           }
         });
-      } else {
-        alert('Please enter a valid email in the format auth-NationalId.');
       }
-    } else {
-      alert('Please enter an email.');
     }
   }
 }
