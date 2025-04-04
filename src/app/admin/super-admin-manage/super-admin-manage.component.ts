@@ -1,11 +1,12 @@
 import { Router } from '@angular/router';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
+import { SupabaseAdminService } from 'src/app/shared/supabase-admin.service';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
 import { SwalService } from 'src/app/shared/swal.service';
 import { UploadExcelComponent } from '../upload-excel/upload-excel.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-super-admin-manage',
@@ -13,7 +14,7 @@ import { UploadExcelComponent } from '../upload-excel/upload-excel.component';
   styleUrls: ['./super-admin-manage.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class SuperAdminManageComponent implements OnInit {
+export class SuperAdminManageComponent implements OnInit, OnDestroy {
   currentClass = localStorage.getItem('currentClass');
 
   superAdminCheck =
@@ -31,17 +32,23 @@ export class SuperAdminManageComponent implements OnInit {
   itemsPerPage: any = 1;
   currentPage: number = 1;
 
+  private subscriptions: Subscription[] = [];
+
   constructor(
-    private fireBaseAdminService: FireBaseAdminService,
+    private supabaseAdminService: SupabaseAdminService,
     private spinner: NgxSpinnerService,
     private swal: SwalService,
     private modalService: NgbModal,
     private activeModal: NgbActiveModal,
     private route: Router
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.loadFolders();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   onTabChange(event: any) {
@@ -63,12 +70,13 @@ export class SuperAdminManageComponent implements OnInit {
   getFoldersFromRealtimeDatabase() {
     this.spinner.show();
 
-    this.fireBaseAdminService
-      .getAllData(`/${this.currentClass}`, 'object')
+    const sub = this.supabaseAdminService
+      .getAllData('students', { class_id: this.currentClass })
       .subscribe((result) => {
         this.foldersRealDatabase = this.flattenFolderStructure(result);
         this.spinner.hide();
       });
+    this.subscriptions.push(sub);
   }
 
   goEdit(ClassMonth: any, id: any) {
@@ -79,12 +87,10 @@ export class SuperAdminManageComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message =
       'هل انت متأكد من الذهاب لقائمة تعديل الطالب';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.route.navigateByUrl(
@@ -94,12 +100,10 @@ export class SuperAdminManageComponent implements OnInit {
     });
   }
 
-  // A method that flattens your folders and national IDs into a single list
   getFlattenedData() {
     const flattenedData: any = [];
 
     this.filteredFoldersRealtimeDatabase().forEach((folder, folderIndex) => {
-      // Push folder as the main row
       flattenedData.push({
         isFolder: true,
         folderIndex: folderIndex,
@@ -107,13 +111,12 @@ export class SuperAdminManageComponent implements OnInit {
         nationalIds: folder.nationalIds,
       });
 
-      // Push each national ID as a separate row under the folder and reset numbering
-      let subIndex = 1; // Reset subIndex to 1 for each folder
+      let subIndex = 1;
       folder.nationalIds.forEach((id: any, index: any) => {
         flattenedData.push({
           isFolder: false,
           folderIndex: folderIndex,
-          idIndex: subIndex++, // Increment subIndex for each ID, reset to 1 at the start of each folder
+          idIndex: subIndex++,
           id: id,
           subFolderData: folder.subFolderData[id],
         });
@@ -123,25 +126,26 @@ export class SuperAdminManageComponent implements OnInit {
     return flattenedData;
   }
 
-  // Flatten the folder structure to handle root and subfolders
-  flattenFolderStructure(data: any): any[] {
-    const folderArray = [];
+  flattenFolderStructure(data: any[]): any[] {
+    const folderMap: { [key: string]: any } = {};
     this.studentsNumber = 0;
-    for (const folder in data) {
-      const subFolderData = data[folder];
-      const nationalIds = Object.keys(subFolderData);
-      folderArray.push({
-        folderName: folder, // E.g., 'June', 'September'
-        subFolderData, // Contains the objects inside
-        nationalIds, // National IDs of the objects in the folder
-      });
-      this.studentsNumber += nationalIds.length;
-    }
+    data.forEach((student) => {
+      const folderName = student.subclass_id.split('-').pop();
+      if (!folderMap[folderName]) {
+        folderMap[folderName] = {
+          folderName,
+          subFolderData: {},
+          nationalIds: [],
+        };
+      }
+      folderMap[folderName].subFolderData[student.id] = student;
+      folderMap[folderName].nationalIds.push(student.id);
+      this.studentsNumber++;
+    });
 
-    return folderArray;
+    return Object.values(folderMap);
   }
 
-  // Search logic (optional)
   filteredFoldersRealtimeDatabase() {
     return this.foldersRealDatabase.filter(
       (folder) =>
@@ -154,16 +158,23 @@ export class SuperAdminManageComponent implements OnInit {
         )
     );
   }
+
   getIndex(index: number) {
     return index + 1 + (this.currentPage - 1) * this.itemsPerPage;
   }
 
   async loadFolders() {
     this.spinner.show();
-    this.folders = await this.fireBaseAdminService.listAllFolders();
-    this.groupFoldersByParent();
-    this.spinner.hide();
+    try {
+      this.folders = await this.supabaseAdminService.listAllFolders();
+      this.groupFoldersByParent();
+    } catch (error) {
+      this.swal.toastr('error', 'حدث خطأ أثناء تحميل المجلدات');
+    } finally {
+      this.spinner.hide();
+    }
   }
+
   getFolderName(folderPath: string): string {
     const pathParts = folderPath.split('/');
     return pathParts[pathParts.length - 1];
@@ -171,12 +182,11 @@ export class SuperAdminManageComponent implements OnInit {
 
   groupFoldersByParent() {
     this.spinner.show();
-    // Group folders by their first segment (parent folder)
     const folderMap: any = new Map<string, string[]>();
 
     this.folders.forEach((folder) => {
       const segments = folder.split('/');
-      const rootFolder = segments[0]; // first segment is the root folder
+      const rootFolder = segments[0];
 
       if (!folderMap.has(rootFolder)) {
         folderMap.set(rootFolder, []);
@@ -185,7 +195,6 @@ export class SuperAdminManageComponent implements OnInit {
       folderMap.get(rootFolder).push(folder);
     });
 
-    // Convert map to an array for easier use in template
     this.groupedFolders = Array.from(folderMap.entries()).map(
       ([parentFolder, subFolders]: any) => {
         return { parentFolder, subFolders };
@@ -196,7 +205,6 @@ export class SuperAdminManageComponent implements OnInit {
 
   filteredFolders(): any[] {
     const filtered = this.groupedFolders.filter((group) => {
-      // Check if the parent folder or any of its subfolders match the search term
       return (
         group.parentFolder
           .toLowerCase()
@@ -211,28 +219,27 @@ export class SuperAdminManageComponent implements OnInit {
   }
 
   deleteFolder(path: any, comingFrom?: any) {
-
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.deleteSvg = true;
     modalRef.componentInstance.message =
       comingFrom == 'realtimeDatabase'
         ? 'هل انت متأكد من حذف البيانات ؟'
         : 'هل انت متأكد من حذف المجلد ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        const folderPath = path; // Replace with your folder path
+        const folderPath = path;
+
         if (comingFrom == 'realtimeDatabase') {
-          this.fireBaseAdminService
-            .removeImagePropertyFromDatabase(path, 'deleteAll')
+
+          this.supabaseAdminService
+            .removeImagePropertyFromDatabase(folderPath, 'deleteAll') // Use the correct method
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم حذف البيانات بنجاح');
@@ -245,7 +252,8 @@ export class SuperAdminManageComponent implements OnInit {
             });
           return;
         }
-        this.fireBaseAdminService.deleteFolder(folderPath).subscribe({
+
+        const sub = this.supabaseAdminService.deleteFolder(folderPath).subscribe({
           next: () => {
             this.spinner.hide();
             this.swal.toastr('success', 'تم حذف المجلد بنجاح');
@@ -257,6 +265,7 @@ export class SuperAdminManageComponent implements OnInit {
             this.loadFolders();
           },
         });
+        this.subscriptions.push(sub);
       }
     });
   }
@@ -268,12 +277,10 @@ export class SuperAdminManageComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message =
       'هل انت متأكد من تحميل ملف نصي به اسماء جميع الملفات / المجلدات الموجوده بالمجلد ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.swal.toastr(
@@ -281,9 +288,9 @@ export class SuperAdminManageComponent implements OnInit {
           'جار تجهيز قائمة بأسماء الملفات الموجوده داخل المجلد'
         );
         this.spinner.show();
-        const folderPath = path; // Replace with your folder path
 
-        this.fireBaseAdminService.getFileNames(folderPath).subscribe({
+        const folderPath = path;
+        const sub = this.supabaseAdminService.getFileNames(folderPath).subscribe({
           next: (fileNames) => {
             this.downloadTxtFile(fileNames, fileName);
             this.spinner.hide();
@@ -297,6 +304,7 @@ export class SuperAdminManageComponent implements OnInit {
             this.spinner.hide();
           },
         });
+        this.subscriptions.push(sub);
       }
     });
   }
@@ -320,17 +328,15 @@ export class SuperAdminManageComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message =
       'هل انت متأكد من ضغط جميع الصور الموجودة بالمجلد ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
 
-        this.fireBaseAdminService
+        this.supabaseAdminService
           .downloadFolderAsZip(path, fileName)
           .then(() => {
             this.swal.toastr('success', 'تم تحضير الصور بنجاح');
@@ -351,13 +357,12 @@ export class SuperAdminManageComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.model = model;
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         modalRef.componentInstance.model = null;
+        this.getFoldersFromRealtimeDatabase();
       }
     });
   }
@@ -369,20 +374,18 @@ export class SuperAdminManageComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message =
       'هل تريد تحميل شيت الرفع (excel) الافتراضي؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         const downloadLink = document.createElement('a');
         downloadLink.setAttribute('download', 'مسودة لشيت الرفع.xlsx');
         downloadLink.href = 'assets/Graduation-Certificate-Sample.xlsx';
-        document.body.appendChild(downloadLink); // Append the link to the DOM
-        downloadLink.click(); // Programmatically trigger the click
-        document.body.removeChild(downloadLink); // Remove link after download
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
 
         this.activeModal.dismiss();
       }

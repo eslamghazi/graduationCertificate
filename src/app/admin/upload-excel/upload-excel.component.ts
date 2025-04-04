@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
+import { Subscription } from 'rxjs';
+import { SupabaseAdminService } from 'src/app/shared/supabase-admin.service';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
 import { SwalService } from 'src/app/shared/swal.service';
 
@@ -10,41 +11,44 @@ import { SwalService } from 'src/app/shared/swal.service';
   templateUrl: './upload-excel.component.html',
   styleUrls: ['./upload-excel.component.scss'],
 })
-export class UploadExcelComponent implements OnInit {
+export class UploadExcelComponent implements OnInit, OnDestroy {
   currentClass = localStorage.getItem('currentClass');
-  data: any; // This will store the final structured data
+  data: any;
   firebaseData: any;
 
-  flatData: any; // This will store the flattened data for display in a single table
-
+  flatData: any[] = [];
+  filteredData: any[] = [];
   model: string = 'upload';
+  currentPage = 1;
+  itemsPerPage = 5;
+  searchTerm: string = '';
 
-  filteredData: any; // This will store the filtered data for rendering
-  currentPage = 1; // Current page of pagination
-  itemsPerPage = 5; // Number of items per page
-  searchTerm: string = ''; // Holds the search input
+  private subscriptions: Subscription[] = [];
 
   constructor(
     public activeModal: NgbActiveModal,
-    private firebaseAdminService: FireBaseAdminService,
+    private supabaseAdminService: SupabaseAdminService,
     private modalService: NgbModal,
     private spinner: NgxSpinnerService,
     private swal: SwalService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.data = null;
     this.firebaseData = null;
-    this.flatData = null;
+    this.flatData = [];
     this.filteredData = [];
     this.currentPage = 1;
     this.itemsPerPage = 5;
     this.searchTerm = '';
   }
 
-  // Function to handle file input
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
   onFileChange(event: any): void {
-    const target: DataTransfer = <DataTransfer>event.target;
+    const target: DataTransfer = event.target as DataTransfer;
 
     if (target.files.length !== 1) {
       throw new Error('Cannot use multiple files');
@@ -52,35 +56,41 @@ export class UploadExcelComponent implements OnInit {
 
     const file: File = target.files[0];
 
-    // Use the service to process the Excel file
-    this.firebaseAdminService
+    this.supabaseAdminService
       .processExcelFile(file)
       .then((structuredData: any) => {
         this.data = structuredData;
-        this.flatData = this.flattenData(this.data); // Flatten the data for rendering in a single table
-        this.filteredData = this.flatData; // Flatten the data for rendering in a single table
+        this.flatData = this.flattenData(this.data);
+        this.filteredData = this.flatData;
       })
       .catch((error) => {
         console.error('Error processing Excel file:', error);
+        this.swal.toastr('error', 'حدث خطأ أثناء معالجة ملف الإكسل');
       });
   }
 
-  // Helper function to flatten the data into a single array with month breaks
-  flattenData(structuredData: any): any[] {
+  flattenData(structuredData: any[]): any[] {
     const result: any[] = [];
-    const months = Object.keys(structuredData[this.currentClass as any]);
+    const monthMap: { [key: string]: any[] } = {};
 
-    months.forEach((month) => {
-      // Add a month separator row (can be flagged with `isMonthBreak` for display purposes)
-      result.push({ isMonthBreak: true, month: month });
-
-      // Add each entry for the current month
-      const nationalIds = Object.keys(
-        structuredData[this.currentClass as any][month]
-      );
-      nationalIds.forEach((nationalId) => {
-        result.push(structuredData[this.currentClass as any][month][nationalId]);
+    structuredData.forEach((student, index) => {
+      const month = student.subclass_id.split('-').pop();
+      if (!monthMap[month]) {
+        monthMap[month] = [];
+      }
+      monthMap[month].push({
+        id: index + 1,
+        Name: student.name,
+        NationalId: student.national_id,
+        DateOfBirth: student.date_of_birth,
+        PlaceOfBirth: student.place_of_birth,
+        ClassMonth: month,
       });
+    });
+
+    Object.keys(monthMap).forEach((month) => {
+      result.push({ isMonthBreak: true, month });
+      result.push(...monthMap[month]);
     });
 
     return result;
@@ -93,114 +103,105 @@ export class UploadExcelComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message =
-      this.model == 'upload'
+      this.model === 'upload'
         ? 'هل انت متأكد من رفع هذه البيانات ؟'
         : 'هل انت متأكد من حذف هذه البيانات ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
-        const subscription = this.firebaseAdminService
-          .getAllData(`/${this.currentClass}`, 'object')
-          .subscribe(async (firebaseData: any) => {
-            if (firebaseData) {
-              if (this.model == 'upload') {
-                this.firebaseData = {
-                  [this.currentClass as any]: firebaseData,
-                };
-                this.data = this.mergeData(this.firebaseData, this.data);
 
-                const classData = this.constructClassData(this.data);
+        let updatedData = this.data.map((item: { national_id?: string; [key: string]: any }) => {
+          const { national_id, ...rest } = item;
+          return rest;
+        });
 
-                await this.pushClassDataToFirebase(classData);
+          const sub = this.supabaseAdminService
+          .getAllData('students', { class_id: this.currentClass })
+          .subscribe({
+            next: async (existingStudents: any[]) => {
+              if (existingStudents && existingStudents.length > 0) {
+                if (this.model === 'upload') {
+
+                  this.firebaseData = existingStudents;
+                  const mergedData = this.mergeData(this.firebaseData, updatedData);
+                  await this.supabaseAdminService.upsertData(mergedData, 'students');
+                } else {
+                  this.firebaseData = existingStudents;
+                  const idsToDelete = this.getIdsToDelete(this.firebaseData, updatedData);
+                  await this.supabaseAdminService.deleteMultiple(idsToDelete, 'students');
+                }
               } else {
-                this.firebaseData = firebaseData;
-                this.removeMatchingEntries({
-                  [this.currentClass as any]: this.firebaseData,
-                });
+                if (this.model === 'upload') {
 
-                await this.pushClassDataToFirebase(this.firebaseData);
+                  await this.supabaseAdminService.upsertData(updatedData, 'students');
+                }
               }
 
-              // Unsubscribe after the first execution
-              subscription.unsubscribe();
-            } else {
-              const classData = this.constructClassData(this.data);
-
-              await this.pushClassDataToFirebase(classData);
-            }
+              this.spinner.hide();
+              this.swal.toastr(
+                'success',
+                this.model === 'upload' ? 'تم رفع البيانات بنجاح' : 'تم حذف البيانات بنجاح'
+              );
+              this.activeModal.close(true);
+            },
+            error: (error) => {
+              this.spinner.hide();
+              this.swal.toastr(
+                'error',
+                this.model === 'upload' ? 'خطأ في رفع البيانات' : 'خطأ في حذف البيانات'
+              );
+              console.error(error);
+            },
+            complete: () => {
+              sub.unsubscribe();
+            },
           });
+        this.subscriptions.push(sub);
       }
     });
   }
 
-  mergeData(obj1: any, obj2: any): any {
-    const mergedResult: any = {
-      [this.currentClass as any]: {},
-    };
+  mergeData(existingStudents: any[], newStudents: any[]): any[] {
 
-    // Helper function to merge two months
-    function mergeMonthData(monthData1: any, monthData2: any): any {
-      const mergedMonth: any = { ...monthData1 }; // Start with data from obj1
+    const existingMap = new Map<string, any>();
+    existingStudents.forEach((student) => {
+      existingMap.set(student.id, student);
+    });
 
-      // Merge data from obj2
-      for (const nationalId in monthData2) {
-        // If a NationalId exists in both, obj2's data will override
-        mergedMonth[nationalId] = { ...monthData2[nationalId] };
-      }
-
-      return mergedMonth;
-    }
-
-    // Iterate over the months in obj1
-    for (const month in obj1[this.currentClass as any]) {
-      // If the month exists in both obj1 and obj2, merge them
-      if (obj2[this.currentClass as any][month]) {
-        mergedResult[this.currentClass as any][month] = mergeMonthData(
-          obj1[this.currentClass as any][month],
-          obj2[this.currentClass as any][month]
-        );
+    const mergedData: any[] = [...existingStudents];
+    newStudents.forEach((newStudent) => {
+      const existingIndex = mergedData.findIndex((s) => s.id === newStudent.id);
+      if (existingIndex !== -1) {
+        mergedData[existingIndex] = { ...mergedData[existingIndex], ...newStudent };
       } else {
-        // If the month only exists in obj1, copy it
-        mergedResult[this.currentClass as any][month] = {
-          ...obj1[this.currentClass as any][month],
-        };
+        mergedData.push(newStudent);
       }
-    }
+    });
 
-    // Iterate over the months in obj2 that are not in obj1 and add them
-    for (const month in obj2[this.currentClass as any]) {
-      if (!mergedResult[this.currentClass as any][month]) {
-        mergedResult[this.currentClass as any][month] = {
-          ...obj2[this.currentClass as any][month],
-        };
-      }
-    }
-
-    return mergedResult;
+    return mergedData;
   }
 
-  // Function to check all images and store results
+  getIdsToDelete(existingStudents: any[], excelStudents: any[]): string[] {
+    const excelIds = new Set(excelStudents.map((student) => student.id));
+    return existingStudents
+      .filter((student) => excelIds.has(student.id))
+      .map((student) => student.id);
+  }
+
   search() {
-    const query = this.searchTerm.toLowerCase(); // Make search case-insensitive
+    const query = this.searchTerm.toLowerCase();
     this.filteredData = this.flatData.filter((entry: any) => {
       if (entry.isMonthBreak) {
-        return true; // Always include the month break rows
+        return true;
       }
       const matchesName = entry.Name.toLowerCase().includes(query);
-      const matchesNationalId = entry.NationalId.includes(query);
-
-      return matchesName || matchesNationalId; // Return true if either matches
+      const matchesNationalId = entry.NationalId.toString().includes(query);
+      return matchesName || matchesNationalId;
     });
 
-    this.currentPage = 1; // Reset to the first page after search
-  }
-
-  openImage(item: any) {
-    window.open(item.Image, '_blank');
+    this.currentPage = 1;
   }
 
   closeModal() {
@@ -210,86 +211,13 @@ export class UploadExcelComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.deleteSvg = true;
-    modalRef.componentInstance.message = 'هل انت متأكد من الغاء هذه العملية ؟';
+    modalRef.componentInstance.message = 'هل انت متأكد من إلغاء هذه العملية ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.activeModal.close();
       }
     });
-  }
-
-  // Construct the (this.currentClass) object dynamically with all months from structured data
-  constructClassData(data: any): any {
-    this.spinner.show();
-    const cleanedData: any = { [this.currentClass as any]: {} };
-
-    const months = Object.keys(data[this.currentClass as any]);
-    months.forEach((month) => {
-      cleanedData[this.currentClass as any][month] = {};
-      const nationalIds = Object.keys(data[this.currentClass as any][month]);
-      nationalIds.forEach((nationalId) => {
-        const entry = { ...this.data[this.currentClass as any][month][nationalId] }; // Copy the entry
-        delete entry.id; // Remove the 'id' field
-        cleanedData[this.currentClass as any][month][nationalId] = entry;
-      });
-    });
-
-    this.spinner.hide();
-    return cleanedData;
-  }
-  // Function to remove entries from Firebase that match the Excel data by NationalId
-  removeMatchingEntries(data: any): void {
-    Object.keys(this.data[this.currentClass as any] || {}).forEach((month) => {
-      const excelEntries = this.data[this.currentClass as any][month];
-      // Loop through the Excel data for this month
-      Object.keys(excelEntries || {}).forEach((nationalId) => {
-        // Check if the NationalId exists in the Firebase data for the same month
-        if (
-          data[this.currentClass as any][month] &&
-          data[this.currentClass as any][month][nationalId]
-        ) {
-          // Remove the matching entry from Firebase data
-          delete data[this.currentClass as any][month][nationalId];
-          console.log(`Removed NationalId ${nationalId} from month ${month}`);
-        }
-      });
-    });
-  }
-
-  restructureData(originalData: any) {
-    // Check if the input data has the (this.currentClass) wrapper
-    if (originalData[this.currentClass as any]) {
-      // Extract and return the nested data directly
-      return originalData[this.currentClass as any];
-    } else {
-      // Return the input if the structure is already correct
-      return originalData;
-    }
-  }
-
-  // Function to push the entire (this.currentClass) object to Firebase
-  async pushClassDataToFirebase(classData: any): Promise<void> {
-    this.spinner.show();
-    const restructuredData = this.restructureData(classData);
-
-    await this.firebaseAdminService
-      .pushClassData(restructuredData, `/${this.currentClass}`)
-      .then(() => {
-        this.spinner.hide();
-        this.model == 'upload'
-          ? this.swal.toastr('success', 'تم رفع البيانات بنجاح')
-          : this.swal.toastr('success', 'تم حذف البيانات بنجاح');
-        this.activeModal.close();
-      })
-      .catch((error) => {
-        this.spinner.hide();
-        this.model == 'upload'
-          ? this.swal.toastr('error', 'خطأ في رفع البيانات')
-          : this.swal.toastr('error', 'خطأ في حذف البيانات');
-      });
   }
 }

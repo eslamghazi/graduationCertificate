@@ -1,49 +1,34 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { FireBaseAuthService } from 'src/app/shared/fire-base-auth.service';
-import { SettingsService } from 'src/app/shared/settings.service';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
 import { SwalService } from 'src/app/shared/swal.service';
 import { AddEditSettingsComponent } from '../add-edit-settings/add-edit-settings.component';
+import { SupabaseAuthService } from 'src/app/shared/supabase-auth.service';
+import { SupabaseSettingsService } from 'src/app/shared/supabase-settings.service';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.scss']
+  styleUrls: ['./settings.component.scss'],
 })
 export class SettingsComponent implements OnInit {
   superAdminCheck =
-    localStorage.getItem('adminCheck')?.split('-')[0] == 'superadmin';
-
-  authPrevilige = localStorage.getItem('adminCheck')?.split('-')[1]
-
+    localStorage.getItem('adminCheck')?.split('-')[0] === 'superadmin';
+  authPrevilige = localStorage.getItem('adminCheck')?.split('-')[1];
   comingSoonStatus = false;
 
-  allClassesData: any
+  allClassesData: any[] = [];
+  classes: any[] = [];
+  subClasses: any[] = [];
+  options: any[] = [];
 
-  classes: any[] = []
-  subClasses: any[] = []
-  options: any[] = []
-
-
-  class = new FormControl("0");
-  subClass = new FormControl("0");
-  option = new FormControl("0");
-  currentClass = new FormControl(localStorage.getItem("currentClass"));
-  defaultClass = new FormControl(null);
-
-  constructor(private settingsService: SettingsService, private firebaseAuthService: FireBaseAuthService,
-    private spinner: NgxSpinnerService,
-    private swal: SwalService,
-    private modalService: NgbModal
-  ) { }
-
-  ngOnInit(): void {
-    this.getComingSoonStatus()
-    this.getSettingsData()
-  }
+  class = new FormControl('0');
+  subClass = new FormControl('0');
+  option = new FormControl('0');
+  currentClass = new FormControl('0');
+  defaultClass = new FormControl('0');
 
   settingsForm = new FormGroup({
     class: this.class,
@@ -53,57 +38,110 @@ export class SettingsComponent implements OnInit {
     defaultClass: this.defaultClass,
   });
 
-  getSettingsData() {
-    this.spinner.show()
-    this.classes = []
-    this.class.patchValue("0")
-    this.settingsService.getDataByPath("auth/Classes").subscribe((data) => {
-      this.allClassesData = data
-      for (const key in data) {
-        if (key != "DefaultClass") {
-          this.classes.push({ key: key, value: data[key] });
-        } else {
-          this.defaultClass.setValue(data[key] as any)
+  constructor(
+    private supabaseSettingsService: SupabaseSettingsService,
+    private supabaseAuthService: SupabaseAuthService,
+    private spinner: NgxSpinnerService,
+    private swal: SwalService,
+    private modalService: NgbModal
+  ) {}
+
+  ngOnInit(): void {
+    this.getComingSoonStatus();
+    this.getSettingsData();
+
+    this.getCurrentClass();
+  }
+
+  getCurrentClass() {
+    this.supabaseAuthService
+      .getDataByPath(`auth/${this.authPrevilige}`)
+      .subscribe((userData) => {
+        if (userData) {
+          this.supabaseAuthService
+            .getDataByPath('classes')
+            .subscribe((classData) => {
+              if (classData) {
+                const userClass = userData.class_id;
+                if (classData[userClass]) {
+                  this.currentClass.setValue(userClass);
+                } else {
+                  this.currentClass.setValue(classData.default_class);
+                }
+              }
+            });
         }
-      }
-
-      this.getSubClasses(data[this.defaultClass.value as any ?? this.classes[0]?.key])
-      this.getOptions(data[this.defaultClass.value as any ?? this.classes[0]?.key])
-      this.spinner.hide()
-    })
+      });
   }
 
-  getSubClasses(Class: any) {
-    this.spinner.show()
-
-    this.subClasses = []
-    for (const key in Class?.SubClasses) {
-      this.subClasses.push({ key: key, value: Class.SubClasses[key] });
-    }
-
-    this.spinner.hide()
-  }
-
-  getOptions(Class: any) {
-    this.spinner.show()
-
-    this.options = []
-    for (const key in Class?.Options) {
-      this.options.push({ key: key, value: Class.Options[key] });
-    }
-
-    this.spinner.hide()
-  }
-
-
-  getComingSoonStatus() {
+  getSettingsData() {
     this.spinner.show();
-    this.firebaseAuthService.getDataByPath('/auth/comingSoon').subscribe((result: any) => {
-      this.comingSoonStatus = result
-      this.spinner.hide();
+    this.classes = [];
+    this.class.patchValue('0');
+
+    this.supabaseSettingsService.getDataByPath('classes').subscribe((classesData) => {
+      this.allClassesData = classesData || [];
+      this.classes = this.allClassesData.map((cls: any) => ({
+        key: cls.id,
+        value: cls,
+      }));
+
+      this.supabaseSettingsService
+        .getDataByPath('settings', { id: 'default_class' })
+        .subscribe((authData) => {
+          const defaultClassId = authData?.[0]?.value;
+          this.defaultClass.setValue(defaultClassId || this.classes[0]?.key);
+
+          const selectedClass =
+            this.allClassesData.find(
+              (cls: any) => cls.id === this.defaultClass.value
+            ) || this.allClassesData[0];
+          if (selectedClass) {
+            this.getSubClasses(selectedClass.id);
+            this.getOptions(selectedClass.id);
+          }
+          this.spinner.hide();
+        });
     });
   }
 
+  getSubClasses(classId: string) {
+    this.spinner.show();
+    this.subClasses = [];
+    this.supabaseSettingsService
+      .getDataByPath('subclasses', { class_id: classId })
+      .subscribe((subClassesData) => {
+        this.subClasses = (subClassesData || []).map((sub: any) => ({
+          key: sub.id,
+          value: sub,
+        }));
+        this.spinner.hide();
+      });
+  }
+
+  getOptions(classId: string) {
+    this.spinner.show();
+    this.options = [];
+    this.supabaseSettingsService
+      .getDataByPath('options', { class_id: classId })
+      .subscribe((optionsData) => {
+        this.options = (optionsData || []).map((opt: any) => ({
+          key: opt.id,
+          value: opt,
+        }));
+        this.spinner.hide();
+      });
+  }
+
+  getComingSoonStatus() {
+    this.spinner.show();
+    this.supabaseSettingsService
+      .getDataByPath('settings', { id: 'coming_soon' })
+      .subscribe((result: any) => {
+        this.comingSoonStatus = result?.[0]?.value === 'true' ? true : false;
+        this.spinner.hide();
+      });
+  }
 
   changeComingSoon() {
     const modalRef = this.modalService.open(SharedModalComponent, {
@@ -112,26 +150,26 @@ export class SettingsComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message = this.comingSoonStatus
       ? 'هل انت متأكد من ايقاف واجهة Coming Soon ؟'
       : 'هل انت متأكد من تفعيل واجهة Coming Soon ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
-        if (this.comingSoonStatus) {
-          this.firebaseAuthService.insertIntoDb('auth/comingSoon', false);
-          window.location.reload();
-        } else {
-          this.firebaseAuthService.insertIntoDb('auth/comingSoon', true);
-          window.location.reload();
-        }
+        const newStatus = !this.comingSoonStatus;
+        this.supabaseSettingsService
+          .insertIntoDb(
+            'settings',
+            { id: 'coming_soon', value: newStatus },
+            true
+          )
+          .then(() => {
+            window.location.reload();
+          });
       }
     });
   }
-
 
   add(target: string) {
     const modalRef = this.modalService.open(AddEditSettingsComponent, {
@@ -140,27 +178,49 @@ export class SettingsComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
-    modalRef.componentInstance.header = "اضافة بيانات جديدة";
-    modalRef.componentInstance.footer = "اضافة";
+    modalRef.componentInstance.header = 'اضافة بيانات جديدة';
+    modalRef.componentInstance.footer = 'اضافة';
+    modalRef.componentInstance.isReadonly = false;
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
-        if (target == "addClass") {
+        if (target === 'addClass') {
           this.spinner.show();
+          const defaultSubClass = [
+            { id: `${result.id}-June`, name: 'يونيو', class_id: result.id },
+            {
+              id: `${result.id}-September`,
+              name: 'سبتمبر',
+              class_id: result.id,
+            },
+          ];
+          const defaultOptions = [
+            {
+              id: `${result.id}-NotUpload`,
+              name: 'الطلاب الذين لم يقوموا برفع صورهم',
+              class_id: result.id,
+            },
+            {
+              id: `${result.id}-UploadedImages`,
+              name: 'الطلاب الذين قاموا برفعوا صورهم',
+              class_id: result.id,
+            },
+          ];
 
-          const defaultSubClass = {
-            June: { Id: "June", Name: "يونيو" }, September: { Id: "September", Name: "سبتمبر" }
-          }
-          const defaultOptions = {
-            NotUpload: { Id: "NotUpload", Name: "الطلاب الذين لم يقوموا برفع صورهم" }, UploadedImages: { Id: "UploadedImages", Name: "الطلاب الذين قاموا برفعوا صورهم" }
-          }
-
-          let newClasses: any = {};
-
-          newClasses = { ...this.allClassesData, [result.Id]: { ...result, SubClasses: { ...defaultSubClass }, Options: { ...defaultOptions } } };
-          this.firebaseAuthService.insertIntoDb('auth/Classes', newClasses)
+          this.supabaseSettingsService
+            .insertIntoDb('classes', result)
+            .then(() => {
+              return this.supabaseSettingsService.insertIntoDb(
+                'subclasses',
+                defaultSubClass
+              );
+            })
+            .then(() => {
+              return this.supabaseSettingsService.insertIntoDb(
+                'options',
+                defaultOptions
+              );
+            })
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم اضافة البيانات بنجاح');
@@ -170,43 +230,51 @@ export class SettingsComponent implements OnInit {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ أثناء اضافة البيانات');
               console.log(error);
-            })
-
-        } else if (target == "addSubClass") {
+            });
+        } else if (target === 'addSubClass') {
           this.spinner.show();
-          let currentClass = this.classes.find((x) => x.key == this.class.value)?.value
-          currentClass.SubClasses = { ...currentClass.SubClasses, [result.Id]: result }
-
-          this.firebaseAuthService.insertIntoDb(`auth/Classes/${currentClass.Id}`, currentClass)
+          const currentClass = this.classes.find(
+            (x) => x.key === this.class.value
+          )?.value;
+          const newSubClass = {
+            ...result,
+            id: `${currentClass.id}-${result.id}`,
+            class_id: currentClass.id,
+          };
+          this.supabaseSettingsService
+            .insertIntoDb('subclasses', newSubClass)
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم اضافة البيانات بنجاح');
-              this.getSettingsData()
-
+              this.getSettingsData();
             })
             .catch((error) => {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ أثناء اضافة البيانات');
               console.log(error);
-            })
-
-        } else if (target == "addOption") {
+            });
+        } else if (target === 'addOption') {
           this.spinner.show();
-          let currentClass = this.classes.find((x) => x.key == this.class.value)?.value
-          currentClass.Options = { ...currentClass.Options, [result.Id]: result }
-
-          this.firebaseAuthService.insertIntoDb(`auth/Classes/${currentClass.Id}`, currentClass)
+          const currentClass = this.classes.find(
+            (x) => x.key === this.class.value
+          )?.value;
+          const newOption = {
+            ...result,
+            id: `${currentClass.id}-${result.id}`,
+            class_id: currentClass.id,
+          };
+          this.supabaseSettingsService
+            .insertIntoDb('options', newOption)
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم اضافة البيانات بنجاح');
-              this.getSettingsData()
+              this.getSettingsData();
             })
             .catch((error) => {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ أثناء اضافة البيانات');
               console.log(error);
-            })
-
+            });
         }
       }
     });
@@ -214,14 +282,9 @@ export class SettingsComponent implements OnInit {
 
   edit(target: string) {
     if (
-      (target == "editClass" &&
-        this.class.value == "0")
-      ||
-      (target == "editSubClass" &&
-        this.subClass.value == "0")
-      ||
-      (target == "editOption" &&
-        this.option.value == "0")
+      (target === 'editClass' && this.class.value === '0') ||
+      (target === 'editSubClass' && this.subClass.value === '0') ||
+      (target === 'editOption' && this.option.value === '0')
     ) {
       return;
     }
@@ -232,29 +295,22 @@ export class SettingsComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
-    modalRef.componentInstance.header = "تعديل البيانات";
-    modalRef.componentInstance.footer = "تعديل";
-    modalRef.componentInstance.data = target == "editClass"
-      ? this.classes.find((x) => x.key == this.class.value)?.value
-      : target == "editSubClass" ? this.subClasses.find((x) => x.key == this.subClass.value)?.value
-        : this.options.find((x) => x.key == this.option.value)?.value
+    modalRef.componentInstance.header = 'تعديل البيانات';
+    modalRef.componentInstance.footer = 'تعديل';
+    modalRef.componentInstance.isReadonly = true;
+    modalRef.componentInstance.data =
+      target === 'editClass'
+        ? this.classes.find((x) => x.key === this.class.value)?.value
+        : target === 'editSubClass'
+        ? this.subClasses.find((x) => x.key === this.subClass.value)?.value
+        : this.options.find((x) => x.key === this.option.value)?.value;
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
-        if (target == "editClass") {
+        if (target === 'editClass') {
           this.spinner.show();
-          let currentSubClasses = { ...this.allClassesData[this.class.value as any].SubClasses };
-          let currentOptions = { ...this.allClassesData[this.class.value as any].Options };
-
-          let newClasses: any = { ...this.allClassesData };
-
-          delete newClasses[`${this.class.value as any}`]
-
-          newClasses = { ...newClasses, [result.Id]: { ...result, SubClasses: { ...currentSubClasses }, Options: { ...currentOptions } } };
-
-          this.firebaseAuthService.insertIntoDb('auth/Classes', newClasses)
+          this.supabaseSettingsService
+            .insertIntoDb('classes', result, true)
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم تعديل البيانات بنجاح');
@@ -264,152 +320,143 @@ export class SettingsComponent implements OnInit {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ أثناء تعديل البيانات');
               console.log(error);
-            })
-
-        } else if (target == "editSubClass") {
+            });
+        } else if (target === 'editSubClass') {
           this.spinner.show();
-          let currentClass = this.classes.find((x) => x.key == this.class.value)?.value
-
-          delete currentClass.SubClasses[this.subClass.value as any]
-
-          currentClass.SubClasses = { ...currentClass.SubClasses, [result.Id]: result }
-
-          this.firebaseAuthService.insertIntoDb(`auth/Classes/${currentClass.Id}`, currentClass)
+          this.supabaseSettingsService
+            .insertIntoDb('subclasses', result, true)
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم تعديل البيانات بنجاح');
-              this.getSettingsData()
-
+              this.getSettingsData();
             })
             .catch((error) => {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ أثناء تعديل البيانات');
               console.log(error);
-            })
-
-        } else if (target == "editOption") {
+            });
+        } else if (target === 'editOption') {
           this.spinner.show();
-          let currentClass = this.classes.find((x) => x.key == this.class.value)?.value
-
-          delete currentClass.Options[this.option.value as any]
-
-          currentClass.Options = { ...currentClass.Options, [result.Id]: result }
-
-          this.firebaseAuthService.insertIntoDb(`auth/Classes/${currentClass.Id}`, currentClass)
+          this.supabaseSettingsService
+            .insertIntoDb('options', result, true)
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم تعديل البيانات بنجاح');
-              this.getSettingsData()
+              this.getSettingsData();
             })
             .catch((error) => {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ أثناء تعديل البيانات');
               console.log(error);
-            })
-
+            });
         }
       }
     });
   }
+
   delete(target: string) {
     if (
-      (target == "deleteClass" &&
-        this.class.value == "0")
-      ||
-      (target == "deleteSubClass" &&
-        this.subClass.value == "0")
-      ||
-      (target == "deleteOption" &&
-        this.option.value == "0")
+      (target === 'deleteClass' && this.class.value === '0') ||
+      (target === 'deleteSubClass' && this.subClass.value === '0') ||
+      (target === 'deleteOption' && this.option.value === '0')
     ) {
       return;
     }
-    if (this.allClassesData.DefaultClass == this.class.value) {
-      this.swal.toastr('info', 'لا يمكن حذف هذه الفرقة نظرًا لانها الفرقة الإفتراضية');
+
+    if (this.defaultClass.value === this.class.value) {
+      this.swal.toastr(
+        'info',
+        'لا يمكن حذف هذه الفرقة نظرًا لانها الفرقة الإفتراضية'
+      );
       return;
     }
+
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.deleteSvg = true;
-    modalRef.componentInstance.message = "هل انت متأكد من حذف البيانات ؟";
+    modalRef.componentInstance.message = 'هل انت متأكد من حذف البيانات ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
-        if (target == "deleteClass") {
+        if (target === 'deleteClass') {
           this.spinner.show();
-
-          this.firebaseAuthService.removeImagePropertyFromDatabase(`auth/Classes/${this.class.value}`, 'deleteAll')
+          this.supabaseSettingsService
+            .removeImagePropertyFromDatabase(
+              'classes',
+              this.class.value!,
+              'deleteAll'
+            )
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم حذف البيانات بنجاح');
-              this.getSettingsData()
+              this.getSettingsData();
             })
             .catch((error) => {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ أثناء حذف البيانات');
               console.log(error);
-            })
-        } else if (target == "deleteSubClass") {
-          let currentClass = this.classes.find((x) => x.key == this.class.value)?.value
-
-          delete currentClass.SubClasses[this.subClass.value as any]
-
-          this.firebaseAuthService.insertIntoDb(`auth/Classes/${this.class.value}`, currentClass)
+            });
+        } else if (target === 'deleteSubClass') {
+          this.spinner.show();
+          this.supabaseSettingsService
+            .removeImagePropertyFromDatabase(
+              'subclasses',
+              this.subClass.value!,
+              'deleteAll'
+            )
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم حذف البيانات بنجاح');
-              this.getSettingsData()
+              this.getSettingsData();
             })
             .catch((error) => {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ أثناء حذف البيانات');
               console.log(error);
-            })
-        } else if (target == "deleteOption") {
-
-          let currentClass = this.classes.find((x) => x.key == this.class.value)?.value
-
-          delete currentClass.Options[this.option.value as any]
-
-          this.firebaseAuthService.insertIntoDb(`auth/Classes/${this.class.value}`, currentClass)
+            });
+        } else if (target === 'deleteOption') {
+          this.spinner.show();
+          this.supabaseSettingsService
+            .removeImagePropertyFromDatabase(
+              'options',
+              this.option.value!,
+              'deleteAll'
+            )
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم حذف البيانات بنجاح');
-              this.getSettingsData()
+              this.getSettingsData();
             })
             .catch((error) => {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ أثناء حذف البيانات');
               console.log(error);
-            })
-
+            });
         }
       }
     });
   }
 
   changeClass() {
-    if (this.class.value == "0") {
-      this.subClasses = []
-      this.options = []
-      return
+    if (this.class.value === '0') {
+      this.subClasses = [];
+      this.options = [];
+      return;
     }
 
-    let currentClass = this.classes.find((x) => x.key == this.class.value)?.value
-
-    this.getSubClasses(currentClass)
-    this.getOptions(currentClass)
+    const currentClass = this.classes.find(
+      (x) => x.key === this.class.value
+    )?.value;
+    this.getSubClasses(currentClass.id);
+    this.getOptions(currentClass.id);
   }
 
   changeDefaultClass() {
-
-    if (this.defaultClass.value == "0") {
+    if (this.defaultClass.value === '0') {
       return;
     }
 
@@ -419,60 +466,67 @@ export class SettingsComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
-    modalRef.componentInstance.message = "هل انت متأكد من تغيير الفرقة الإفتراضية ؟";
+    modalRef.componentInstance.message =
+      'هل انت متأكد من تغيير الفرقة الإفتراضية ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-
-        this.firebaseAuthService.insertIntoDb(`auth/Classes/DefaultClass`, this.defaultClass.value)
+        this.supabaseSettingsService
+          .insertIntoDb(
+            'settings',
+            { id: 'default_class', value: this.defaultClass.value },
+            true
+          )
           .then(() => {
             this.spinner.hide();
             this.swal.toastr('success', 'تم تعديل الفرقة الإفتراضية بنجاح');
-            window.location.reload()
-
+            window.location.reload();
           })
           .catch((error) => {
             this.spinner.hide();
             this.swal.toastr('error', 'حدث خطأ أثناء تعديل الفرقة الإفتراضية');
             console.log(error);
-          })
+          });
       }
     });
   }
 
   changeCurrentClass() {
-    if (this.currentClass.value == "0") {
-      return
+    if (this.currentClass.value === '0') {
+      return;
     }
+
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
-    modalRef.componentInstance.message = "هل انت متأكد من تغيير الفرقة الحالية ؟";
+    modalRef.componentInstance.message =
+      'هل انت متأكد من تغيير الفرقة الحالية ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        this.firebaseAuthService.insertIntoDb(`auth/${this.authPrevilige}/Class`, this.currentClass.value)
+        this.supabaseSettingsService
+          .insertIntoDb(
+            'auth',
+            { id: this.authPrevilige, class_id: this.currentClass.value },
+            true
+          )
           .then(() => {
             this.spinner.hide();
             this.swal.toastr('success', 'تم تعديل الفرقة الحالية بنجاح');
-            window.location.reload()
+            window.location.reload();
           })
           .catch((error) => {
             this.spinner.hide();
             this.swal.toastr('error', 'حدث خطأ أثناء تعديل الفرقة الحالية');
             console.log(error);
-          })
+          });
       }
     });
   }

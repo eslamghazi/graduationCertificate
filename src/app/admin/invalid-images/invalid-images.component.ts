@@ -35,9 +35,9 @@ export class InvalidImagesComponent implements OnInit {
       // Perform search on the original dataArray to always start with the full dataset
       this.filteredData = this.data.filter(
         (item: any) =>
-          (item.Name &&
-            item.Name.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-          (item.NationalId && item.NationalId.includes(this.searchTerm))
+          (item.name &&
+            item.name.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+          (item.id && item.id.includes(this.searchTerm))
       );
     } else {
       // If search term is empty, reset to show all data with Image property
@@ -47,6 +47,6 @@ export class InvalidImagesComponent implements OnInit {
   }
 
   openImage(item: any) {
-    window.open(item.Image, '_blank');
+    window.open(item.image_url, '_blank');
   }
 }

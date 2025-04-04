@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
+import { SupabaseAdminService } from 'src/app/shared/supabase-admin.service';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
 import { SwalService } from 'src/app/shared/swal.service';
 
@@ -12,28 +12,27 @@ import { SwalService } from 'src/app/shared/swal.service';
   styleUrls: ['./search-student.component.scss'],
 })
 export class SearchStudentComponent implements OnInit {
-  currentClass = localStorage.getItem('currentClass')
+  currentClass = localStorage.getItem('currentClass');
   subClasses: any[] = [];
 
   data: any[] = [];
-
+  filteredData: any[] = [];
   clickSearch = false;
 
-  checkedImages: { [key: string]: boolean } = {}; // Store image checks
+  checkedImages: { [key: string]: boolean } = {};
 
-  filteredData: any[] = [];
-  currentPage = 1; // Current page of pagination
-  itemsPerPage = 5; // Number of items per page
-  searchTerm: string = ''; // Holds the search input
+  currentPage = 1;
+  itemsPerPage = 5;
+  searchTerm: string = '';
 
   constructor(
     public activeModal: NgbActiveModal,
     private spinner: NgxSpinnerService,
     private swal: SwalService,
-    private fireBaseAdminService: FireBaseAdminService,
+    private supabaseAdminService: SupabaseAdminService,
     private router: Router,
     private modalService: NgbModal
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.getSubClasses();
@@ -41,13 +40,16 @@ export class SearchStudentComponent implements OnInit {
 
   getSubClasses() {
     this.spinner.show();
-    this.fireBaseAdminService.getAllData(`/auth/Classes/${this.currentClass}`, "object").subscribe((data) => {
-      for (let key in data.SubClasses) {
-        this.subClasses.push({ key: key, value: data.SubClasses[key] });
-      }
-      this.spinner.hide();
-
-    })
+    this.supabaseAdminService
+      .getAllData('subclasses', { class_id: this.currentClass })
+      .subscribe((data) => {
+        this.subClasses = (data || []).map((sub: any) => ({
+          key: sub.id,
+          value: sub,
+        }));
+        console.log('Subclasses:', this.subClasses); // Add logging
+        this.spinner.hide();
+      });
   }
 
   getIndex(index: number): number {
@@ -56,18 +58,19 @@ export class SearchStudentComponent implements OnInit {
 
   studentSearch() {
     this.clickSearch = false;
-    let dataBasegroups: any[] = [];
-
-    this.subClasses.forEach(element => {
-      dataBasegroups.push(`${this.currentClass}/${element.value.Id}`)
-    })
-
+    const dataBaseGroups: string[] = this.subClasses.map(
+      (sub) => `${this.currentClass}/${sub.value.id}`
+    );
 
     if (this.searchTerm) {
       this.spinner.show();
-      this.fireBaseAdminService
-        .searchObject(dataBasegroups, this.searchTerm)
+      this.supabaseAdminService
+        .searchObject(
+          this.subClasses.map((sub) => sub.value.id),
+          this.searchTerm
+        )
         .subscribe((result) => {
+          console.log('Search result:', result); // Log the result for debugging
           this.data = result;
           this.filteredData = result;
           this.checkAllImages(result);
@@ -78,55 +81,49 @@ export class SearchStudentComponent implements OnInit {
       this.clickSearch = false;
     }
   }
-  // Function to check all images and store results
+
   checkAllImages(items: any[]): void {
     items.forEach((item) => {
-      const imageUrl = item.data.Image;
-      const key = item.data.NationalId;
+      const imageUrl = item.data.image_url;
+      const key = item.data.id;
 
       if (imageUrl) {
-        // Call the service once per item and store the result
-        this.fireBaseAdminService
+        this.supabaseAdminService
           .checkImageUrl(imageUrl)
           .subscribe((result) => {
             this.checkedImages[key] = result;
           });
       } else {
-        // If no image URL is provided, store false
         this.checkedImages[key] = false;
       }
     });
   }
 
-  // Helper method to get the image check result
   hasImage(item: any): boolean {
-    const key = item.data.NationalId;
-    return this.checkedImages[key];
+    const key = item.data.id;
+    return this.checkedImages[key] || false;
   }
 
   openImage(item: any) {
-    window.open(item.data.Image, '_blank');
+    window.open(item.data.image_url, '_blank');
   }
 
-  goEdit(ClassMonth: any, id: any) {
-
+  goEdit(classMonth: any, id: any) {
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message =
       'هل انت متأكد من الذهاب لقائمة تعديل الطالب';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.activeModal.dismiss();
         this.router.navigateByUrl(
-          `/student/editStudentData/${this.currentClass}/${ClassMonth}/${id}`
+          `/student/editStudentData/${this.currentClass}/${classMonth}/${id}`
         );
       }
     });
@@ -139,24 +136,20 @@ export class SearchStudentComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.deleteSvg = true;
     modalRef.componentInstance.message =
-      target == 'deleteImage'
+      target === 'deleteImage'
         ? 'هل انت متأكد من حذف الصورة الخاصة بالطالب ؟'
         : 'هل انت متأكد من حذف هذا الطالب ؟';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
+        const path = `${item.source}/${item.data.id}.jpg`;
+        const dbPath = `${this.currentClass}/${item.source}/${item.data.id}`;
 
-        const path = `${item.source}/${item.data.NationalId}.jpg`
-
-        const dbPath = `${item.source}/${item.data.NationalId}`
-
-        if (target == 'deleteStudent') {
-          this.fireBaseAdminService
+        if (target === 'deleteStudent') {
+          this.supabaseAdminService
             .removeImagePropertyFromDatabase(dbPath, 'deleteAll')
             .then(() => {
               this.spinner.hide();
@@ -167,25 +160,25 @@ export class SearchStudentComponent implements OnInit {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ اثناء حذف الطالب');
             });
-          return;
+        } else {
+          this.supabaseAdminService
+            .deleteFileAndImageProperty(path, dbPath, 'deleteImageOnly')
+            .subscribe(
+              () => {
+                this.spinner.hide();
+                this.swal.toastr('success', 'تم حذف الصورة الخاصة بالطالب بنجاح');
+                this.studentSearch();
+              },
+              (error) => {
+                this.spinner.hide();
+                this.swal.toastr(
+                  'error',
+                  'حدث خطأ اثناء حذف الصورة الخاصة بالطالب'
+                );
+                this.studentSearch();
+              }
+            );
         }
-        this.fireBaseAdminService
-          .deleteFileAndImageProperty(path, dbPath, "deleteImageOnly")
-          .subscribe(
-            () => {
-              this.spinner.hide();
-              this.swal.toastr('success', 'تم حذف الصورة الخاصة بالطالب بنجاح');
-              this.studentSearch();
-            },
-            (error) => {
-              this.spinner.hide();
-              this.swal.toastr(
-                'error',
-                'حدث خطأ اثناء حذف الصورة الخاصة بالطالب'
-              );
-              this.studentSearch();
-            }
-          );
       }
     });
   }

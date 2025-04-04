@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Subscription } from 'rxjs';
-import { FireBaseAuthService } from 'src/app/shared/fire-base-auth.service';
+import { SupabaseAdminService } from 'src/app/shared/supabase-admin.service';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
 import { SwalService } from 'src/app/shared/swal.service';
 import { AddEditAdminComponent } from '../add-edit-admin/add-edit-admin.component';
@@ -12,38 +12,59 @@ import { AddEditAdminComponent } from '../add-edit-admin/add-edit-admin.componen
   templateUrl: './admin-manage.component.html',
   styleUrls: ['./admin-manage.component.scss'],
 })
-export class AdminManageComponent implements OnInit {
+export class AdminManageComponent implements OnInit, OnDestroy {
   admins: any[] = [];
   filteredAdmins: any[] = [];
 
-
   searchTerm: string = '';
-  itemsPerPage: any = 5;
+  itemsPerPage: number = 5;
   currentPage: number = 1;
 
+  private subscriptions: Subscription[] = [];
+
   constructor(
-    private firebaseAuthService: FireBaseAuthService,
+    private supabaseAdminService: SupabaseAdminService,
     private spinner: NgxSpinnerService,
     private swal: SwalService,
     private modalService: NgbModal
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.getAuthData();
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
   getAuthData() {
     this.spinner.show();
-    this.firebaseAuthService.getAuthData('/auth').subscribe((result) => {
-      this.admins = result.filter(
-        (auth) => auth.key != 'comingSoon' && auth.key != 'Classes'
-      );
-      this.filteredAdmins = this.admins;
-      this.spinner.hide();
-    });
+    const sub = this.supabaseAdminService
+      .getAllData('auth')
+      .subscribe({
+        next: (result) => {
+          this.admins = result.map((admin: any) => ({
+            key: admin.id,
+            data: {
+              Name: admin.name,
+              NationalId: admin.id,
+              Auth: admin.auth_level,
+              Class: admin.class_id,
+            },
+          }));
+          this.filteredAdmins = this.admins;
+          this.spinner.hide();
+        },
+        error: (error) => {
+          this.spinner.hide();
+          this.swal.toastr('error', 'حدث خطأ أثناء تحميل بيانات الأدمن');
+        },
+      });
+    this.subscriptions.push(sub);
   }
 
   deleteAdmin(item: any) {
+
     const path = `/auth/${item.data.NationalId}`;
 
     const modalRef = this.modalService.open(SharedModalComponent, {
@@ -52,46 +73,42 @@ export class AdminManageComponent implements OnInit {
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.deleteSvg = true;
     modalRef.componentInstance.message = 'هل انت متأكد من حذف الأدمن';
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        this.firebaseAuthService
-          .removeImagePropertyFromDatabase(path, 'deleteAll')
+        this.supabaseAdminService
+          .removeImagePropertyFromDatabase(path, 'deleteAuthor', 'auth')
           .then(() => {
             this.spinner.hide();
-            this.swal.toastr('success', 'تم حذف البيانات بنجاح');
+            this.swal.toastr('success', 'تم حذف الأدمن بنجاح');
             this.getAuthData();
           })
           .catch((error) => {
             this.spinner.hide();
-            this.swal.toastr('error', 'عفوًا حدث خطأ أثناء حذف البيانات');
+            this.swal.toastr('error', 'عفوًا حدث خطأ أثناء حذف الأدمن');
             this.getAuthData();
           });
       }
     });
   }
 
-  addEditAdmin(target: any, item?: any) {
-
+  addEditAdmin(target: string, item?: any) {
     const modalRef = this.modalService.open(AddEditAdminComponent, {
       centered: true,
       backdrop: 'static',
       keyboard: false,
     });
 
-    // Passing data to the modal
     modalRef.componentInstance.header =
-      target == 'editAdmin' ? 'تعديل بيانات الأدمن' : 'اضافة أدمن جديد';
-    modalRef.componentInstance.data = target == 'editAdmin' ? item.data : null;
+      target === 'editAdmin' ? 'تعديل بيانات الأدمن' : 'اضافة أدمن جديد';
+    modalRef.componentInstance.data = target === 'editAdmin' ? item.data : null;
 
-    // Handle modal result
     modalRef.result.then((result) => {
       if (result) {
+        this.getAuthData();
       }
     });
   }
@@ -99,7 +116,6 @@ export class AdminManageComponent implements OnInit {
   search() {
     if (this.searchTerm) {
       this.spinner.show();
-      // Perform search on the original dataArray to always start with the full dataset
       this.filteredAdmins = this.admins.filter(
         (item) =>
           (item.data.Name &&
@@ -111,10 +127,8 @@ export class AdminManageComponent implements OnInit {
       );
       this.spinner.hide();
     } else {
-      this.getAuthData();
+      this.filteredAdmins = this.admins;
     }
-    this.currentPage = 1; // Reset to the first page after search
+    this.currentPage = 1;
   }
-
-
 }

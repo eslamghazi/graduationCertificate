@@ -11,12 +11,12 @@
       <div class="input-group my-3">
         <input type="text" class="form-control" formControlName="Name">
         <div class="input-group-append">
-          <span class="input-group-text " id="">الإسم</span>
+          <span class="input-group-text" id="">الإسم</span>
         </div>
       </div>
 
       <div class="input-group my-3">
-        <input (keyup)="typingId($event.target)" type="number" class="form-control" formControlName="NationalId">
+        <input id="idInput" (keyup)="typingId($event.target)" type="number" class="form-control" formControlName="NationalId">
         <div class="input-group-append">
           <span class="input-group-text">الرقم القومي</span>
         </div>
@@ -24,12 +24,10 @@
 
       <ng-container *ngIf="NationalId.touched && NationalId.dirty">
         <p class="h6 text-danger float-right" *ngIf="NationalId.errors?.['required']">يجب ملئ هذا الحقل</p>
-        <p class="h6 text-danger float-right" *ngIf="NationalId.errors?.['pattern']">الرجاء كتابة
-          الرقم القومي بشكل صحيح</p>
+        <p class="h6 text-danger float-right" *ngIf="NationalId.errors?.['pattern']">الرجاء كتابة الرقم القومي بشكل صحيح</p>
       </ng-container>
 
       <div class="input-group my-3">
-
         <select class="custom-select" id="inputGroupSelect01" formControlName="Auth">
           <option value="0">اختر صلاحية للتعيين</option>
           <option value="1">ادمن</option>
@@ -39,22 +37,18 @@
       </div>
 
       <div class="input-group my-3">
-
         <select class="custom-select" id="inputGroupSelect01" formControlName="class">
           <option value="0">اختر فرقة للتعيين</option>
           <option *ngFor="let class of classes" [value]="class.value.Id">{{class.value.Name}}</option>
-
         </select>
       </div>
 
       <br>
     </form>
   </div>
-
 </div>
 
 <div class="modal-footer">
   <button (click)="activeModal.close()" class="btn btn-outline-danger btn-lg" style="width: 150px;">إلغاء</button>
-  <button [disabled]="!editForm.valid || Auth.value == 0" (click)="confirm()" class="btn btn-outline-primary btn-lg"
-    style="width: 150px;">تأكيد</button>
+  <button [disabled]="!editForm.valid || Auth.value == 0" (click)="confirm()" class="btn btn-outline-primary btn-lg" style="width: 150px;">تأكيد</button>
 </div>

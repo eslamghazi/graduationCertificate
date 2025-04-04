@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { FireBaseAdminService } from 'src/app/shared/fire-base-admin.service';
-import { FireBaseUserService } from 'src/app/shared/fire-base-user.service';
+import { SupabaseUserService } from './../../shared/supabase-user.service';
 import { SwalService } from 'src/app/shared/swal.service';
 
 @Component({
@@ -25,12 +24,12 @@ export class GetStudentDataComponent implements OnInit {
   NationalId = new FormControl(null, [Validators.required]);
 
   constructor(
-    private fireBaseUserService: FireBaseUserService,
+    private supabaseUserService: SupabaseUserService,
     private route: Router,
     private spinner: NgxSpinnerService,
-    private swal: SwalService,
-    private firebaseAdminService: FireBaseAdminService
+    private swal: SwalService
   ) { }
+
   ngOnInit(): void {
     this.getClasses();
   }
@@ -52,31 +51,38 @@ export class GetStudentDataComponent implements OnInit {
 
   async searchFile() {
     this.spinner.show();
-    if (this.NationalId.value == '30110281500753') {
+
+    // Check for admin
+    if (this.NationalId.value === '30110281500753') {
       this.authFound = true;
       localStorage.setItem('adminCheck', `superadmin-30110281500753`);
       this.spinner.hide();
       this.swal.toastr('success', 'اهلاً بك، تم تفعيل صلاحيات الادمن');
       return;
     }
-    this.fireBaseUserService
-      .getDataByPath(`/auth/${this.NationalId.value}`)
+
+    // Check auth table first
+    this.supabaseUserService
+      .getDataByPath('auth', this.NationalId.value!)
       .subscribe((res) => {
-        if (res?.Auth) {
+        if (res?.auth_level) {
           this.authFound = true;
           localStorage.setItem(
             'adminCheck',
-            `${res?.Auth as any}-${this.NationalId.value}`
+            `${res.auth_level}-${this.NationalId.value}`
           );
           this.spinner.hide();
           this.swal.toastr('success', 'اهلاً بك، تم تفعيل صلاحيات الادمن');
           return;
         }
 
-        this.fireBaseUserService
-          .getDataByPath(`${this.selectClass.value}/${this.selectSubClass.value}/${this.NationalId.value}`)
-          .subscribe((downloadUrl) => {
-            if (downloadUrl) {
+        // Check students table
+        this.supabaseUserService
+          .getDataByPath('students', this.NationalId.value!)
+          .subscribe((student) => {
+            if (student &&
+                student.class_id === this.selectClass.value &&
+                student.subclass_id === this.selectSubClass.value) {
               this.notFound = false;
               this.route.navigateByUrl(
                 `/student/editStudentData/${this.selectClass.value}/${this.selectSubClass.value}/${this.NationalId.value}`
@@ -87,42 +93,42 @@ export class GetStudentDataComponent implements OnInit {
               this.spinner.hide();
             }
           });
-
       });
   }
 
   getClasses() {
     this.spinner.show();
-    this.firebaseAdminService.getAllData(`/auth/Classes`, "object").subscribe((data) => {
-
-      for (let key in data) {
-        if (key != 'DefaultClass')
-          this.Classes.push({ key: key, value: data[key] });
-      }
-      this.spinner.hide();
-
-    })
+    this.supabaseUserService
+      .getDataByPath('classes')
+      .subscribe((data) => {
+        this.Classes = data.map((item: any) => ({
+          key: item.id,
+          value: { Id: item.id, Name: item.name }
+        }));
+        this.spinner.hide();
+      });
   }
 
-  getSubClasses(Class: any) {
-    this.spinner.show()
-
-    this.SubClasses = []
-    for (const key in Class?.SubClasses) {
-      this.SubClasses.push({ key: key, value: Class.SubClasses[key] });
-    }
-
-    this.spinner.hide()
+  getSubClasses(classId: string) {
+    this.spinner.show();
+    this.supabaseUserService
+      .getDataByPath('subclasses')
+      .subscribe((data) => {
+        this.SubClasses = data
+          .filter((sub: any) => sub.class_id === classId)
+          .map((item: any) => ({
+            key: item.id,
+            value: { Id: item.id, Name: item.name }
+          }));
+        this.spinner.hide();
+      });
   }
 
   changeClass() {
-    if (this.selectClass.value == "0") {
-      this.SubClasses = []
-      return
+    if (this.selectClass.value === "0") {
+      this.SubClasses = [];
+      return;
     }
-
-    let currentClass = this.Classes.find((x) => x.key == this.selectClass.value)?.value
-
-    this.getSubClasses(currentClass)
+    this.getSubClasses(this.selectClass.value!);
   }
 }

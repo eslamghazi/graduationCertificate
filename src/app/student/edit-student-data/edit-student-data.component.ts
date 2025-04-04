@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxImageCompressService } from 'ngx-image-compress';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { FireBaseEditUserService } from 'src/app/shared/fire-base-edit-user.service';
+import { SupabaseEditUserService } from 'src/app/shared/supabase-edit-user.service';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
 import { SwalService } from 'src/app/shared/swal.service';
 
@@ -32,7 +32,7 @@ export class EditStudentDataComponent implements OnInit {
   Image = new FormControl(null);
 
   constructor(
-    private fireBaseEditService: FireBaseEditUserService,
+    private supabaseEditService: SupabaseEditUserService,
     private activatedRoute: ActivatedRoute,
     private spinner: NgxSpinnerService,
     private modalService: NgbModal,
@@ -55,39 +55,14 @@ export class EditStudentDataComponent implements OnInit {
     this.class = this.activatedRoute.snapshot.paramMap.get('class');
 
     if (this.id && this.class) {
-      // this.searchFile(this.id);
       this.searchData(this.id);
     }
   }
 
-  // async searchFile(id: any) {
-  //   const folderPath = this.class == 1 ? 'Class2024Internship' : 'NotYet';
-  //   const fileName = `${id}.jpg`;
-
-  //   await this.fireBaseEditService
-  //     .getFileUrl(`${folderPath}/September`, fileName)
-  //     .then(async (downloadUrl: any) => {
-  //       if (downloadUrl) {
-  //         this.defaultImage = downloadUrl;
-  //       } else {
-  //         await this.fireBaseEditService
-  //           .getFileUrl(`${folderPath}/June`, fileName)
-  //           .then((downloadUrl: any) => {
-  //             if (downloadUrl) {
-  //               this.defaultImage = downloadUrl;
-  //             } else {
-  //               this.defaultImage = 'assets/Images/DefaultImage.jpg';
-  //             }
-  //           });
-  //       }
-  //     });
-  // }
-
   searchData(id: any) {
     this.spinner.show();
-
-    this.fireBaseEditService
-      .getDataByPath(`${this.class}/${this.subClass}/${id}`)
+    this.supabaseEditService
+      .getData(this.class, this.subClass, id)
       .subscribe((data) => {
         if (data) {
           this.data = data;
@@ -96,16 +71,26 @@ export class EditStudentDataComponent implements OnInit {
         }
       });
   }
-  patchValues() {
+
+  async patchValues() {
     this.spinner.show();
-    this.NationalId.patchValue(this.data.NationalId);
-    this.Name.patchValue(this.data.Name);
-    this.DateOfBirth.patchValue(this.data.DateOfBirth);
-    this.PlaceOfBirth.patchValue(this.data.PlaceOfBirth);
-    this.Image.patchValue(this?.data?.Image);
-    this.defaultImage = this.data.Image
-      ? this.data.Image
+    this.NationalId.patchValue(this.data.id);
+    this.Name.patchValue(this.data.name);
+    this.DateOfBirth.patchValue(this.data.date_of_birth);
+    this.PlaceOfBirth.patchValue(this.data.place_of_birth);
+    this.Image.patchValue(this.data.image_url);
+
+    const filePath = `${this.class}/${this.data.subclass_id}/${this.NationalId.value}.jpg`;
+
+    let isImageValid = await this.supabaseEditService
+    .isExists(filePath)
+    if (isImageValid) {
+      this.defaultImage = this.data.image_url
+      ? this.data.image_url
       : 'assets/Images/DefaultImage.jpg';
+    } else {
+      this.defaultImage = 'assets/Images/DefaultImage.jpg'
+    }
     this.spinner.hide();
   }
 
@@ -120,77 +105,43 @@ export class EditStudentDataComponent implements OnInit {
     this.spinner.show();
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
+      const fileType = file.type; // Get the file type (MIME type)
+
       if (file.size > 1000000) {
         this.swal.toastr(
           'warning',
           'حجم الصورة اكبر من 1 ميجا، تتم الآن محاولة ضغط حجم الصورة'
         );
 
-        // If file size is more than 1.5MB, compress it
         const reader = new FileReader();
-
         reader.onload = (e: any) => {
           const image = e.target.result;
-          // Compress the image using ngx-image-compress
-          this.imageCompress
-            .compressFile(image, -1, 100, 60)
-            .then((compressedImage) => {
-              // Set the compressed image as the default image
-              this.defaultImage = compressedImage;
 
-              // Convert the compressed base64 image back to a file (optional)
-              const compressedFile = this.dataURLtoFile(
-                compressedImage,
-                file.name
-              );
-              console.log(
-                'compressedFile',
-                (compressedFile.size / (1024 * 1024)).toFixed(2)
-              );
-              // Assign the compressed file to selectedImage
-              this.selectedImage = compressedFile;
-              this.spinner.hide();
-              if (
-                parseFloat((compressedFile.size / (1024 * 1024)).toFixed(2)) > 1
-              ) {
-                this.spinner.show();
+          if (fileType === 'image/png') {
 
-                this.imageCompress
-                  .compressFile(image, -1, 50, 50)
-                  .then((compressedImage) => {
-                    // Set the compressed image as the default image
-                    this.defaultImage = compressedImage;
+            this.imageCompress
+              .compressFile(image, -1, 50, 50)
+              .then((compressedImage) => {
+                this.handleCompressedImage(compressedImage, file);
+              });
+          } else {
 
-                    // Convert the compressed base64 image back to a file (optional)
-                    const compressedFile = this.dataURLtoFile(
-                      compressedImage,
-                      file.name
-                    );
-                    console.log(
-                      'compressedFile',
-                      (compressedFile.size / (1024 * 1024)).toFixed(2)
-                    );
-                    // Assign the compressed file to selectedImage
-                    this.selectedImage = compressedFile;
-
-                    // Hide the spinner
-                    this.spinner.hide();
-                  });
-              }
-            });
+            this.imageCompress
+              .compressFile(image, -1, 100, 60)
+              .then((compressedImage) => {
+                this.handleCompressedImage(compressedImage, file);
+              });
+          }
         };
-
-        // Read the original image as base64 data URL
         reader.readAsDataURL(file);
       } else {
-        // If file size is less than 1MB, do not compress
+
         const reader = new FileReader();
         reader.onload = (e: any) => {
-          this.defaultImage = e.target.result; // Set the original image
-          this.selectedImage = file; // Use the original file without compression
+          this.defaultImage = e.target.result;
+          this.selectedImage = file;
         };
         reader.readAsDataURL(file);
-
         this.spinner.hide();
       }
     } else {
@@ -200,74 +151,99 @@ export class EditStudentDataComponent implements OnInit {
     }
   }
 
-  // Helper function to convert base64 data URL back to a file
+  private handleCompressedImage(compressedImage: string, file: File) {
+    this.defaultImage = compressedImage;
+    const compressedFile = this.dataURLtoFile(compressedImage, file.name);
+    this.selectedImage = compressedFile;
+    this.spinner.hide();
+
+    if (parseFloat((compressedFile.size / (1024 * 1024)).toFixed(2)) > 1) {
+      this.spinner.show();
+      this.imageCompress
+        .compressFile(compressedImage, -1, 50, 50)
+        .then((compressedImage) => {
+          this.defaultImage = compressedImage;
+          const compressedFile = this.dataURLtoFile(compressedImage, file.name);
+          this.selectedImage = compressedFile;
+          this.spinner.hide();
+        });
+    }
+  }
+
+
   dataURLtoFile(dataurl: string, filename: string) {
     this.spinner.show();
     const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)?.[1] || 'unknown'; // Provide a default value if no match is found
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'unknown';
     const bstr = atob(arr[1]);
     let n = bstr.length;
     const u8arr = new Uint8Array(n);
     while (n--) {
       u8arr[n] = bstr.charCodeAt(n);
     }
-    var aa = new File([u8arr], filename, { type: mime });
+    const file = new File([u8arr], filename, { type: mime });
     this.spinner.hide();
-    return new File([u8arr], filename, { type: mime });
+    return file;
   }
 
-  async onSubmit(formValues: any) {
+  async onSubmit() {
     this.spinner.show();
-    let isImageValid = await this.fireBaseEditService
-      .checkImageUrl(this.data.Image)
-      .toPromise();
+    let isImageValid = await this.supabaseEditService
+    .checkImageUrl(this.data.image_url)
+    .toPromise();
+  this.spinner.hide();
 
-    this.spinner.hide();
-
-    if (
-      (!this.selectedImage && !this.data.Image) ||
-      (this.data.Image && !isImageValid && !this.selectedImage)
-    ) {
-      this.swal.toastr('error', 'الرجاء رفع صورة اخري ثم حاول مرة اخري');
-      this.spinner.hide();
-      return;
-    }
-
-    const modalRef = this.modalService.open(SharedModalComponent, {
-      centered: true,
-      backdrop: 'static',
-      keyboard: false,
-    });
-
-    // Passing data to the modal
-    modalRef.componentInstance.warningSvg = true;
-    modalRef.componentInstance.message = 'هل انت متأكد من تعديل البيانات ؟';
-
-    // Handle modal result
-    modalRef.result.then((result) => {
-      if (result) {
-        this.spinner.show();
-        var dataPath = `${this.class}/${this.data.ClassMonth}/${this.NationalId.value}`;
-        var filePath = `${this.class}/${this.data.ClassMonth}/${this.NationalId.value}.jpg`;
-        if (this.selectedImage) {
-          this.fireBaseEditService.uploadToStorage(
-            filePath,
-            this.selectedImage,
-            {
-              ...formValues,
-              ClassMonth: this.data.ClassMonth,
-            }
-          );
+        if (
+          (!this.selectedImage && !this.data.image_url) ||
+          (this.data.image_url && !isImageValid && !this.selectedImage)
+        ) {
+          this.swal.toastr('error', 'الرجاء رفع صورة اخري ثم حاول مرة اخري');
+          this.spinner.hide();
           return;
         }
-        if (!this.selectedImage && (this.userForm.dirty || this.selectedDate)) {
-          this.fireBaseEditService.insertImageDetails(
-            { ...formValues, ClassMonth: this.data.ClassMonth },
-            dataPath
-          );
-        }
-      }
-    });
+
+        const modalRef = this.modalService.open(SharedModalComponent, {
+          centered: true,
+          backdrop: 'static',
+          keyboard: false,
+        });
+
+        modalRef.componentInstance.warningSvg = true;
+        modalRef.componentInstance.message = 'هل انت متأكد من تعديل البيانات ؟';
+
+        modalRef.result.then((result) => {
+          if (result) {
+            this.spinner.show();
+            const formValues = this.userForm.value;
+            const studentData = {
+              ...this.data,
+              id: formValues.NationalId,
+              name: formValues.Name,
+              date_of_birth: formValues.DateOfBirth,
+              place_of_birth: formValues.PlaceOfBirth,
+              image_url: formValues.Image,
+            };
+            let imagePromise;
+            if (this.selectedImage) {
+              const filePath = `${this.class}/${this.data.subclass_id}/${formValues.NationalId}.jpg`;
+              imagePromise = this.supabaseEditService.uploadFile(filePath, this.selectedImage);
+              this.selectedImage = null
+            } else {
+              imagePromise = Promise.resolve(studentData.image_url);
+            }
+            imagePromise
+              .then((imageUrl) => {
+                studentData.image_url = imageUrl;
+                this.supabaseEditService.insertImageDetails(studentData, `${this.class}/${this.subClass}/${this.id}`).then(() => {
+                  this.spinner.hide();
+                });
+              })
+              .catch(() => {
+                this.spinner.hide();
+              });
+          }
+        });
+
   }
 
   goBack() {
@@ -278,12 +254,9 @@ export class EditStudentDataComponent implements OnInit {
         keyboard: false,
       });
 
-      // Passing data to the modal
       modalRef.componentInstance.warningSvg = true;
-      modalRef.componentInstance.message =
-        'هل انت متأكد من العودة للصفحة السابقة ؟';
+      modalRef.componentInstance.message = 'هل انت متأكد من العودة للصفحة السابقة ؟';
 
-      // Handle modal result
       modalRef.result.then((result) => {
         if (result) {
           this.router.navigateByUrl('/student/getStudentData');

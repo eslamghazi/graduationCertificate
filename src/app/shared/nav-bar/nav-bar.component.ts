@@ -1,7 +1,5 @@
-import { FireBaseEditUserService } from 'src/app/shared/fire-base-edit-user.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FireBaseAuthService } from '../fire-base-auth.service';
 
 @Component({
   selector: 'app-nav-bar',

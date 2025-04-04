@@ -8,7 +8,7 @@ import {
 } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { SwalService } from './swal.service';
-import { FireBaseEditUserService } from './fire-base-edit-user.service';
+import { SupabaseUserService } from './supabase-user.service';
 
 @Injectable({
   providedIn: 'root',
@@ -73,7 +73,7 @@ export class AccessEditStudentData implements CanActivate {
     private router: Router,
     private spinner: NgxSpinnerService,
     private swal: SwalService,
-    private fireBaseEditService: FireBaseEditUserService
+    private supabaseUserService: SupabaseUserService
   ) { }
   async canActivate(
     route: ActivatedRouteSnapshot,
@@ -86,8 +86,8 @@ export class AccessEditStudentData implements CanActivate {
     let subClassNumber: any = route.paramMap.get('subClass');
 
 
-    let data = await this.fireBaseEditService.getDataByPathPromise(
-      `${classNumber}/${subClassNumber}/${id}`
+    let data = await this.supabaseUserService.getStudentForEditAuth(
+      classNumber, subClassNumber, id!
     );
 
     if (data) {

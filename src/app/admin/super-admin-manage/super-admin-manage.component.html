@@ -151,7 +151,7 @@
                     </ul>
                   </td>
                   <td>
-                    <button (click)="deleteFolder(currentClass + '/' + item.folderName + '/', 'realtimeDatabase')"
+                    <button (click)="deleteFolder(currentClass + '-' + item.folderName, 'realtimeDatabase')"
                       class="btn btn-outline-warning btn-sm">
                       <img src="assets/svgs/trash.svg" alt="delete" width="40">
                     </button>
@@ -161,16 +161,16 @@
                 <!-- National ID row -->
                 <tr *ngIf="!item.isFolder" class="bg-light">
                   <td> {{ item.folderIndex + 1 }}.{{ item.idIndex }}</td>
-                  <td>{{ item.id }} ({{item.subFolderData.ClassMonth}})</td>
+                  <td>{{ item.id }} ({{item.subFolderData.subclass_id.split('-')[1]}})</td>
                   <td style="width: 370px;" dir="ltr">{{ item.subFolderData | json }}</td>
                   <td>
-                    <button (click)="goEdit(item.subFolderData.ClassMonth, item.id)"
+                    <button (click)="goEdit(item.subFolderData.subclass_id, item.id)"
                       class="btn btn-outline-warning btn-sm">
                       <img src="assets/svgs/edit.svg" alt="edit" width="40">
                     </button>
 
                     <button
-                      (click)="deleteFolder(currentClass +'/' + item.subFolderData.ClassMonth + '/' + item.id, 'realtimeDatabase')"
+                      (click)="deleteFolder(currentClass +'/' + item.subFolderData.subclass_id + '/' + item.id, 'realtimeDatabase')"
                       class="btn btn-outline-info btn-sm mr-3">
                       <img src="assets/svgs/trash.svg" alt="delete" width="40">
                     </button>

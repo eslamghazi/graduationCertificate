@@ -4,8 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxImageCompressService } from 'ngx-image-compress';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { FireBaseEditUserService } from 'src/app/shared/fire-base-edit-user.service';
 import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.component';
+import { SupabaseEditUserService } from 'src/app/shared/supabase-edit-user.service';
 import { SwalService } from 'src/app/shared/swal.service';
 
 @Component({
@@ -19,6 +19,8 @@ export class AddStudentDataComponent implements OnInit {
   selectedImage: any = null;
   selectedDate: any = null;
 
+  subclasses: any = null
+
   class: any
 
   NationalId = new FormControl(null, [Validators.required]);
@@ -29,7 +31,7 @@ export class AddStudentDataComponent implements OnInit {
   Image = new FormControl(null);
 
   constructor(
-    private fireBaseEditService: FireBaseEditUserService,
+    private supabaseEditUserService: SupabaseEditUserService,
     private activatedRoute: ActivatedRoute,
     private spinner: NgxSpinnerService,
     private modalService: NgbModal,
@@ -47,8 +49,10 @@ export class AddStudentDataComponent implements OnInit {
     Image: this.Image,
   });
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.class = this.activatedRoute.snapshot.paramMap.get('class');
+
+    this.subclasses = await this.supabaseEditUserService.getDataTable("subclasses", { class_id: this.class })
   }
 
   onChangeDate(event: any) {
@@ -63,83 +67,68 @@ export class AddStudentDataComponent implements OnInit {
     this.spinner.show();
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
+      const fileType = file.type; // Get the file type (MIME type)
+
       if (file.size > 1000000) {
         this.swal.toastr(
           'warning',
           'حجم الصورة اكبر من 1 ميجا، تتم الآن محاولة ضغط حجم الصورة'
         );
 
-        // If file size is more than 1.5MB, compress it
         const reader = new FileReader();
-
         reader.onload = (e: any) => {
           const image = e.target.result;
-          // Compress the image using ngx-image-compress
-          this.imageCompress
-            .compressFile(image, -1, 100, 60)
-            .then((compressedImage) => {
-              // Set the compressed image as the default image
-              this.defaultImage = compressedImage;
 
-              // Convert the compressed base64 image back to a file (optional)
-              const compressedFile = this.dataURLtoFile(
-                compressedImage,
-                file.name
-              );
-              console.log(
-                'compressedFile',
-                (compressedFile.size / (1024 * 1024)).toFixed(2)
-              );
-              // Assign the compressed file to selectedImage
-              this.selectedImage = compressedFile;
-              this.spinner.hide();
-              if (
-                parseFloat((compressedFile.size / (1024 * 1024)).toFixed(2)) > 1
-              ) {
-                this.spinner.show();
+          if (fileType === 'image/png') {
 
-                this.imageCompress
-                  .compressFile(image, -1, 50, 50)
-                  .then((compressedImage) => {
-                    // Set the compressed image as the default image
-                    this.defaultImage = compressedImage;
+            this.imageCompress
+              .compressFile(image, -1, 50, 50)
+              .then((compressedImage) => {
+                this.handleCompressedImage(compressedImage, file);
+              });
+          } else {
 
-                    // Convert the compressed base64 image back to a file (optional)
-                    const compressedFile = this.dataURLtoFile(
-                      compressedImage,
-                      file.name
-                    );
-                    console.log(
-                      'compressedFile',
-                      (compressedFile.size / (1024 * 1024)).toFixed(2)
-                    );
-                    // Assign the compressed file to selectedImage
-                    this.selectedImage = compressedFile;
-
-                    // Hide the spinner
-                    this.spinner.hide();
-                  });
-              }
-            });
+            this.imageCompress
+              .compressFile(image, -1, 100, 60)
+              .then((compressedImage) => {
+                this.handleCompressedImage(compressedImage, file);
+              });
+          }
         };
-
-        // Read the original image as base64 data URL
         reader.readAsDataURL(file);
       } else {
-        // If file size is less than 1MB, do not compress
+
         const reader = new FileReader();
         reader.onload = (e: any) => {
-          this.defaultImage = e.target.result; // Set the original image
-          this.selectedImage = file; // Use the original file without compression
+          this.defaultImage = e.target.result;
+          this.selectedImage = file;
         };
         reader.readAsDataURL(file);
-
         this.spinner.hide();
       }
     } else {
       this.defaultImage = 'assets/Images/DefaultImage.jpg';
       this.selectedImage = null;
       this.spinner.hide();
+    }
+  }
+
+  private handleCompressedImage(compressedImage: string, file: File) {
+    this.defaultImage = compressedImage;
+    const compressedFile = this.dataURLtoFile(compressedImage, file.name);
+    this.selectedImage = compressedFile;
+    this.spinner.hide();
+
+    if (parseFloat((compressedFile.size / (1024 * 1024)).toFixed(2)) > 1) {
+      this.spinner.show();
+      this.imageCompress
+        .compressFile(compressedImage, -1, 50, 50)
+        .then((compressedImage) => {
+          this.defaultImage = compressedImage;
+          const compressedFile = this.dataURLtoFile(compressedImage, file.name);
+          this.selectedImage = compressedFile;
+          this.spinner.hide();
+        });
     }
   }
 
@@ -159,7 +148,7 @@ export class AddStudentDataComponent implements OnInit {
     return new File([u8arr], filename, { type: mime });
   }
 
-  async onSubmit(formValues: any) {
+  async onSubmit() {
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
@@ -174,38 +163,44 @@ export class AddStudentDataComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
+        const formValues = this.userForm.value;
+        const studentData = {
+          id: formValues.NationalId,
+          name: formValues.Name,
+          date_of_birth: formValues.DateOfBirth,
+          place_of_birth: formValues.PlaceOfBirth,
+          image_url: formValues.Image,
+        };
 
-        const ClassMonth =
-          (this.ClassMonth.value as any) == '1'
-            ? 'June'
-            : (this.ClassMonth.value as any) == '2'
-              ? 'September'
-              : null;
+        console.log(studentData);
 
-        var filePath = `${this.class}/${ClassMonth}/${this.NationalId.value}.jpg`;
-        var dataPath = `${this.class}/${ClassMonth}/${this.NationalId.value}`;
-
+        let imagePromise;
         if (this.selectedImage) {
-          this.fireBaseEditService.uploadToStorage(
-            filePath,
-            this.selectedImage,
-            {
-              ...formValues,
-              ClassMonth: ClassMonth,
-            }
-          );
-          return;
+          var filePath = `${this.class}/${this.ClassMonth.value}/${this.NationalId.value}.jpg`;
+          imagePromise = this.supabaseEditUserService.uploadFile(filePath, this.selectedImage);
+          this.selectedImage = null
         } else {
-          if (
-            !this.selectedImage &&
-            (this.userForm.dirty || this.selectedDate)
-          ) {
-            this.fireBaseEditService.insertImageDetails(
-              { ...formValues, ClassMonth: ClassMonth },
-              dataPath
-            );
-          }
+          imagePromise = Promise.resolve(studentData.image_url);
         }
+        var dataPath = `${this.class}/${this.ClassMonth.value}/${this.NationalId.value}`;
+        imagePromise
+              .then((imageUrl: any) => {
+                studentData.image_url = imageUrl;
+                this.supabaseEditUserService.insertImageDetails(studentData, dataPath).then(() => {
+                  this.spinner.hide();
+                });
+              })
+              .catch(() => {
+                this.spinner.hide();
+              });
+          // if (
+          //   !this.selectedImage &&
+          //   (this.userForm.dirty || this.selectedDate)
+          // ) {
+          //   this.supabaseEditUserService.insertImageDetails(studentData, dataPath);
+          //   this.spinner.hide();
+          // }
+
       }
     });
   }

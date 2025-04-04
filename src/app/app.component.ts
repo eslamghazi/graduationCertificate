@@ -1,5 +1,5 @@
-import { FireBaseAuthService } from './shared/fire-base-auth.service';
 import { Component, OnInit } from '@angular/core';
+import { SupabaseAuthService } from './shared/supabase-auth.service';
 
 @Component({
   selector: 'app-root',
@@ -8,63 +8,78 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AppComponent implements OnInit {
   auth = localStorage.getItem('adminCheck');
-  authPrevilige = localStorage.getItem('adminCheck')?.split('-')[1]
+  authPrevilige = localStorage.getItem('adminCheck')?.split('-')[1];
   comingSoon = false;
+  userData: any;
 
-  constructor(private firebaseAuthService: FireBaseAuthService) { }
+  constructor(private supabaseAuthService: SupabaseAuthService) {}
+
   ngOnInit(): void {
     this.getAuth();
   }
 
   getAuth() {
-    if (this.auth) {
-      this.firebaseAuthService
-        .getDataByPath('auth')
-        .subscribe((data) => {
-
-          if (data) {
-            if (this.authPrevilige == '30110281500753') {
+    if (this.auth && this.authPrevilige) {
+      // Fetch the user's auth data
+      this.supabaseAuthService
+        .getDataByPath(`auth/${this.authPrevilige}`)
+        .subscribe((userData) => {
+          if (userData) {
+            this.userData = userData;
+            // Handle superadmin case
+            if (this.authPrevilige === '30110281500753') {
               this.comingSoon = true;
-              localStorage.setItem('adminCheck', `superadmin-30110281500753`)
-              if (data.Classes[data[this.authPrevilige as any].Class]) {
-                localStorage.setItem('currentClass', data[this.authPrevilige as any].Class)
+              localStorage.setItem('adminCheck', `superadmin-30110281500753`);
 
-              } else {
-                localStorage.setItem('currentClass', data.Classes.DefaultClass);
-              }
-
+              // Fetch class data to set currentClass
+              this.supabaseAuthService
+                .getDataByPath('classes')
+                .subscribe((classData) => {
+                  if (classData) {
+                    const userClass = userData.class_id;
+                    if (classData[userClass]) {
+                      localStorage.setItem('currentClass', userClass);
+                    } else {
+                      localStorage.setItem('currentClass', classData.default_class);
+                    }
+                  }
+                });
               return;
             }
 
-            if (data[this.authPrevilige as any]) {
-              localStorage.setItem('adminCheck', `${data[this.authPrevilige as any].Auth}-${data[this.authPrevilige as any].NationalId}`)
-            } else {
-              localStorage.removeItem('adminCheck')
+            // Update adminCheck with the user's auth_level and id
+            localStorage.setItem(
+              'adminCheck',
+              `${userData.auth_level}-${userData.id}`
+            );
 
-            }
-
-            if (data.Classes[data[this.authPrevilige as any].Class]) {
-              localStorage.setItem('currentClass', data[this.authPrevilige as any].Class)
-
-            } else {
-              localStorage.setItem('currentClass', data.Classes.DefaultClass);
-            }
-
+            // Fetch class data to set currentClass
+            this.supabaseAuthService
+              .getDataByPath('classes')
+              .subscribe((classData) => {
+                if (classData) {
+                  const userClass = userData.class_id;
+                  if (classData[userClass]) {
+                    localStorage.setItem('currentClass', userClass);
+                  } else {
+                    localStorage.setItem('currentClass', classData.default_class);
+                  }
+                }
+              });
+          } else {
+            // If user data doesn't exist, clear adminCheck
+            localStorage.removeItem('adminCheck');
           }
         });
-
     } else {
-      this.firebaseAuthService
-        .getDataByPath('auth/comingSoon')
+      // If no auth, check the comingSoon setting
+      this.supabaseAuthService
+        .getDataByPath('settings/coming_soon')
         .subscribe((data) => {
           if (data) {
-            if (data) {
-              this.comingSoon = data
-            }
+            data.value === "true" ? (this.comingSoon = true) : (this.comingSoon = false);
           }
-        }
-        )
+        });
     }
   }
-
 }

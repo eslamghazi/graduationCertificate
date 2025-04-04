@@ -1,4 +1,4 @@
-<form class="form-signin text-center" [formGroup]="userForm" (submit)="onSubmit(userForm.value)">
+<form class="form-signin text-center" [formGroup]="userForm" (submit)="onSubmit()">
 
   <label for="image" class="h3 mb-4 text-info">اضافة طالب جديد غير موجود بقاعدة البيانات</label>
 
@@ -64,8 +64,8 @@
     <div class="input-group">
       <select class="form-control text-right" id="exampleFormControlSelect1" formControlName="ClassMonth">
         <option value="0">اختر دور الطالب</option>
-        <option value="1">يونيو</option>
-        <option value="2">سبتمبر</option>
+        <option *ngFor="let subClass of subclasses" value="{{subClass.id}}">{{subClass.name}}</option>
+
       </select>
     </div>
   </div>

@@ -1,32 +1,51 @@
 <div>
   <div class="modal-header">
     <h4 class="modal-title">بحث عن طالب بقاعدة البيانات</h4>
-    <button (click)="activeModal.close()" class="close" type="button" aria-label="Close">
+    <button
+      (click)="activeModal.close()"
+      class="close"
+      type="button"
+      aria-label="Close"
+    >
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
 
   <div class="modal-body">
     <div class="row">
-      <img class="svg" src="assets/svgs/personSearch.svg" alt="search">
+      <img class="svg" src="assets/svgs/personSearch.svg" alt="search" />
     </div>
-    <br>
+    <br />
     <div class="row">
       <h4 style="color: #004687" dir="rtl">البحث عن طالب داخل قاعدة اليبانات</h4>
     </div>
 
-    <br>
+    <br />
     <div class="input-group my-1">
       <div class="input-group-prepend">
-        <button class="btn btn-outline-success m-auto" type="button" (click)="studentSearch()">بحث</button>
+        <button
+          class="btn btn-outline-success m-auto"
+          type="button"
+          (click)="studentSearch()"
+        >
+          بحث
+        </button>
       </div>
-      <input (input)="clickSearch = false" type="text" class="form-control" placeholder="البحث بالرقم القومي"
-        [(ngModel)]="searchTerm" />
+      <input
+        (input)="clickSearch = false"
+        type="text"
+        class="form-control"
+        placeholder="البحث بالرقم القومي"
+        [(ngModel)]="searchTerm"
+      />
     </div>
 
     <div style="overflow: auto;">
-      <table *ngIf="filteredData.length > 0 else NoData" class="table table-bordered table-striped text-center"
-        dir="rtl">
+      <table
+        *ngIf="filteredData.length > 0; else NoData"
+        class="table table-bordered table-striped text-center"
+        dir="rtl"
+      >
         <thead class="thead-dark">
           <tr>
             <th>م</th>
@@ -41,46 +60,92 @@
         </thead>
         <tbody>
           <tr
-            *ngFor="let item of filteredData | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage } let i = index;">
+            *ngFor="
+              let item of filteredData
+                | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage };
+              let i = index
+            "
+          >
             <td>{{ getIndex(i) }}</td>
-            <td>{{ item.data.Name }}</td>
-            <td style="text-wrap: nowrap;">{{ item.data.NationalId }}</td>
-            <td>{{ item.data.PlaceOfBirth }}</td>
-            <td style="text-wrap: nowrap;">{{ item.data.DateOfBirth }}</td>
-            <td>{{ item.source.split("/")[1] == "June" ? "يونيو" : "سبتمبر" }}</td>
-            <td> <img *ngIf="hasImage(item)" [src]="item.data.Image" alt="{{item.data.NationalId}}" role="button"
-                class="img-thumbnail" style="max-width: 100px; max-height: 60px;" (click)="openImage(item)" />
-
+            <td>{{ item.data.name }}</td>
+            <td style="text-wrap: nowrap;">{{ item.data.id }}</td>
+            <td>{{ item.data.place_of_birth }}</td>
+            <td style="text-wrap: nowrap;">{{ item.data.date_of_birth }}</td>
+            <td>
+              {{
+                item.source.split("-")[1] === "June"
+                  ? "يونيو"
+                  : item.source.split("-")[1] === "September"
+                  ? "سبتمبر"
+                  : item.source.split("-")[1]
+              }}
+            </td>
+            <td>
+              <img
+                *ngIf="hasImage(item)"
+                [src]="item.data.image_url"
+                alt="{{ item.data.id }}"
+                role="button"
+                class="img-thumbnail"
+                style="max-width: 100px; max-height: 60px;"
+                (click)="openImage(item)"
+              />
               <p *ngIf="!hasImage(item)">لا توجد صورة للطالب !</p>
             </td>
             <td class="actions">
-              <button (click)="goEdit(item.source.split('/')[1], item.data.NationalId)"
-                class="btn btn-outline-warning btn-sm">
-                <img src="assets/svgs/edit.svg" alt="edit" width="40">
+              <button
+                (click)="goEdit(item.source, item.data.id)"
+                class="btn btn-outline-warning btn-sm"
+              >
+                <img src="assets/svgs/edit.svg" alt="edit" width="40" />
               </button>
-              <button *ngIf="hasImage(item)" (click)="deleteStudent(item,'deleteImage')"
-                class="btn btn-outline-danger btn-sm"><img src="assets/svgs/deletePhoto.svg" alt="delete"
-                  width="40"></button>
-              <button (click)="deleteStudent(item,'deleteStudent')" class="btn btn-outline-danger btn-sm"><img
-                  src="assets/svgs/trash.svg" alt="delete" width="40"></button>
+              <button
+                *ngIf="hasImage(item)"
+                (click)="deleteStudent(item, 'deleteImage')"
+                class="btn btn-outline-danger btn-sm"
+              >
+                <img
+                  src="assets/svgs/deletePhoto.svg"
+                  alt="delete"
+                  width="40"
+                />
+              </button>
+              <button
+                (click)="deleteStudent(item, 'deleteStudent')"
+                class="btn btn-outline-danger btn-sm"
+              >
+                <img src="assets/svgs/trash.svg" alt="delete" width="40" />
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
 
-      <pagination-controls dir="rtl" (pageChange)="currentPage = $event" *ngIf="filteredData.length > 0"
-        class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
+      <pagination-controls
+        dir="rtl"
+        (pageChange)="currentPage = $event"
+        *ngIf="filteredData.length > 0"
+        class="my-4 d-flex justify-content-center custom-pagination"
+        previousLabel="السابق"
+        nextLabel="التالي"
+      >
       </pagination-controls>
     </div>
   </div>
 
   <ng-template #NoData>
-    <p *ngIf="clickSearch" class="h5 mt-3 text-center text-danger">عفوًا لا توجد بيانات للطالب
-      الذي تم البحث عنه</p>
+    <p *ngIf="clickSearch" class="h5 mt-3 text-center text-danger">
+      عفوًا لا توجد بيانات للطالب الذي تم البحث عنه
+    </p>
   </ng-template>
-
 </div>
 
 <div class="modal-footer">
-  <button (click)="activeModal.close()" class="btn btn-outline-primary btn-lg" style="width: 150px;">حسنًا</button>
+  <button
+    (click)="activeModal.close()"
+    class="btn btn-outline-primary btn-lg"
+    style="width: 150px;"
+  >
+    حسنًا
+  </button>
 </div>

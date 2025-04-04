@@ -38,9 +38,9 @@
           <tr
             *ngFor="let item of filteredData | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage } let i = index;">
             <td>{{ getIndex(i) }}</td>
-            <td>{{ item.Name }}</td>
-            <td style="text-wrap: nowrap;">{{ item.NationalId }}</td>
-            <td> <img [src]="item.Image" alt="{{ item.NationalId}}" role="button" class="img-thumbnail"
+            <td>{{ item.name }}</td>
+            <td style="text-wrap: nowrap;">{{ item.id }}</td>
+            <td> <img [src]="item.image_url" alt="{{ item.id}}" role="button" class="img-thumbnail"
                 style="max-width: 100px; max-height: 60px;" (click)="openImage(item)" />
 
             </td>

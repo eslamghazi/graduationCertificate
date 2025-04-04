@@ -4,16 +4,8 @@
 
 export const environment = {
   production: false,
-  firebaseConfig: {
-    apiKey: 'AIzaSyA6ak_wgTvSGrn5mHmeoZz7JE_hii8H5jA',
-    authDomain: 'graduationcertificate.firebaseapp.com',
-    databaseURL: 'https://graduationcertificate-default-rtdb.firebaseio.com',
-    projectId: 'graduationcertificate',
-    storageBucket: 'graduationcertificate.appspot.com',
-    messagingSenderId: '983303063401',
-    appId: '1:983303063401:web:5411398039627306cf9ff8',
-    measurementId: 'G-HS5WBCY79L',
-  },
+  supabaseUrl: "https://vjeloqvzkdjmpftwpziv.supabase.co",
+  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqZWxvcXZ6a2RqbXBmdHdweml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMzODYzMTQsImV4cCI6MjA1ODk2MjMxNH0.giEqVwOSiTrsjzIW4bE3VLeoG3OZ_aNTSZAZyb9LbWU"
 };
 
 /*

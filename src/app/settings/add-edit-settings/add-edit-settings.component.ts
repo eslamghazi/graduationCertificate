@@ -11,23 +11,28 @@ export class AddEditSettingsComponent implements OnInit {
   @Input() header: string = '';
   @Input() footer: string = '';
   @Input() data: any;
+  @Input() isReadonly: boolean = false;
 
-  Id = new FormControl(null, [Validators.required])
-  Name = new FormControl(null, [Validators.required])
+  id = new FormControl(null, [Validators.required])
+  name = new FormControl(null, [Validators.required])
 
   constructor(public activeModal: NgbActiveModal) { }
   addEditForm = new FormGroup({
-    Id: this.Id,
-    Name: this.Name,
+    id: this.id,
+    name: this.name,
   })
   ngOnInit(): void {
     if (this.data) {
       this.addEditForm.patchValue({
-        Id: this.data.Id,
-        Name: this.data.Name
+        id: this.data.id,
+        name: this.data.name
       });
     }
+    console.log(this.isReadonly);
 
+if (this.isReadonly) {
+  document.getElementById('idInput')?.setAttribute('readonly', "true");
+}
   }
   confirm() {
     this.activeModal.close(this.addEditForm.value);
