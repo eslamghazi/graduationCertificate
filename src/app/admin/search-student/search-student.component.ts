@@ -47,7 +47,6 @@ export class SearchStudentComponent implements OnInit {
           key: sub.id,
           value: sub,
         }));
-        console.log('Subclasses:', this.subClasses); // Add logging
         this.spinner.hide();
       });
   }
@@ -70,7 +69,6 @@ export class SearchStudentComponent implements OnInit {
           this.searchTerm
         )
         .subscribe((result) => {
-          console.log('Search result:', result); // Log the result for debugging
           this.data = result;
           this.filteredData = result;
           this.checkAllImages(result);

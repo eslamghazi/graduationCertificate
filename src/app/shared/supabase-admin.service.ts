@@ -429,7 +429,6 @@ export class SupabaseAdminService {
         .from(table)
         .upsert(data);
       if (error) throw new Error(error.message);
-      console.log(`${table} data upserted successfully`);
     } catch (error) {
       console.error(`Error upserting ${table} data:`, error);
       throw error;
@@ -458,7 +457,6 @@ export class SupabaseAdminService {
         .delete()
         .in('id', ids);
       if (error) throw new Error(error.message);
-      console.log(`Deleted ${ids.length} records from ${table}`);
     } catch (error) {
       console.error(`Error deleting records from ${table}:`, error);
       throw error;

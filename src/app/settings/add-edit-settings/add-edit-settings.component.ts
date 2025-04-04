@@ -28,7 +28,6 @@ export class AddEditSettingsComponent implements OnInit {
         name: this.data.name
       });
     }
-    console.log(this.isReadonly);
 
 if (this.isReadonly) {
   document.getElementById('idInput')?.setAttribute('readonly', "true");

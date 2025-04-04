@@ -58,7 +58,6 @@ export class SupabaseSettingsService {
       if (error) {
         throw new Error(error.message);
       }
-      console.log(`${this.currentClass} data pushed successfully`);
     } catch (error) {
       console.error(`Error pushing ${this.currentClass} data:`, error);
       throw error;

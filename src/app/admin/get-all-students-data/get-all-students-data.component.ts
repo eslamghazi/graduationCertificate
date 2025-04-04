@@ -174,7 +174,6 @@ export class GetAllStudentsDataComponent implements OnInit {
           const orderedItem: any = {};
           orderedItem['id'] = this.getIndex(index);
           orderedItem['national_id'] = item.id;
-          console.log(item);
 
           columns.slice(1).forEach((column) => {
             orderedItem[column] = item[column];

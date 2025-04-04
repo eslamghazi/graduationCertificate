@@ -172,8 +172,6 @@ export class AddStudentDataComponent implements OnInit {
           image_url: formValues.Image,
         };
 
-        console.log(studentData);
-
         let imagePromise;
         if (this.selectedImage) {
           var filePath = `${this.class}/${this.ClassMonth.value}/${this.NationalId.value}.jpg`;
