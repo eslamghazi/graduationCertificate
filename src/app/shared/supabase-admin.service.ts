@@ -7,6 +7,7 @@ import * as XLSX from 'xlsx';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import * as JSZip from 'jszip';
 import { environment } from 'src/environments/environment';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,8 @@ export class SupabaseAdminService {
   constructor(
     private spinner: NgxSpinnerService,
     private swal: SwalService,
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router
   ) {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
       auth: {
@@ -32,7 +34,7 @@ export class SupabaseAdminService {
 
   // Fetch data from a specific table with optional filters
   getAllData(table: string, filters: any = {}, need = 'list'): Observable<any> {
-    let query = this.supabase.from(table).select('*');
+    let query = this.supabase.from(table).select('*')
 
     for (const key in filters) {
       if (filters[key]) {
@@ -45,6 +47,8 @@ export class SupabaseAdminService {
         }
       }
     }
+
+    query.order('created_at', { ascending: false });
 
     return from(query).pipe(
       map((response: any) => {
@@ -183,11 +187,17 @@ export class SupabaseAdminService {
         });
     });
   }
+  decryptFileName(encrypted: string): string {
+    const parts = encrypted.split(".");
+    const name = decodeURIComponent(escape(atob(parts.slice(0, -1).join("."))));
+    const ext = parts.slice(-1)[0];
+    return `${name}.${ext}`;
+  }
 
   // Download a folder of images as a ZIP file
   async downloadFolderAsZip(path: string, zipNameWillBe: string): Promise<void> {
 
-    this.swal.toastr('warning', 'جار تجهيز الصور ...');
+    this.swal.toastr('info', 'جار تجهيز الصور ...');
     this.spinner.show();
 
     try {
@@ -208,7 +218,9 @@ export class SupabaseAdminService {
 
         if (fileError) throw new Error(fileError.message);
         const arrayBuffer = await fileData.arrayBuffer();
-        zip.file(file.name, arrayBuffer);
+
+        const decryptedFileName = this.decryptFileName(file.name)
+        zip.file(decryptedFileName, arrayBuffer);
       }
 
       const content = await zip.generateAsync({ type: 'blob' });
@@ -217,7 +229,7 @@ export class SupabaseAdminService {
       link.href = url;
       link.download = `${zipNameWillBe}.zip`;
       link.click();
-      window.URL.revokeObjectURL(url);
+      window?.URL?.revokeObjectURL(url);
 
       this.spinner.hide();
       this.swal.toastr('success', 'تم تحضير الصور بنجاح');
@@ -431,20 +443,6 @@ export class SupabaseAdminService {
       if (error) throw new Error(error.message);
     } catch (error) {
       console.error(`Error upserting ${table} data:`, error);
-      throw error;
-    }
-  }
-
-  // Remove a specific student entry from Supabase
-  async removeEntry(classId: string, subclassId: string, nationalId: string): Promise<void> {
-    try {
-      const { error } = await this.supabase
-        .from('students')
-        .delete()
-        .eq('id', nationalId);
-      if (error) throw new Error(error.message);
-    } catch (error) {
-      console.error(`Error removing student ${nationalId}:`, error);
       throw error;
     }
   }

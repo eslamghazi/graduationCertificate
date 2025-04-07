@@ -8,15 +8,15 @@
     </select>
   </div>
 
-  <div class="form-group my-2" *ngIf="selectClass.value && selectClass.value != '0'">
+  <!-- <div class="form-group my-2" *ngIf="selectClass.value && selectClass.value != '0'">
     <h1 class="h3 my-3 font-weight-normal text-center text-info">اختر دورك</h1>
     <select class="form-control" formControlName="selectSubClass">
       <option value="0" selected>الرجاء اختيار دورك</option>
       <option *ngFor="let subClass of SubClasses" [value]="subClass.value.Id">{{subClass.value.Name}}</option>
     </select>
-  </div>
+  </div> -->
 
-  <div *ngIf="selectSubClass.value && selectSubClass.value != '0'">
+  <div *ngIf="selectClass.value && selectClass.value != '0'">
     <div class="form-label-group">
       <h1 class="h3 my-5 font-weight-normal text-center text-info">ادخل رقمك القومي</h1>
       <input (keyup)="typingId($event.target)" type="number" id="id" class="form-control" placeholder="ادخل رقمك القومي"

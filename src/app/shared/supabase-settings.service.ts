@@ -34,6 +34,8 @@ export class SupabaseSettingsService {
       }
     }
 
+    query.order('created_at', { ascending: false });
+
     return from(query).pipe(
       map((response: any) => {
         if (response.error) {
@@ -58,16 +60,6 @@ export class SupabaseSettingsService {
       if (error) {
         throw new Error(error.message);
       }
-    } catch (error) {
-      console.error(`Error pushing ${this.currentClass} data:`, error);
-      throw error;
-    }
-  }
-
-  // Push class data (specific to the classes table)
-  async pushClassData(classData: any, table: string = 'classes'): Promise<void> {
-    try {
-      await this.insertIntoDb(table, classData, true); // Use upsert to update if exists
     } catch (error) {
       console.error(`Error pushing ${this.currentClass} data:`, error);
       throw error;

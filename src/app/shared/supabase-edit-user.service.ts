@@ -47,6 +47,7 @@ export class SupabaseEditUserService {
         .eq('class_id', classId)
         .eq('subclass_id', subClassId)
         .eq('id', id)
+        .order('created_at', { ascending: false })
         .single()
     ).pipe(
       map(({ data, error }) => {
@@ -71,25 +72,6 @@ export class SupabaseEditUserService {
     return this.getData(classId, subClassId, id);
   }
 
-  async getDataByPathPromise(path: string): Promise<any> {
-    const parsed = this.parsePath(path);
-    if (!parsed) {
-      return null;
-    }
-    const { classId, subClassId, id } = parsed;
-    const { data, error } = await this.supabase
-      .from('students')
-      .select('*')
-      .eq('class_id', classId)
-      .eq('subclass_id', subClassId)
-      .eq('id', id)
-      .single();
-    if (error) {
-      throw error;
-    }
-    return data;
-  }
-
   getAllData(path = '/'): Observable<any> {
     let query = this.supabase.from('students').select('*');
     if (path !== '/') {
@@ -100,6 +82,7 @@ export class SupabaseEditUserService {
       if (parts.length >= 2) {
         query = query.eq('subclass_id', parts[1]);
       }
+      query.order('created_at', { ascending: false });
     }
     return from(query).pipe(
       map(({ data, error }) => {
@@ -107,6 +90,13 @@ export class SupabaseEditUserService {
         return data;
       })
     );
+  }
+
+  encryptFileName(filename: string): string {
+    const parts = filename.split(".");
+    const name = btoa(unescape(encodeURIComponent(parts.slice(0, -1).join("."))));
+    const ext = parts.slice(-1)[0];
+    return `${name}.${ext}`;
   }
 
   async uploadFile(filePath: string, file: File): Promise<string> {
@@ -171,22 +161,6 @@ export class SupabaseEditUserService {
     this.swal.toastr('success', 'تم رفع البيانات بنجاح');
   }
 
-  async getFileUrl(folderPath: string, fileName: string): Promise<string | null> {
-    this.spinner.show();
-        try {
-      const { data } = this.supabase.storage
-        .from('images')
-        .getPublicUrl(`${folderPath}/${fileName}`);
-      this.swal.toastr('success', 'تم العثور علي الصورة بنجاح');
-      return data.publicUrl;
-    } catch (error) {
-      this.swal.toastr('error', 'حدث خطأ اثناء العثور علي الصورة');
-      return null;
-    } finally {
-      this.spinner.hide();
-    }
-  }
-
   checkImageUrl(url: string): Observable<boolean> {
     return this.http.head(url, { observe: 'response' }).pipe(
       map((response) => response.status === 200),
@@ -194,8 +168,14 @@ export class SupabaseEditUserService {
     );
   }
 
-  async isExists(path: string): Promise<boolean> {
-    return  (await this.supabase.storage.from("images").exists(path)).data
+  async checkImageExists(imageUrl: string): Promise<boolean> {
+    try {
+      const response = await fetch(imageUrl, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.error('Error checking image:', error);
+      return false;
+    }
   }
 
   async getDataTable(table: string, filters: any = {}): Promise<any> {
@@ -207,6 +187,8 @@ export class SupabaseEditUserService {
         query = query.eq(key, filters[key]);
       }
     }
+
+    query.order('created_at', { ascending: false });
 
     return (await query).data
   }

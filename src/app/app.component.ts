@@ -40,7 +40,15 @@ export class AppComponent implements OnInit {
                     if (classData[userClass]) {
                       localStorage.setItem('currentClass', userClass);
                     } else {
-                      localStorage.setItem('currentClass', classData.default_class);
+
+                      this.supabaseAuthService
+                .getDataByPath('settings')
+                .subscribe((settingsData) => {
+                  if (settingsData) {
+                    localStorage.setItem('currentClass', settingsData.find((x: any) => x.id === 'default_class').value);
+                  }
+                });
+
                     }
                   }
                 });
@@ -62,7 +70,14 @@ export class AppComponent implements OnInit {
                   if (classData[userClass]) {
                     localStorage.setItem('currentClass', userClass);
                   } else {
-                    localStorage.setItem('currentClass', classData.default_class);
+                    this.supabaseAuthService
+              .getDataByPath('settings')
+              .subscribe((settingsData) => {
+                if (settingsData) {
+                  localStorage.setItem('currentClass', settingsData.find((x: any) => x.id === 'default_class').value);
+                }
+              });
+
                   }
                 }
               });

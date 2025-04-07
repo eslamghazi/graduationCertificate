@@ -80,10 +80,8 @@ export class EditStudentDataComponent implements OnInit {
     this.PlaceOfBirth.patchValue(this.data.place_of_birth);
     this.Image.patchValue(this.data.image_url);
 
-    const filePath = `${this.class}/${this.data.subclass_id}/${this.NationalId.value}.jpg`;
-
     let isImageValid = await this.supabaseEditService
-    .isExists(filePath)
+    .checkImageExists(this.data.image_url)
     if (isImageValid) {
       this.defaultImage = this.data.image_url
       ? this.data.image_url
@@ -225,7 +223,7 @@ export class EditStudentDataComponent implements OnInit {
             };
             let imagePromise;
             if (this.selectedImage) {
-              const filePath = `${this.class}/${this.data.subclass_id}/${formValues.NationalId}.jpg`;
+              const filePath = `${this.class}/${this.data.subclass_id}/${this.supabaseEditService.encryptFileName(formValues.NationalId + "_" + formValues.Name + ".jpg")}`;
               imagePromise = this.supabaseEditService.uploadFile(filePath, this.selectedImage);
               this.selectedImage = null
             } else {

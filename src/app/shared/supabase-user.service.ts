@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { Observable, from } from 'rxjs';
-import { SwalService } from './swal.service';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -11,10 +9,7 @@ import { environment } from 'src/environments/environment';
 export class SupabaseUserService {
   private supabase: SupabaseClient;
 
-  constructor(
-    private spinner: NgxSpinnerService,
-    private swal: SwalService
-  ) {
+  constructor() {
     this.supabase = createClient(
       environment.supabaseUrl,
       environment.supabaseKey, {
@@ -34,6 +29,7 @@ export class SupabaseUserService {
           .from(table)
           .select('*')
           .eq('id', id)
+          .order('created_at', { ascending: false })
           .single()
           .then(response => response.data)
       );
@@ -42,6 +38,7 @@ export class SupabaseUserService {
       this.supabase
         .from(table)
         .select('*')
+        .order('created_at', { ascending: false })
         .then(response => response.data)
     );
   }
@@ -55,6 +52,7 @@ export class SupabaseUserService {
           .eq('class_id', classNumber)
           .eq('subclass_id', subClassNumber)
           .eq('id', id)
+          .order('created_at', { ascending: false })
           .single()
           .then(response => response.data)
       );
@@ -63,30 +61,9 @@ export class SupabaseUserService {
       this.supabase
         .from("students")
         .select('*')
+        .order('created_at', { ascending: false })
         .then(response => response.data)
     );
   }
 
-  async getFileUrl(folderPath: string, fileName: string): Promise<string | null> {
-    this.spinner.show();
-    try {
-      const { data } = this.supabase
-        .storage
-        .from('images')
-        .getPublicUrl(`${folderPath}/${fileName}`);
-
-      // Check if the URL is valid (optional, depending on your needs)
-      if (!data.publicUrl) {
-        throw new Error('No public URL returned');
-      }
-
-      this.swal.toastr('success', 'تم العثور علي الصورة بنجاح');
-      this.spinner.hide();
-      return data.publicUrl;
-    } catch (error) {
-      this.swal.toastr('error', 'حدث خطأ اثناء العثور علي الصورة بنجاح');
-      this.spinner.hide();
-      return null;
-    }
-  }
 }

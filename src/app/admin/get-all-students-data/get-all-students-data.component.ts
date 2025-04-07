@@ -28,7 +28,7 @@ export class GetAllStudentsDataComponent implements OnInit {
   data: any[] = [];
   filteredData: any[] = [];
   actualData: any[] = [];
-
+  rowClass: any = {};
   searchTerm: string = '';
   selectClass = new FormControl('0');
   selectUserType = new FormControl('0');
@@ -50,14 +50,18 @@ export class GetAllStudentsDataComponent implements OnInit {
   });
 
   ngOnInit() {
-    setTimeout(() => {
-      this.spinner.show();
+    this.getRowClass()
       if (this.currentClass) {
         this.getSubClassesOptions();
       }
-      this.spinner.hide();
-    }, 1000);
+  }
 
+  getRowClass () {
+    this.spinner.show();
+    this.supabaseAdminService.getAllData('classes').subscribe((result) => {
+      this.rowClass = result.find((x: any) => x.id === this.currentClass);
+      this.spinner.hide();
+    })
   }
 
   getSubClassesOptions() {
@@ -93,7 +97,8 @@ export class GetAllStudentsDataComponent implements OnInit {
         this.actualData = result || [];
         this.spinner.hide();
       });
-  }
+
+    }
 
   selectUserTypeFunc() {
     this.spinner.show();
@@ -162,6 +167,7 @@ export class GetAllStudentsDataComponent implements OnInit {
       if (result) {
         this.spinner.show();
         const columns = [
+          'id',
           'name',
           'date_of_birth',
           'place_of_birth',
@@ -223,12 +229,10 @@ export class GetAllStudentsDataComponent implements OnInit {
   }
 
   exportAllPhotos() {
-    const fileName =
-      this.selectClass.value === `${this.currentClass}-June`
-        ? 'الصور الخاصة بدور يونيو دفعة 2024'
-        : this.selectClass.value === `${this.currentClass}-September`
-        ? 'الصور الخاصة بدور سبتمبر دفعة 2024'
-        : 'NotYet';
+    const rowSubClass = this.subClasses.find(
+      (x) => x.key === this.selectClass.value)
+
+    const fileName = `الصور الخاصة بـ ${this.rowClass.name} دور ${rowSubClass.value.name}`;
 
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,

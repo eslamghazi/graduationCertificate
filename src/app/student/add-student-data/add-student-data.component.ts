@@ -174,7 +174,7 @@ export class AddStudentDataComponent implements OnInit {
 
         let imagePromise;
         if (this.selectedImage) {
-          var filePath = `${this.class}/${this.ClassMonth.value}/${this.NationalId.value}.jpg`;
+          const filePath = `${this.class}/${this.ClassMonth.value}/${this.supabaseEditUserService.encryptFileName(studentData.id + "_" + formValues.Name + ".jpg")}`;
           imagePromise = this.supabaseEditUserService.uploadFile(filePath, this.selectedImage);
           this.selectedImage = null
         } else {
@@ -185,6 +185,7 @@ export class AddStudentDataComponent implements OnInit {
               .then((imageUrl: any) => {
                 studentData.image_url = imageUrl;
                 this.supabaseEditUserService.insertImageDetails(studentData, dataPath).then(() => {
+                  this.router.navigateByUrl(`/student/editStudentData/${this.class}/${this.ClassMonth.value}/${this.NationalId.value}`);
                   this.spinner.hide();
                 });
               })

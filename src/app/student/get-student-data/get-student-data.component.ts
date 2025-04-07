@@ -49,6 +49,36 @@ export class GetStudentDataComponent implements OnInit {
     }
   }
 
+  getClass() {
+    const nationalId = this.NationalId.value;
+    this.supabaseUserService
+    .getDataByPath('auth')
+    .subscribe((data) => {
+      if (data) {
+        const myAuth = data.find((x: any) => +x.id === nationalId);
+        const authClass = myAuth.class_id;
+
+        this.supabaseUserService
+        .getDataByPath('classes')
+        .subscribe((classData) => {
+          if (classData.find((x: any) => x.id === authClass)) {
+              localStorage.setItem('currentClass', authClass);
+            } else {
+              this.supabaseUserService
+        .getDataByPath('settings')
+        .subscribe((settingsData) => {
+          if (settingsData) {
+            localStorage.setItem('currentClass', settingsData.find((x: any) => x.id === 'default_class').value);
+          }
+        });
+
+            }
+        });
+
+      }
+    });
+  }
+
   async searchFile() {
     this.spinner.show();
 
@@ -56,8 +86,9 @@ export class GetStudentDataComponent implements OnInit {
     if (this.NationalId.value === '30110281500753') {
       this.authFound = true;
       localStorage.setItem('adminCheck', `superadmin-30110281500753`);
-      this.spinner.hide();
+      this.getClass();
       this.swal.toastr('success', 'اهلاً بك، تم تفعيل صلاحيات الادمن');
+      this.spinner.hide();
       return;
     }
 
@@ -71,8 +102,9 @@ export class GetStudentDataComponent implements OnInit {
             'adminCheck',
             `${res.auth_level}-${this.NationalId.value}`
           );
-          this.spinner.hide();
+          this.getClass();
           this.swal.toastr('success', 'اهلاً بك، تم تفعيل صلاحيات الادمن');
+          this.spinner.hide();
           return;
         }
 
@@ -81,11 +113,12 @@ export class GetStudentDataComponent implements OnInit {
           .getDataByPath('students', this.NationalId.value!)
           .subscribe((student) => {
             if (student &&
-                student.class_id === this.selectClass.value &&
-                student.subclass_id === this.selectSubClass.value) {
+                student.class_id === this.selectClass.value
+                // && student.subclass_id === this.selectSubClass.value
+              ) {
               this.notFound = false;
               this.route.navigateByUrl(
-                `/student/editStudentData/${this.selectClass.value}/${this.selectSubClass.value}/${this.NationalId.value}`
+                `/student/editStudentData/${student.class_id}/${student.subclass_id}/${student.id}`
               );
               this.spinner.hide();
             } else {

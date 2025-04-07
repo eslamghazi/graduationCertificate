@@ -25,8 +25,8 @@ export class SupabaseAuthService {
   getDataByPath(path: string): Observable<any> {
 
     const pathParts = path.split('/');
-    const basePath = pathParts[0]; // e.g., "auth", "classes", "settings"
-    const subPath = pathParts[1]; // e.g., "30110281500753", "comingSoon"
+    const basePath = pathParts[0];
+    const subPath = pathParts[1];
 
     if (basePath === 'auth' && subPath) {
       // Fetch a single auth record by NationalId
@@ -35,6 +35,7 @@ export class SupabaseAuthService {
           .from('auth')
           .select('*')
           .eq('id', subPath)
+          .order('created_at', { ascending: false })
           .single()
       ).pipe(
         map((response: any) => {
@@ -54,6 +55,7 @@ export class SupabaseAuthService {
         this.supabase
           .from('classes')
           .select('*')
+          .order('created_at', { ascending: false })
       ).pipe(
         map((response: any) => {
           if (response.error) {
@@ -81,6 +83,7 @@ export class SupabaseAuthService {
           .from('settings')
           .select('*')
           .eq('id', subPath)
+          .order('created_at', { ascending: false })
           .single()
       ).pipe(
         map((response: any) => {
@@ -111,6 +114,7 @@ export class SupabaseAuthService {
         .from('auth')
         .select('*')
         .eq('class_id', classId)
+        .order('created_at', { ascending: false })
     ).pipe(
       map((response: any) => {
         if (response.error) {
@@ -151,23 +155,6 @@ export class SupabaseAuthService {
     }
   }
 
-  async addEditDataToObject(path: string, data: any): Promise<void> {
-    const nationalId = path.split('/').pop();
-    if (!nationalId) {
-      throw new Error('Invalid path: NationalId not found');
-    }
-
-    const { error } = await this.supabase
-      .from('auth')
-      .update(data)
-      .eq('id', nationalId);
-
-    if (error) {
-      console.error(`Error updating data at path ${path}:`, error);
-      throw new Error(error.message);
-    }
-  }
-
   async removeImagePropertyFromDatabase(
     dbPath: string,
     deleteState: string
@@ -182,6 +169,7 @@ export class SupabaseAuthService {
         .from('auth')
         .delete()
         .eq('id', nationalId);
+
       if (error) {
         console.error(`Error deleting auth record at path ${dbPath}:`, error);
         throw new Error(error.message);
