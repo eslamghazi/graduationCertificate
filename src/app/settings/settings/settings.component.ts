@@ -172,6 +172,13 @@ export class SettingsComponent implements OnInit {
   }
 
   add(target: string) {
+    if (
+      (target === 'addSubClass' || target === 'addOption') &&
+      this.class.value === '0'
+    ) {
+      this.swal.toastr('error', 'يرجى اختيار الفرقة');
+      return;
+    }
     const modalRef = this.modalService.open(AddEditSettingsComponent, {
       centered: true,
       backdrop: 'static',

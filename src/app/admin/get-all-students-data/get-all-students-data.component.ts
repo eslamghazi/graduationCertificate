@@ -279,7 +279,7 @@ export class GetAllStudentsDataComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        const path = `${this.currentClass}/${this.selectClass.value}/${item.id}.jpg`;
+        const path = `${this.currentClass}/${this.selectClass.value}/${this.supabaseAdminService.encryptFileName(item.id + "_" + item.name + ".jpg")}`;
         const dbPath = `${this.currentClass}/${this.selectClass.value}/${item.id}`;
 
         if (target === 'deleteStudent') {

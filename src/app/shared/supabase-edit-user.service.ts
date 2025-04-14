@@ -148,6 +148,7 @@ export class SupabaseEditUserService {
       date_of_birth: imageDetails.date_of_birth,
       place_of_birth: imageDetails.place_of_birth,
       image_url: imageDetails.image_url,
+      created_at: new Date().toISOString(),
       // Add other fields as necessary based on your table schema
     };
 

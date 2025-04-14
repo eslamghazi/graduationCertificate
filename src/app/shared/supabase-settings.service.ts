@@ -52,10 +52,16 @@ export class SupabaseSettingsService {
 
   // Insert or update data in a table
   async insertIntoDb(table: string, value: any, upsert = false): Promise<void> {
-    try {
+
+
+const updatedData = Array.isArray(value)
+? value.map(item => ({ ...item, created_at: new Date().toISOString() }))
+: { ...value, created_at: new Date().toISOString() };
+
+try {
       const { error } = upsert
-        ? await this.supabase.from(table).upsert(value)
-        : await this.supabase.from(table).insert(value);
+        ? await this.supabase.from(table).upsert(updatedData)
+        : await this.supabase.from(table).insert(updatedData);
 
       if (error) {
         throw new Error(error.message);

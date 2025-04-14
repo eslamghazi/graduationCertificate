@@ -34,29 +34,57 @@ export class SupabaseAdminService {
 
   // Fetch data from a specific table with optional filters
   getAllData(table: string, filters: any = {}, need = 'list'): Observable<any> {
-    let query = this.supabase.from(table).select('*')
+    const pageSize = 1000;
+    let allData: any[] = [];
+    let page = 0;
 
-    for (const key in filters) {
-      if (filters[key]) {
-        if (filters[key].type === 'like') {
-          query = query.like(key, filters[key].value);
-        } else if (filters[key].type === 'ilike') {
-          query = query.ilike(key, filters[key].value);
-        } else {
-          query = query.eq(key, filters[key]);
+    const buildQuery = (from: number, to: number) => {
+      let query = this.supabase.from(table).select('*').range(from, to);
+
+      for (const key in filters) {
+        if (filters[key]) {
+          if (filters[key].type === 'like') {
+            query = query.like(key, filters[key].value);
+          } else if (filters[key].type === 'ilike') {
+            query = query.ilike(key, filters[key].value);
+          } else {
+            query = query.eq(key, filters[key]);
+          }
         }
       }
-    }
 
-    query.order('created_at', { ascending: false });
+      return query.order('created_at', { ascending: false });
+    };
 
-    return from(query).pipe(
-      map((response: any) => {
-        if (response.error) {
-          throw new Error(response.error.message);
+    return new Observable((observer) => {
+      const fetchPage = async () => {
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data, error } = await buildQuery(from, to);
+
+        if (error) {
+          observer.error(error);
+          return;
         }
-        return need === 'list' ? response.data : response.data[0];
-      }),
+
+        if (data && data.length > 0) {
+          allData = [...allData, ...data];
+          page++;
+          if (data.length < pageSize) {
+            observer.next(need === 'list' ? allData : allData[0]);
+            observer.complete();
+          } else {
+            fetchPage(); // fetch next chunk
+          }
+        } else {
+          observer.next(need === 'list' ? allData : allData[0]);
+          observer.complete();
+        }
+      };
+
+      fetchPage();
+    }).pipe(
       catchError((error) => {
         console.error(`Error fetching data from ${table}:`, error);
         return of(null);
@@ -64,30 +92,46 @@ export class SupabaseAdminService {
     );
   }
 
+
   // List all folders in Supabase Storage (equivalent to Firebase listAllFolders)
   async listAllFolders(bucket: string = 'images'): Promise<string[]> {
     try {
-      const { data, error } = await this.supabase.storage.from(bucket).list('', {
-        limit: 1000,
-        offset: 0,
-        sortBy: { column: 'name', order: 'asc' },
-      });
-
-      if (error) throw new Error(error.message);
-      if (!data) return [];
-
-      // Recursively list all folders and subfolders
       const folders: string[] = [];
-      const listSubfolders = async (prefix: string) => {
-        const { data: subData, error: subError } = await this.supabase.storage
-          .from(bucket)
-          .list(prefix, { limit: 1000, offset: 0 });
 
-        if (subError) throw new Error(subError.message);
-        if (!subData) return;
+      // Helper function to list all items with pagination
+      const paginatedList = async (prefix: string): Promise<any[]> => {
+        const allItems: any[] = [];
+        const pageSize = 1000;
+        let offset = 0;
+        let done = false;
+
+        while (!done) {
+          const { data, error } = await this.supabase.storage.from(bucket).list(prefix, {
+            limit: pageSize,
+            offset,
+            sortBy: { column: 'name', order: 'asc' },
+          });
+
+          if (error) throw new Error(error.message);
+          if (!data || data.length === 0) break;
+
+          allItems.push(...data);
+          offset += pageSize;
+
+          if (data.length < pageSize) {
+            done = true;
+          }
+        }
+
+        return allItems;
+      };
+
+      // Recursive folder listing
+      const listSubfolders = async (prefix: string) => {
+        const subData = await paginatedList(prefix);
 
         for (const item of subData) {
-          if (item.metadata === null) { // Folders have metadata === null
+          if (item.metadata === null) {
             const folderPath = prefix ? `${prefix}/${item.name}` : item.name;
             folders.push(folderPath);
             await listSubfolders(folderPath);
@@ -95,8 +139,10 @@ export class SupabaseAdminService {
         }
       };
 
-      for (const item of data) {
-        if (item.metadata === null) { // Folders have metadata === null
+      // Start with root folders
+      const rootData = await paginatedList('');
+      for (const item of rootData) {
+        if (item.metadata === null) {
           folders.push(item.name);
           await listSubfolders(item.name);
         }
@@ -108,6 +154,7 @@ export class SupabaseAdminService {
       throw error;
     }
   }
+
 
   // Get all file names in a folder (equivalent to Firebase getFileNames)
   getFileNames(path: string, bucket: string = 'images'): Observable<string[]> {
@@ -187,6 +234,14 @@ export class SupabaseAdminService {
         });
     });
   }
+
+  encryptFileName(filename: string): string {
+    const parts = filename.split(".");
+    const name = btoa(unescape(encodeURIComponent(parts.slice(0, -1).join("."))));
+    const ext = parts.slice(-1)[0];
+    return `${name}.${ext}`;
+  }
+
   decryptFileName(encrypted: string): string {
     const parts = encrypted.split(".");
     const name = decodeURIComponent(escape(atob(parts.slice(0, -1).join("."))));
@@ -436,10 +491,17 @@ export class SupabaseAdminService {
 
   // Push student data to Supabase
   async upsertData(data: any[], table: string): Promise<void> {
+
+    const updatedData = data.map((item: any) => ({
+      ...item,
+      created_at: new Date().toISOString()
+    }));
+
+
     try {
       const { error } = await this.supabase
         .from(table)
-        .upsert(data);
+        .upsert(updatedData);
       if (error) throw new Error(error.message);
     } catch (error) {
       console.error(`Error upserting ${table} data:`, error);

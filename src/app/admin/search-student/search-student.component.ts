@@ -143,7 +143,7 @@ export class SearchStudentComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        const path = `${item.source}/${item.data.id}.jpg`;
+        const path = `${this.currentClass}/${item.source}/${this.supabaseAdminService.encryptFileName(item.data.id + "_" + item.data.name + ".jpg")}`;
         const dbPath = `${this.currentClass}/${item.source}/${item.data.id}`;
 
         if (target === 'deleteStudent') {

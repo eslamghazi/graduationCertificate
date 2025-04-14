@@ -143,6 +143,7 @@ export class SupabaseAuthService {
       name: value.Name || '',
       auth_level: value.Auth || 'user',
       class_id: value.ClassId || null,
+      created_at: new Date().toISOString()
     };
 
     const { error } = await this.supabase
@@ -178,4 +179,5 @@ export class SupabaseAuthService {
       throw new Error('removeImagePropertyFromDatabase is not applicable for auth table');
     }
   }
+
 }

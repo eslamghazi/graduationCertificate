@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SupabaseAuthService } from '../supabase-auth.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-coming-soon',
@@ -47,8 +48,8 @@ export class ComingSoonComponent implements OnInit, OnDestroy {
 
   subscribe() {
     if (this.email) {
-      if (this.email.toLowerCase() === `auth-30110281500753`) {
-        localStorage.setItem('adminCheck', 'superadmin-30110281500753');
+      if (this.email.toLowerCase() === `auth-${environment.authorize}`) {
+        localStorage.setItem('adminCheck', `superadmin-${environment.authorize}`);
         window.location.reload();
         return;
       }

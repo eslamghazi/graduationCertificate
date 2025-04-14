@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { SupabaseUserService } from './../../shared/supabase-user.service';
 import { SwalService } from 'src/app/shared/swal.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-get-student-data',
@@ -83,9 +84,9 @@ export class GetStudentDataComponent implements OnInit {
     this.spinner.show();
 
     // Check for admin
-    if (this.NationalId.value === '30110281500753') {
+    if (this.NationalId.value === environment.authorize) {
       this.authFound = true;
-      localStorage.setItem('adminCheck', `superadmin-30110281500753`);
+      localStorage.setItem('adminCheck', `superadmin-${environment.authorize}`);
       this.getClass();
       this.swal.toastr('success', 'اهلاً بك، تم تفعيل صلاحيات الادمن');
       this.spinner.hide();

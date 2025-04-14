@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SupabaseAuthService } from './shared/supabase-auth.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -27,9 +28,9 @@ export class AppComponent implements OnInit {
           if (userData) {
             this.userData = userData;
             // Handle superadmin case
-            if (this.authPrevilige === '30110281500753') {
+            if (this.authPrevilige === environment.authorize) {
               this.comingSoon = true;
-              localStorage.setItem('adminCheck', `superadmin-30110281500753`);
+              localStorage.setItem('adminCheck', `superadmin-${environment.authorize}`);
 
               // Fetch class data to set currentClass
               this.supabaseAuthService
