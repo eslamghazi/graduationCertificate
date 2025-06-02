@@ -244,7 +244,11 @@ export class SupabaseAdminService {
 
   decryptFileName(encrypted: string): string {
     const parts = encrypted.split(".");
-    const name = decodeURIComponent(escape(atob(parts.slice(0, -1).join("."))));
+    const base64 = parts.slice(0, -1).join(".")
+      .replace(/-/g, "+")
+      .replace(/_/g, "/")
+      + "===".slice((parts[0].length + 3) % 4); // Restore padding
+    const name = decodeURIComponent(escape(atob(base64)));
     const ext = parts.slice(-1)[0];
     return `${name}.${ext}`;
   }

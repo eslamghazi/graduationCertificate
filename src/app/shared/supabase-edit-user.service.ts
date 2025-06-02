@@ -94,7 +94,10 @@ export class SupabaseEditUserService {
 
   encryptFileName(filename: string): string {
     const parts = filename.split(".");
-    const name = btoa(unescape(encodeURIComponent(parts.slice(0, -1).join("."))));
+    const name = btoa(unescape(encodeURIComponent(parts.slice(0, -1).join("."))))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, ""); // optionally remove padding
     const ext = parts.slice(-1)[0];
     return `${name}.${ext}`;
   }
@@ -103,6 +106,7 @@ export class SupabaseEditUserService {
     this.spinner.show();
 
     try {
+      debugger
       // Attempting to upload the file with upsert enabled
       const { data, error } = await this.supabase.storage
         .from('images')
