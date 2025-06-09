@@ -6,10 +6,10 @@
     <img class="rounded-lg" role="button" src={{defaultImage}} width="200" height="200" id="image"
       (click)="imageUploader.click()">
   </div>
-  <label *ngIf="!data?.Image" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️</label>
+  <label *ngIf="!data?.Image" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️ (formal)</label>
 
   <div class="mb-3 text-right" hidden>
-    <label for="image">ارفع الصورة</label>
+    <label for="image">ارفع الصورة (formal)</label>
     <div class="input-group">
       <input class="form-control" type="file" id="image" #imageUploader (change)="onFileChange($event)"
         accept="image/png, image/jpg, image/jpeg">
@@ -17,14 +17,14 @@
   </div>
 
   <div class="mb-3 text-right">
-    <label for="username">الإسم</label>
+    <label for="username">الإسم (مطابق لشهادة الميلاد)</label>
     <div class="input-group">
       <input type="text" class="form-control" id="Name" formControlName="Name" placeholder="الإسم">
     </div>
   </div>
 
   <div class="mb-3 text-right">
-    <label for="PlaceOfBirth">محل الميلاد</label>
+    <label for="PlaceOfBirth">محل الميلاد (مطابق لشهادة الميلاد)</label>
     <div class="input-group">
       <input type="text" class="form-control" id="PlaceOfBirth" formControlName="PlaceOfBirth"
         placeholder="محل الميلاد">
