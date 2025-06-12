@@ -35,7 +35,7 @@
                   <td>{{ group.parentFolder }} <span class="text-warning">(مجلد رئيسي)</span></td>
                   <td>{{ group.parentFolder }}</td>
                   <td>
-                    <button (click)="downloadFileNames(group.parentFolder, group.parentFolder)"
+                    <button (click)="downloadFileNames(group.parentFolder, group.parentFolder, 'mainFolders')"
                       class="btn btn-outline-success btn-sm"><img src="assets/svgs/document.svg" alt="downloadFileNames"
                         width="40"></button>
 
@@ -54,7 +54,7 @@
                     <td>{{ subFolder | json }}</td>
                     <td>
 
-                      <button (click)="downloadFileNames(subFolder, subFolder)"
+                      <button (click)="downloadFileNames(subFolder, subFolder, 'subFiles')"
                         class="btn btn-outline-success btn-sm"><img src="assets/svgs/document.svg"
                           alt="downloadFileNames" width="40"></button>
 

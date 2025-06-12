@@ -270,7 +270,7 @@ export class SuperAdminManageComponent implements OnInit, OnDestroy {
     });
   }
 
-  downloadFileNames(path: any, fileName: any) {
+  downloadFileNames(path: any, fileName: any, target?: any) {
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
@@ -292,7 +292,13 @@ export class SuperAdminManageComponent implements OnInit, OnDestroy {
         const folderPath = path;
         const sub = this.supabaseAdminService.getFileNames(folderPath).subscribe({
           next: (fileNames) => {
-            this.downloadTxtFile(fileNames, fileName);
+            let decodedFileNames = fileNames;
+            if (target === 'subFiles') {
+              decodedFileNames = fileNames.map((name: string) =>
+                this.supabaseAdminService.decryptFileName(name)
+              );
+            }
+            this.downloadTxtFile(decodedFileNames, fileName);
             this.spinner.hide();
             this.swal.toastr('success', 'تم تجهيز الملف بنجاح');
           },
