@@ -106,7 +106,6 @@ export class SupabaseEditUserService {
     this.spinner.show();
 
     try {
-      debugger
       // Attempting to upload the file with upsert enabled
       const { data, error } = await this.supabase.storage
         .from('images')

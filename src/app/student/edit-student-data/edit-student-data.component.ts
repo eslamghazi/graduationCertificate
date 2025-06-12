@@ -211,7 +211,6 @@ export class EditStudentDataComponent implements OnInit {
 
         modalRef.result.then((result) => {
           if (result) {
-    debugger
             this.spinner.show();
             const formValues = this.userForm.value;
             const studentData = {
