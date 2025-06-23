@@ -291,12 +291,21 @@ export class GetAllStudentsDataComponent implements OnInit {
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم حذف الطالب بنجاح');
-              this.selectClassFunc(true);
+              [this.data, this.filteredData, this.actualData].forEach(arr => {
+                const idx = arr.findIndex((s) => s.id === item.id);
+                if (idx !== -1) arr.splice(idx, 1);
+              });
+              const prevPage = this.currentPage;
+              if (this.selectUserType.value === `${this.currentClass}-UploadedImages`) {
+                this.filterDataWithImages();
+              } else if (this.selectUserType.value === `${this.currentClass}-NotUpload`) {
+                this.filterDataWithOutImages();
+              }
+              this.currentPage = prevPage;
             })
             .catch((err) => {
               this.spinner.hide();
               this.swal.toastr('error', 'حدث خطأ اثناء حذف الطالب');
-              this.selectClassFunc(true);
             });
         } else {
           this.supabaseAdminService
@@ -305,7 +314,18 @@ export class GetAllStudentsDataComponent implements OnInit {
               () => {
                 this.spinner.hide();
                 this.swal.toastr('success', 'تم حذف الصورة الخاصة بالطالب بنجاح');
-                this.selectClassFunc(true);
+                [this.data, this.filteredData, this.actualData].forEach(arr => {
+                  const found = arr.find((s) => s.id === item.id);
+                  if (found) found.image_url = null;
+                });
+                // Re-filter the data if the current filter is for students with images
+                const prevPage = this.currentPage;
+                if (this.selectUserType.value === `${this.currentClass}-UploadedImages`) {
+                  this.filterDataWithImages();
+                } else if (this.selectUserType.value === `${this.currentClass}-NotUpload`) {
+                  this.filterDataWithOutImages();
+                }
+                this.currentPage = prevPage;
               },
               (error) => {
                 this.spinner.hide();
@@ -313,7 +333,6 @@ export class GetAllStudentsDataComponent implements OnInit {
                   'error',
                   'حدث خطأ اثناء حذف الصورة الخاصة بالطالب'
                 );
-                this.selectClassFunc(true);
               }
             );
         }
