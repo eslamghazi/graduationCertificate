@@ -1,18 +1,18 @@
 /* Custom Pagination Styles */
 .custom-pagination .ngx-pagination {
-  display: flex !important;
+  // display: flex !important;
   justify-content: center !important;
   list-style-type: none !important;
   padding: 0 !important;
 }
 
 .custom-pagination .ngx-pagination li {
-  margin: 0 5px !important;
+  margin: 3px 5px !important;
 }
 
 .custom-pagination .ngx-pagination li a {
   display: inline-block !important;
-  padding: 8px 12px !important;
+  padding: 12px 12px !important;
   border: 1px solid #007bff !important;
   border-radius: 4px !important;
   color: #007bff !important;
@@ -22,7 +22,7 @@
 
 .custom-pagination .ngx-pagination li.pagination-previous.disabled {
   display: inline-block !important;
-  padding: 8px 12px !important;
+  padding: 12px 12px !important;
   border: 1px solid #cacad4 !important;
   border-radius: 4px !important;
   text-decoration: none !important;
@@ -30,14 +30,14 @@
 
 .custom-pagination .ngx-pagination li.pagination-next.disabled {
   display: inline-block !important;
-  padding: 8px 12px !important;
+  padding: 12px 12px !important;
   border: 1px solid #cacad4 !important;
   border-radius: 4px !important;
   text-decoration: none !important;
 }
 
 .custom-pagination .ngx-pagination li.current {
-  padding: 8px 12px !important;
+  padding: 12px 12px !important;
   border-radius: 4px !important;
   align-content: center !important;
 }

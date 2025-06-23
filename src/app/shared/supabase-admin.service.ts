@@ -60,7 +60,6 @@ export class SupabaseAdminService {
       const fetchPage = async () => {
         const from = page * pageSize;
         const to = from + pageSize - 1;
-
         const { data, error } = await buildQuery(from, to);
 
         if (error) {
@@ -159,7 +158,7 @@ export class SupabaseAdminService {
   // Get all file names in a folder (equivalent to Firebase getFileNames)
   getFileNames(path: string, bucket: string = 'images'): Observable<string[]> {
     return from(
-      this.supabase.storage.from(bucket).list(path, { limit: 1000, offset: 0 })
+      this.supabase.storage.from(bucket).list(path, { limit: 1500, offset: 0 })
     ).pipe(
       map((response: any) => {
         if (response.error) {
@@ -179,7 +178,7 @@ export class SupabaseAdminService {
     return new Observable((observer) => {
       this.supabase.storage
         .from(bucket)
-        .list(path, { limit: 1000, offset: 0 })
+        .list(path, { limit: 1500, offset: 0 })
         .then(async ({ data, error }) => {
           if (error) {
             observer.error(error);
@@ -197,7 +196,7 @@ export class SupabaseAdminService {
           const listFiles = async (prefix: string) => {
             const { data: subData, error: subError } = await this.supabase.storage
               .from(bucket)
-              .list(prefix, { limit: 1000, offset: 0 });
+              .list(prefix, { limit: 1500, offset: 0 });
 
             if (subError) throw new Error(subError.message);
             if (!subData) return;

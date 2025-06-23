@@ -189,6 +189,29 @@
         </tbody>
       </table>
     </div>
+
+        <!-- Page number input above pagination as input group -->
+        <div class="input-group mb-3 justify-content-center" style="max-width: 300px; margin: 0 auto;">
+          <div class="input-group-prepend">
+            <span class="btn btn-outline-primary" type="button" id="go-to-page-btn" (click)="goToPage()">اذهب</span>
+          </div>
+          <input
+            dir="rtl"
+            type="number"
+            min="1"
+            [max]="totalPages"
+            [(ngModel)]="goToPageNumber"
+            class="form-control"
+            placeholder="رقم الصفحة"
+            aria-label="رقم الصفحة"
+            aria-describedby="go-to-page-btn"
+          />
+
+        </div>
+        <div *ngIf="showPageNotFound" class="text-danger text-center mb-2">
+          الصفحة غير موجودة
+        </div>
+
     <pagination-controls
       dir="rtl"
       (pageChange)="currentPage = $event"
@@ -197,6 +220,7 @@
       nextLabel="التالي"
     >
     </pagination-controls>
+
   </div>
 
   <!-- Display message if no files found -->

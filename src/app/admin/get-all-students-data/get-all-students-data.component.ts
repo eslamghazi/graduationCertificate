@@ -36,6 +36,9 @@ export class GetAllStudentsDataComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 5;
 
+  goToPageNumber: number | null = null;
+  showPageNotFound = false;
+
   constructor(
     private supabaseAdminService: SupabaseAdminService,
     private spinner: NgxSpinnerService,
@@ -422,5 +425,22 @@ export class GetAllStudentsDataComponent implements OnInit {
         );
       }
     });
+  }
+
+  get totalPages(): number {
+    return Math.ceil((this.filteredData?.length || 0) / this.itemsPerPage);
+  }
+
+  goToPage() {
+    this.showPageNotFound = false;
+    if (
+      this.goToPageNumber &&
+      this.goToPageNumber >= 1 &&
+      this.goToPageNumber <= this.totalPages
+    ) {
+      this.currentPage = this.goToPageNumber;
+    } else {
+      this.showPageNotFound = true;
+    }
   }
 }
