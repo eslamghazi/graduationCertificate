@@ -9,7 +9,7 @@
   <label *ngIf="!data?.Image" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️ (formal)</label>
 
   <div class="mb-3 text-right" hidden>
-    <label for="image">ارفع الصورة (formal)</label>
+    <label for="image">ارفع الصورة (formal - 4*6 - واضحة - خلفية بيضاء)</label>
     <div class="input-group">
       <input class="form-control" type="file" id="image" #imageUploader (change)="onFileChange($event)"
         accept="image/png, image/jpg, image/jpeg">
@@ -24,7 +24,7 @@
   </div>
 
   <div class="mb-3 text-right">
-    <label for="name_en">الإسم باللغة الإنجليزية</label>
+    <label for="name_en">الإسم باللغة الإنجليزية (مطابق لجواز السفر)</label>
     <div class="input-group">
       <input type="text" class="form-control" id="name_en" formControlName="name_en" placeholder="الإسم باللغة الإنجليزية">
     </div>
