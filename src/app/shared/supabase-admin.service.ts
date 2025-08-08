@@ -503,6 +503,7 @@ async downloadFolderAsZip(path: string, zipNameWillBe: string): Promise<void> {
       const dateOfBirth = row[3]; // Date of Birth
       const placeOfBirth = row[4]; // Place of Birth
       const classMonth = row[5]; // ClassMonth (e.g., June, September)
+      const name_en = row[6]; // name_en
 
       result.push({
         id: nationalId, // Use NationalId as the primary key
@@ -510,6 +511,7 @@ async downloadFolderAsZip(path: string, zipNameWillBe: string): Promise<void> {
         national_id: nationalId,
         date_of_birth: dateOfBirth,
         place_of_birth: placeOfBirth,
+        name_en: name_en,
         class_id: this.currentClass,
         subclass_id: `${this.currentClass}-${classMonth}`,
       });

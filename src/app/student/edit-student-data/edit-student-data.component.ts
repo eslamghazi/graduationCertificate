@@ -27,6 +27,7 @@ export class EditStudentDataComponent implements OnInit {
 
   NationalId = new FormControl(null, [Validators.required]);
   Name = new FormControl(null, [Validators.required]);
+  name_en = new FormControl(null);
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   Image = new FormControl(null);
@@ -44,6 +45,7 @@ export class EditStudentDataComponent implements OnInit {
   userForm = new FormGroup({
     NationalId: this.NationalId,
     Name: this.Name,
+    name_en: this.name_en,
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
     Image: this.Image,
@@ -76,6 +78,7 @@ export class EditStudentDataComponent implements OnInit {
     this.spinner.show();
     this.NationalId.patchValue(this.data.id);
     this.Name.patchValue(this.data.name);
+    this.name_en.patchValue(this.data.name_en);
     this.DateOfBirth.patchValue(this.data.date_of_birth);
     this.PlaceOfBirth.patchValue(this.data.place_of_birth);
     this.Image.patchValue(this.data.image_url);
@@ -211,12 +214,14 @@ export class EditStudentDataComponent implements OnInit {
 
         modalRef.result.then((result) => {
           if (result) {
+            debugger
             this.spinner.show();
             const formValues = this.userForm.value;
             const studentData = {
               ...this.data,
               id: formValues.NationalId,
               name: formValues.Name,
+              name_en: formValues.name_en,
               date_of_birth: formValues.DateOfBirth,
               place_of_birth: formValues.PlaceOfBirth,
               image_url: formValues.Image,

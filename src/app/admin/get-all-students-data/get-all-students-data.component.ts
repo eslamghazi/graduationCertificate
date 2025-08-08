@@ -140,6 +140,8 @@ export class GetAllStudentsDataComponent implements OnInit {
         (item) =>
           (item.name &&
             item.name.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+          (item.name_en &&
+            item.name_en.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
           (item.id &&
             item.id.toString().includes(this.searchTerm))
       );

@@ -148,6 +148,7 @@ export class SupabaseEditUserService {
       class_id: classId,
       subclass_id: subClassId,
       name: imageDetails.name,
+      name_en: imageDetails.name_en,
       date_of_birth: imageDetails.date_of_birth,
       place_of_birth: imageDetails.place_of_birth,
       image_url: imageDetails.image_url,

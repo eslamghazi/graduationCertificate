@@ -25,6 +25,7 @@ export class AddStudentDataComponent implements OnInit {
 
   NationalId = new FormControl(null, [Validators.required]);
   Name = new FormControl(null, [Validators.required]);
+  name_en = new FormControl(null, [Validators.required]);
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   ClassMonth = new FormControl(0, [Validators.required]);
@@ -43,6 +44,7 @@ export class AddStudentDataComponent implements OnInit {
   userForm = new FormGroup({
     NationalId: this.NationalId,
     Name: this.Name,
+    name_en: this.name_en,
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
     ClassMonth: this.ClassMonth,
@@ -167,6 +169,7 @@ export class AddStudentDataComponent implements OnInit {
         const studentData = {
           id: formValues.NationalId,
           name: formValues.Name,
+          name_en: formValues.name_en,
           date_of_birth: formValues.DateOfBirth,
           place_of_birth: formValues.PlaceOfBirth,
           image_url: formValues.Image,
