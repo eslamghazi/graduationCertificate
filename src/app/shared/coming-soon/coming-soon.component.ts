@@ -53,7 +53,7 @@ export class ComingSoonComponent implements OnInit, OnDestroy {
         window.location.reload();
         return;
       }
-debugger
+
       const nationalId = this.email.split('-')[1];
       if (this.email.split('-')[0].toLowerCase() === 'auth' && nationalId) {
         this.supabaseAuthService.getDataByPath(`auth/${nationalId}`).subscribe((data: any) => {
