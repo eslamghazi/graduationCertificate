@@ -49,6 +49,8 @@ export class SettingsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.subClass.disable();
+    this.option.disable();
     this.getComingSoonStatus();
     this.getSettingsData();
 
@@ -455,8 +457,15 @@ export class SettingsComponent implements OnInit {
       this.subClasses = [];
       this.options = [];
       this.allowAnonymousStatus = false;
+      this.subClass.setValue('0');
+      this.option.setValue('0');
+      this.subClass.disable();
+      this.option.disable();
       return;
     }
+
+    this.subClass.enable();
+    this.option.enable();
 
     const currentClass = this.classes.find(
       (x) => x.key === this.class.value

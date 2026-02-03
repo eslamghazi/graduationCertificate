@@ -91,7 +91,6 @@
         id="inputGroupSelect02"
         formControlName="subClass"
         (change)="changeSubClass()"
-        [disabled]="class.value === '0'"
       >
         <option value="0">اختر</option>
         <option *ngFor="let subClass of subClasses" [value]="subClass.key">
@@ -147,7 +146,6 @@
         class="custom-select"
         id="inputGroupSelect02"
         formControlName="option"
-        [disabled]="class.value === '0'"
       >
         <option value="0">اختر</option>
         <option *ngFor="let option of options" [value]="option.key">
