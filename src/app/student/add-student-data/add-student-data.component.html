@@ -17,16 +17,22 @@
   </div>
 
   <div class="mb-3 text-right">
-    <label for="username">الإسم</label>
+    <label for="username">الإسم الرباعي (مطابق لشهادة الميلاد)</label>
     <div class="input-group">
-      <input type="text" class="form-control" id="Name" formControlName="Name" placeholder="الإسم">
+      <input type="text" class="form-control" id="Name" formControlName="Name" placeholder="الإسم باللغة العربية">
+    </div>
+    <div *ngIf="Name.touched && Name.errors?.['pattern']" class="text-danger small">
+      يجب كتابة الإسم باللغة العربية فقط
     </div>
   </div>
 
   <div class="mb-3 text-right">
-    <label for="name_en">الإسم باللغة الإنجليزية</label>
+    <label for="name_en">الإسم باللغة الإنجليزية (مطابق لجواز السفر)</label>
     <div class="input-group">
-      <input type="text" class="form-control" id="name_en" formControlName="name_en" placeholder="الإسم باللغة الإنجليزية">
+      <input type="text" class="form-control" id="name_en" formControlName="name_en" placeholder="Full English Name">
+    </div>
+    <div *ngIf="name_en.touched && name_en.errors?.['pattern']" class="text-danger small">
+      يجب كتابة الإسم باللغة الإنجليزية فقط
     </div>
   </div>
 
@@ -46,20 +52,19 @@
   </div>
 
   <div class="mb-3 text-right">
-    <label for="DateOfBirth">تاريخ الميلاد</label>
+    <label for="DateOfBirth">تاريخ الميلاد (اختر من التقويم)</label>
     <div class="input-group">
       <input class="form-control" placeholder="yyyy-mm-dd" [value]="DateOfBirth.value"
         (dateSelect)="onChangeDate($event)" ngbDatepicker #d="ngbDatepicker"
-        [minDate]="{ year: 1900, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 31 }" />
+        [minDate]="{ year: 1900, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 31 }" readonly />
 
       <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button"><img src="assets/svgs/calendar3.svg"
-          alt="calender" /></button>
-
+          alt="calendar" /></button>
     </div>
   </div>
 
   <div class="mb-3 text-right">
-    <label for="PlaceOfBirth">محل الميلاد</label>
+    <label for="PlaceOfBirth">(مطابق لجواز السفر) محل الميلاد</label>
     <div class="input-group">
       <input type="text" class="form-control" id="PlaceOfBirth" formControlName="PlaceOfBirth"
         placeholder="محل الميلاد">
@@ -69,7 +74,7 @@
   <div class="mb-3 text-right">
     <label for="PlaceOfBirth">اختر دور الطالب</label>
     <div class="input-group">
-      <select class="form-control text-right" id="exampleFormControlSelect1" formControlName="ClassMonth">
+      <select (change)="changeSubClass()" class="form-control text-right" id="exampleFormControlSelect1" formControlName="ClassMonth">
         <option value="0">اختر دور الطالب</option>
         <option *ngFor="let subClass of subclasses" value="{{subClass.id}}">{{subClass.name}}</option>
 

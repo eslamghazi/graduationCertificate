@@ -123,8 +123,15 @@ export class GetStudentDataComponent implements OnInit {
               );
               this.spinner.hide();
             } else {
-              this.notFound = true;
-              this.spinner.hide();
+              // check if allow_anonymous is true
+              const currentClass = this.Classes.find(x => x.key === this.selectClass.value)?.value;
+              if (currentClass?.allow_anonymous) {
+                this.route.navigate(['/student/addStudentData', this.selectClass.value], { queryParams: { nationalId: this.NationalId.value } });
+                this.spinner.hide();
+              } else {
+                this.notFound = true;
+                this.spinner.hide();
+              }
             }
           });
       });
@@ -137,7 +144,7 @@ export class GetStudentDataComponent implements OnInit {
       .subscribe((data) => {
         this.Classes = data.map((item: any) => ({
           key: item.id,
-          value: { Id: item.id, Name: item.name }
+          value: { Id: item.id, Name: item.name, allow_anonymous: item.allow_anonymous }
         }));
         this.spinner.hide();
       });

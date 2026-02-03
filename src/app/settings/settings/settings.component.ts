@@ -18,6 +18,8 @@ export class SettingsComponent implements OnInit {
     localStorage.getItem('adminCheck')?.split('-')[0] === 'superadmin';
   authPrevilige = localStorage.getItem('adminCheck')?.split('-')[1];
   comingSoonStatus = false;
+  allowAnonymousStatus = false;
+  allowAnonymousSubClassStatus = false;
 
   allClassesData: any[] = [];
   classes: any[] = [];
@@ -452,14 +454,123 @@ export class SettingsComponent implements OnInit {
     if (this.class.value === '0') {
       this.subClasses = [];
       this.options = [];
+      this.allowAnonymousStatus = false;
       return;
     }
 
     const currentClass = this.classes.find(
       (x) => x.key === this.class.value
     )?.value;
+    this.allowAnonymousStatus = currentClass.allow_anonymous || false;
+    this.allowAnonymousSubClassStatus = false;
     this.getSubClasses(currentClass.id);
     this.getOptions(currentClass.id);
+  }
+
+  changeSubClass() {
+    if (this.subClass.value === '0') {
+      this.allowAnonymousSubClassStatus = false;
+      return;
+    }
+
+    const currentSubClass = this.subClasses.find(
+      (x) => x.key === this.subClass.value
+    )?.value;
+    this.allowAnonymousSubClassStatus = currentSubClass?.allow_anonymous || false;
+  }
+
+  changeAllowAnonymousSubClass() {
+    const currentSubClass = this.subClasses.find(
+      (x) => x.key === this.subClass.value
+    )?.value;
+
+    if (!currentSubClass) return;
+
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message = this.allowAnonymousSubClassStatus
+      ? `هل انت متأكد من ايقاف التسجيل المفتوح (التقديم المباشر) لـ ${currentSubClass.name}؟`
+      : `هل انت متأكد من تفعيل التسجيل المفتوح (التقديم المباشر) لـ ${currentSubClass.name}؟`;
+
+    modalRef.result.then((result) => {
+      if (result) {
+        this.spinner.show();
+        const newStatus = !this.allowAnonymousSubClassStatus;
+        this.supabaseSettingsService
+          .insertIntoDb(
+            'subclasses',
+            { ...currentSubClass, allow_anonymous: newStatus },
+            true
+          )
+          .then(() => {
+            this.spinner.hide();
+            this.swal.toastr('success', 'تم تعديل الحالة بنجاح');
+            this.allowAnonymousSubClassStatus = newStatus;
+            // Update local subClasses data
+            const subIdx = this.subClasses.findIndex(s => s.key === currentSubClass.id);
+            if (subIdx > -1) {
+              this.subClasses[subIdx].value.allow_anonymous = newStatus;
+            }
+          })
+          .catch((error) => {
+            this.spinner.hide();
+            this.swal.toastr('error', 'حدث خطأ أثناء تعديل الحالة');
+            console.log(error);
+          });
+      }
+    });
+  }
+
+  changeAllowAnonymous() {
+    const currentClass = this.classes.find(
+      (x) => x.key === this.class.value
+    )?.value;
+
+    if (!currentClass) return;
+
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message = this.allowAnonymousStatus
+      ? `هل انت متأكد من ايقاف التسجيل المفتوح (التقديم المباشر) لـ ${currentClass.name}؟`
+      : `هل انت متأكد من تفعيل التسجيل المفتوح (التقديم المباشر) لـ ${currentClass.name}؟`;
+
+    modalRef.result.then((result) => {
+      if (result) {
+        this.spinner.show();
+        const newStatus = !this.allowAnonymousStatus;
+        this.supabaseSettingsService
+          .insertIntoDb(
+            'classes',
+            { ...currentClass, allow_anonymous: newStatus },
+            true
+          )
+          .then(() => {
+            this.spinner.hide();
+            this.swal.toastr('success', 'تم تعديل الحالة بنجاح');
+            this.allowAnonymousStatus = newStatus;
+            // Update local classes data
+            const classIdx = this.allClassesData.findIndex(c => c.id === currentClass.id);
+            if (classIdx > -1) {
+              this.allClassesData[classIdx].allow_anonymous = newStatus;
+            }
+          })
+          .catch((error) => {
+            this.spinner.hide();
+            this.swal.toastr('error', 'حدث خطأ أثناء تعديل الحالة');
+            console.log(error);
+          });
+      }
+    });
   }
 
   changeDefaultClass() {

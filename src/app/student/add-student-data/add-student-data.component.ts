@@ -23,9 +23,9 @@ export class AddStudentDataComponent implements OnInit {
 
   class: any
 
-  NationalId = new FormControl(null, [Validators.required]);
-  Name = new FormControl(null, [Validators.required]);
-  name_en = new FormControl(null, [Validators.required]);
+  NationalId = new FormControl(null, [Validators.required, Validators.pattern('^[0-9]{14}$')]);
+  Name = new FormControl(null, [Validators.required, Validators.pattern('^[\\u0600-\\u06FF\\s]+$')]);
+  name_en = new FormControl(null, [Validators.required, Validators.pattern('^[a-zA-Z\\s]+$')]);
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   ClassMonth = new FormControl(0, [Validators.required]);
@@ -52,9 +52,28 @@ export class AddStudentDataComponent implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
+    this.spinner.show();
     this.class = this.activatedRoute.snapshot.paramMap.get('class');
+    const nationalIdParam = this.activatedRoute.snapshot.queryParamMap.get('nationalId');
+    if (nationalIdParam) {
+      this.NationalId.patchValue(nationalIdParam as any);
+    }
 
-    this.subclasses = await this.supabaseEditUserService.getDataTable("subclasses", { class_id: this.class })
+    const classData = await this.supabaseEditUserService.getDataTable("classes", { id: this.class });
+    const isAdmin = !!localStorage.getItem('adminCheck');
+
+    if (classData && classData.length > 0) {
+      const currentClassData = classData[0];
+      if (!currentClassData.allow_anonymous && !isAdmin) {
+        this.router.navigateByUrl('/student/getStudentData');
+        this.swal.toastr('error', 'عفوًا، التقديم المباشر غير متاح لهذه الفرقة حاليًا');
+        this.spinner.hide();
+        return;
+      }
+    }
+
+    this.subclasses = await this.supabaseEditUserService.getDataTable("subclasses", { class_id: this.class });
+    this.spinner.hide();
   }
 
   onChangeDate(event: any) {
@@ -151,6 +170,14 @@ export class AddStudentDataComponent implements OnInit {
   }
 
   async onSubmit() {
+    const isAdmin = !!localStorage.getItem('adminCheck');
+    const selectedSubClass = this.subclasses?.find((x: any) => x.id === this.ClassMonth.value);
+
+    if (selectedSubClass && !selectedSubClass.allow_anonymous && !isAdmin) {
+      this.swal.toastr('error', 'عفوًا، التقديم غير متاح لهذا الدور حاليًا');
+      return;
+    }
+
     const modalRef = this.modalService.open(SharedModalComponent, {
       centered: true,
       backdrop: 'static',
@@ -225,6 +252,16 @@ export class AddStudentDataComponent implements OnInit {
         this.router.navigateByUrl('/admin/getAllStudentsData');
       }
     });
+  }
+
+  changeSubClass() {
+    const isAdmin = !!localStorage.getItem('adminCheck');
+    const selectedSubClass = this.subclasses?.find((x: any) => x.id === this.ClassMonth.value);
+
+    if (selectedSubClass && !selectedSubClass.allow_anonymous && !isAdmin) {
+      this.swal.toastr('error', 'عفوًا، التقديم غير متاح لهذا الدور حاليًا');
+      this.ClassMonth.setValue(0 as any);
+    }
   }
 
   typingId(event: any) {
