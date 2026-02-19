@@ -45,7 +45,7 @@
         (dateSelect)="onChangeDate($event)" ngbDatepicker #d="ngbDatepicker"
         [minDate]="{ year: 1900, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 31 }" />
 
-      <button class="btn btn-outline-secondary" [disabled]="!authCheck" (click)="d.toggle()" type="button"><img
+      <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button"><img
           src="assets/svgs/calendar3.svg" alt="calendar" /></button>
 
     </div>
