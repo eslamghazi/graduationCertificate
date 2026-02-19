@@ -32,6 +32,9 @@ export class EditStudentDataComponent implements OnInit {
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   Image = new FormControl(null);
 
+  subClasses: any[] = [];
+  ClassMonth = new FormControl(null, [Validators.required]);
+
   constructor(
     private supabaseEditService: SupabaseEditUserService,
     private activatedRoute: ActivatedRoute,
@@ -49,12 +52,17 @@ export class EditStudentDataComponent implements OnInit {
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
     Image: this.Image,
+    ClassMonth: this.ClassMonth,
   });
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.subClass = this.activatedRoute.snapshot.paramMap.get('subClass');
     this.class = this.activatedRoute.snapshot.paramMap.get('class');
+
+    if (this.class) {
+      this.subClasses = await this.supabaseEditService.getDataTable('subclasses', { class_id: this.class });
+    }
 
     if (this.id && this.class) {
       this.searchData(this.id);
@@ -82,6 +90,7 @@ export class EditStudentDataComponent implements OnInit {
     this.DateOfBirth.patchValue(this.data.date_of_birth);
     this.PlaceOfBirth.patchValue(this.data.place_of_birth);
     this.Image.patchValue(this.data.image_url);
+    this.ClassMonth.patchValue(this.data.subclass_id);
 
     let isImageValid = await this.supabaseEditService
     .checkImageExists(this.data.image_url)
