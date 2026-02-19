@@ -18,7 +18,7 @@ const routes: Routes = [
     component: AddStudentDataComponent,
   },
   {
-    path: 'student/editStudentData/:class/:subClass/:id',
+    path: 'student/editStudentData/:id',
     component: EditStudentDataComponent,
     canActivate: [AccessEditStudentData],
   },

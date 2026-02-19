@@ -119,7 +119,7 @@ export class GetStudentDataComponent implements OnInit {
               ) {
               this.notFound = false;
               this.route.navigateByUrl(
-                `/student/editStudentData/${student.class_id}/${student.subclass_id}/${student.id}`
+                `/student/editStudentData/${student.id}`
               );
               this.spinner.hide();
             } else {

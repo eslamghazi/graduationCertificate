@@ -57,25 +57,26 @@ export class EditStudentDataComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.subClass = this.activatedRoute.snapshot.paramMap.get('subClass');
-    this.class = this.activatedRoute.snapshot.paramMap.get('class');
 
-    if (this.class) {
-      this.subClasses = await this.supabaseEditService.getDataTable('subclasses', { class_id: this.class });
-    }
-
-    if (this.id && this.class) {
+    if (this.id) {
       this.searchData(this.id);
     }
   }
 
-  searchData(id: any) {
+  async searchData(id: any) {
     this.spinner.show();
     this.supabaseEditService
-      .getData(this.class, this.subClass, id)
-      .subscribe((data) => {
+      .getDataById(id)
+      .subscribe(async (data) => {
         if (data) {
           this.data = data;
+          this.class = data.class_id;
+          this.subClass = data.subclass_id;
+          
+          if (this.class) {
+            this.subClasses = await this.supabaseEditService.getDataTable('subclasses', { class_id: this.class });
+          }
+          
           this.patchValues();
           this.spinner.hide();
         }

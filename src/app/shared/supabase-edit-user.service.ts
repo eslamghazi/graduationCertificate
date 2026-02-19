@@ -63,6 +63,28 @@ export class SupabaseEditUserService {
     );
   }
 
+  getDataById(id: string): Observable<any> {
+    this.spinner.show();
+    return from(
+      this.supabase
+        .from('students')
+        .select('*')
+        .eq('id', id)
+        .single()
+    ).pipe(
+      map(({ data, error }) => {
+        this.spinner.hide();
+        if (error) throw error;
+        return data;
+      }),
+      catchError((error) => {
+        this.spinner.hide();
+        this.swal.toastr('error', 'Error fetching data');
+        return of(null);
+      })
+    );
+  }
+
   getDataByPath(path: string): Observable<any> {
     const parsed = this.parsePath(path);
     if (!parsed) {
