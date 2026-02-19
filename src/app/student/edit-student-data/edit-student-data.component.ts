@@ -233,19 +233,25 @@ export class EditStudentDataComponent implements OnInit {
               date_of_birth: formValues.DateOfBirth,
               place_of_birth: formValues.PlaceOfBirth,
               image_url: formValues.Image,
+              subclass_id: formValues.ClassMonth,
             };
             let imagePromise;
             if (this.selectedImage) {
-              const filePath = `${this.class}/${this.data.subclass_id}/${this.supabaseEditService.encryptFileName(formValues.NationalId + "_" + formValues.Name + ".jpg")}`;
+              const filePath = `${this.class}/${formValues.ClassMonth}/${this.supabaseEditService.encryptFileName(formValues.NationalId + "_" + formValues.Name + ".jpg")}`;
               imagePromise = this.supabaseEditService.uploadFile(filePath, this.selectedImage);
               this.selectedImage = null
+            } else if (this.data.subclass_id !== formValues.ClassMonth && this.data.image_url) {
+              // Move image if subclass changed and no new image uploaded
+              const oldPath = `${this.class}/${this.data.subclass_id}/${this.data.image_url.split('/').pop().split('?')[0]}`;
+              const newPath = `${this.class}/${formValues.ClassMonth}/${this.data.image_url.split('/').pop().split('?')[0]}`;
+              imagePromise = this.supabaseEditService.moveFile(oldPath, newPath);
             } else {
               imagePromise = Promise.resolve(studentData.image_url);
             }
             imagePromise
               .then((imageUrl) => {
                 studentData.image_url = imageUrl;
-                this.supabaseEditService.insertImageDetails(studentData, `${this.class}/${this.subClass}/${this.id}`).then(() => {
+                this.supabaseEditService.insertImageDetails(studentData, `${this.class}/${formValues.ClassMonth}/${formValues.NationalId}`).then(() => {
                   this.spinner.hide();
                 });
               })

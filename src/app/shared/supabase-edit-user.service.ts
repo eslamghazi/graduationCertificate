@@ -166,6 +166,28 @@ export class SupabaseEditUserService {
     this.swal.toastr('success', 'تم رفع البيانات بنجاح');
   }
 
+  async moveFile(oldPath: string, newPath: string): Promise<string> {
+    this.spinner.show();
+    const { data, error } = await this.supabase.storage
+      .from('images')
+      .move(oldPath, newPath);
+
+    if (error) {
+      this.spinner.hide();
+      this.swal.toastr('error', 'حدث خطأ أثناء نقل الصورة');
+      console.error('Error moving file:', error);
+      throw error;
+    }
+
+    const { publicUrl } = this.supabase.storage
+      .from('images')
+      .getPublicUrl(newPath).data;
+
+    const freshUrl = `${publicUrl}?t=${new Date().getTime()}`;
+    this.spinner.hide();
+    return freshUrl;
+  }
+
   checkImageUrl(url: string): Observable<boolean> {
     return this.http.head(url, { observe: 'response' }).pipe(
       map((response) => response.status === 200),
