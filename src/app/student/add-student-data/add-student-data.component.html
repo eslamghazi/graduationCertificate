@@ -83,6 +83,19 @@
   </div>
 
 
+  <div class="mb-3 text-right">
+    <label for="is_mozaola">هل قمت بأداء امتحان مزاولة المهنة من قبل؟ (عدد المحاولات، 0 إن لم تقم)</label>
+    <div class="input-group">
+      <select class="form-control text-right" id="is_mozaola" formControlName="is_mozaola">
+        <option [ngValue]="0">لم يسبق لى</option>
+        <option [ngValue]="1">1</option>
+        <option [ngValue]="2">2</option>
+        <option [ngValue]="3">3</option>
+      </select>
+    </div>
+  </div>
+
+
   <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
     [disabled]="!userForm.valid || !selectedDate || !ClassMonth.value || ClassMonth.value == 0">ارسال</button>
   <button class="btn btn-lg btn-danger btn-block mt-4" (click)="goBack()" type="button">العوده</button>

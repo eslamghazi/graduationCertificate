@@ -29,6 +29,7 @@ export class AddStudentDataComponent implements OnInit {
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   ClassMonth = new FormControl(0, [Validators.required]);
+  is_mozaola = new FormControl(0, [Validators.required, Validators.min(0)]);
   Image = new FormControl(null);
 
   constructor(
@@ -48,6 +49,7 @@ export class AddStudentDataComponent implements OnInit {
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
     ClassMonth: this.ClassMonth,
+    is_mozaola: this.is_mozaola,
     Image: this.Image,
   });
 
@@ -199,6 +201,7 @@ export class AddStudentDataComponent implements OnInit {
           name_en: formValues.name_en,
           date_of_birth: formValues.DateOfBirth,
           place_of_birth: formValues.PlaceOfBirth,
+          is_mozaola: formValues.is_mozaola,
           image_url: formValues.Image,
         };
 

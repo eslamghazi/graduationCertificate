@@ -65,13 +65,24 @@
     class="form-group my-3 mt-5"
     *ngIf="filteredData.length > 0 || searchTerm"
   >
-    <input
-      type="text"
-      class="form-control"
-      placeholder="البحث بالإسم و الرقم القومي"
-      [(ngModel)]="searchTerm"
-      (input)="search()"
-    />
+    <div class="input-group" dir="rtl">
+      <div class="input-group-prepend">
+        <select class="custom-select form-control" style="border-radius: 0 0.25rem 0.25rem 0;" [(ngModel)]="searchType" (change)="search()">
+          <option value="all">الكل (إسم، رقم قومي)</option>
+          <option value="name">الإسم</option>
+          <option value="id">الرقم القومي</option>
+          <option value="place_of_birth">محل الميلاد</option>
+          <option value="mozaola">امتحان مزاولة المهنة</option>
+        </select>
+      </div>
+      <input
+        type="text"
+        class="form-control"
+        [placeholder]="getSearchPlaceholder()"
+        [(ngModel)]="searchTerm"
+        (input)="search()"
+      />
+    </div>
   </div>
 
   <div
@@ -133,6 +144,7 @@
             <th>الرقم القومي</th>
             <th>تاريخ الميلاد</th>
             <th>محل الميلاد</th>
+            <th>عدد محاولات مزاولة المهنة</th>
             <th>الصوره الشخصية</th>
             <th>الإجراءات</th>
           </tr>
@@ -151,6 +163,7 @@
             <td>{{ item.id }}</td>
             <td>{{ item.date_of_birth }}</td>
             <td>{{ item.place_of_birth }}</td>
+            <td>{{ item.is_mozaola || 0 }}</td>
             <td *ngIf="item.image_url">
               <img
                 [src]="item.image_url"

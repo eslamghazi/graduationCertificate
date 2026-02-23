@@ -30,6 +30,7 @@ export class GetAllStudentsDataComponent implements OnInit {
   actualData: any[] = [];
   rowClass: any = {};
   searchTerm: string = '';
+  searchType: string = 'all';
   selectClass = new FormControl('0');
   selectUserType = new FormControl('0');
 
@@ -133,17 +134,41 @@ export class GetAllStudentsDataComponent implements OnInit {
     this.spinner.hide();
   }
 
+  getSearchPlaceholder() {
+    switch (this.searchType) {
+      case 'name': return 'البحث بالإسم';
+      case 'id': return 'البحث بالرقم القومي';
+      case 'place_of_birth': return 'البحث بمحل الميلاد';
+      case 'mozaola': return 'البحث بعدد محاولات مزاولة المهنة';
+      case 'all': default: return 'البحث بالإسم و الرقم القومي';
+    }
+  }
+
   search() {
     this.spinner.show();
     if (this.searchTerm) {
       this.filteredData = this.actualData.filter(
-        (item) =>
-          (item.name &&
-            item.name.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-          (item.name_en &&
-            item.name_en.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-          (item.id &&
-            item.id.toString().includes(this.searchTerm))
+        (item) => {
+          const matchesName = item.name && item.name.toLowerCase().includes(this.searchTerm.toLowerCase());
+          const matchesNameEn = item.name_en && item.name_en.toLowerCase().includes(this.searchTerm.toLowerCase());
+          const matchesId = item.id && item.id.toString().includes(this.searchTerm);
+          const matchesPlaceOfBirth = item.place_of_birth && item.place_of_birth.toLowerCase().includes(this.searchTerm.toLowerCase());
+          
+          let isMozaolaValue = item.is_mozaola == 0 || !item.is_mozaola ? '0' : item.is_mozaola.toString();
+          const matchesMozaola = isMozaolaValue.includes(this.searchTerm);
+
+          if (this.searchType === 'name') {
+            return matchesName || matchesNameEn;
+          } else if (this.searchType === 'id') {
+            return matchesId;
+          } else if (this.searchType === 'place_of_birth') {
+            return matchesPlaceOfBirth;
+          } else if (this.searchType === 'mozaola') {
+             return matchesMozaola;
+          } else {
+            return matchesName || matchesNameEn || matchesId;
+          }
+        }
       );
       this.spinner.hide();
     } else {
@@ -178,6 +203,7 @@ export class GetAllStudentsDataComponent implements OnInit {
           'place_of_birth',
           'class_id',
           'subclass_id',
+          'is_mozaola',
           'image_url',
         ];
 

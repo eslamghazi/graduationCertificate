@@ -241,4 +241,13 @@ export class SupabaseEditUserService {
 
     return (await query).data
   }
+
+  async deleteOldRecord(path: string): Promise<void> {
+    const parsed = this.parsePath(path);
+    if (!parsed) {
+      return;
+    }
+    const { id } = parsed;
+    await this.supabase.from('students').delete().eq('id', id);
+  }
 }

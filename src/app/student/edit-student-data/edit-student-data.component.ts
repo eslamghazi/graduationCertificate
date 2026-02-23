@@ -33,7 +33,10 @@ export class EditStudentDataComponent implements OnInit {
   Image = new FormControl(null);
 
   subClasses: any[] = [];
+  Classes: any[] = [];
+  Class = new FormControl(null, [Validators.required]);
   ClassMonth = new FormControl(null, [Validators.required]);
+  is_mozaola = new FormControl(0, [Validators.required, Validators.min(0)]);
 
   constructor(
     private supabaseEditService: SupabaseEditUserService,
@@ -52,15 +55,45 @@ export class EditStudentDataComponent implements OnInit {
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
     Image: this.Image,
+    Class: this.Class,
     ClassMonth: this.ClassMonth,
+    is_mozaola: this.is_mozaola,
   });
 
   async ngOnInit(): Promise<void> {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
 
     if (this.id) {
+      this.getClasses();
       this.searchData(this.id);
     }
+  }
+
+  getClasses() {
+    this.spinner.show();
+    this.supabaseEditService
+      .getDataTable('classes')
+      .then((data: any) => {
+        this.Classes = data.map((item: any) => ({
+          key: item.id,
+          value: item
+        }));
+        this.spinner.hide();
+      });
+  }
+
+  async changeClass() {
+    this.spinner.show();
+    this.class = this.Class.value;
+    if (this.class) {
+      this.subClasses = await this.supabaseEditService.getDataTable('subclasses', { class_id: this.class });
+      // Reset subclass when class changes
+      this.ClassMonth.patchValue(this.subClasses.length > 0 ? this.subClasses[0].id : null);
+    } else {
+      this.subClasses = [];
+      this.ClassMonth.patchValue(null);
+    }
+    this.spinner.hide();
   }
 
   async searchData(id: any) {
@@ -91,7 +124,9 @@ export class EditStudentDataComponent implements OnInit {
     this.DateOfBirth.patchValue(this.data.date_of_birth);
     this.PlaceOfBirth.patchValue(this.data.place_of_birth);
     this.Image.patchValue(this.data.image_url);
+    this.Class.patchValue(this.data.class_id);
     this.ClassMonth.patchValue(this.data.subclass_id);
+    this.is_mozaola.patchValue(this.data.is_mozaola || 0);
 
     let isImageValid = await this.supabaseEditService
     .checkImageExists(this.data.image_url)
@@ -234,17 +269,19 @@ export class EditStudentDataComponent implements OnInit {
               date_of_birth: formValues.DateOfBirth,
               place_of_birth: formValues.PlaceOfBirth,
               image_url: formValues.Image,
+              class_id: formValues.Class,
               subclass_id: formValues.ClassMonth,
+              is_mozaola: formValues.is_mozaola,
             };
             let imagePromise;
             if (this.selectedImage) {
-              const filePath = `${this.class}/${formValues.ClassMonth}/${this.supabaseEditService.encryptFileName(formValues.NationalId + "_" + formValues.Name + ".jpg")}`;
+              const filePath = `${formValues.Class}/${formValues.ClassMonth}/${this.supabaseEditService.encryptFileName(formValues.NationalId + "_" + formValues.Name + ".jpg")}`;
               imagePromise = this.supabaseEditService.uploadFile(filePath, this.selectedImage);
               this.selectedImage = null
-            } else if (this.data.subclass_id !== formValues.ClassMonth && this.data.image_url) {
-              // Move image if subclass changed and no new image uploaded
-              const oldPath = `${this.class}/${this.data.subclass_id}/${this.data.image_url.split('/').pop().split('?')[0]}`;
-              const newPath = `${this.class}/${formValues.ClassMonth}/${this.data.image_url.split('/').pop().split('?')[0]}`;
+            } else if ((this.data.subclass_id !== formValues.ClassMonth || this.data.class_id !== formValues.Class) && this.data.image_url) {
+              // Move image if subclass or class changed and no new image uploaded
+              const oldPath = `${this.data.class_id}/${this.data.subclass_id}/${this.data.image_url.split('/').pop().split('?')[0]}`;
+              const newPath = `${formValues.Class}/${formValues.ClassMonth}/${this.data.image_url.split('/').pop().split('?')[0]}`;
               imagePromise = this.supabaseEditService.moveFile(oldPath, newPath);
             } else {
               imagePromise = Promise.resolve(studentData.image_url);
@@ -252,7 +289,13 @@ export class EditStudentDataComponent implements OnInit {
             imagePromise
               .then((imageUrl) => {
                 studentData.image_url = imageUrl;
-                this.supabaseEditService.insertImageDetails(studentData, `${this.class}/${formValues.ClassMonth}/${formValues.NationalId}`).then(() => {
+                this.supabaseEditService.insertImageDetails(studentData, `${formValues.Class}/${formValues.ClassMonth}/${formValues.NationalId}`).then(() => {
+                  
+                  // Also delete the old record if the path changed
+                  if (this.data.class_id !== formValues.Class || this.data.subclass_id !== formValues.ClassMonth) {
+                     this.supabaseEditService.deleteOldRecord(`${this.data.class_id}/${this.data.subclass_id}/${this.data.id}`);
+                  }
+                  
                   this.spinner.hide();
                 });
               })

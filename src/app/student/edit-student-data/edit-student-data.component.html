@@ -60,10 +60,31 @@
   </div>
 
   <div class="mb-3 text-right">
+    <label for="Class">اختر دفعة الطالب</label>
+    <div class="input-group">
+      <select class="form-control text-right" id="Class" formControlName="Class" (change)="changeClass()">
+        <option *ngFor="let class of Classes" [value]="class.key">{{class.value.name}}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="mb-3 text-right">
     <label for="ClassMonth">اختر دور الطالب</label>
     <div class="input-group">
       <select class="form-control text-right" id="ClassMonth" formControlName="ClassMonth">
         <option *ngFor="let sub of subClasses" [value]="sub.id">{{sub.name}}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="mb-3 text-right">
+    <label for="is_mozaola">هل قمت بأداء امتحان مزاولة المهنة من قبل؟ (عدد المحاولات، 0 إن لم تقم)</label>
+    <div class="input-group">
+      <select class="form-control text-right" id="is_mozaola" formControlName="is_mozaola">
+        <option [ngValue]="0">لم يسبق لى</option>
+        <option [ngValue]="1">1</option>
+        <option [ngValue]="2">2</option>
+        <option [ngValue]="3">3</option>
       </select>
     </div>
   </div>
