@@ -163,7 +163,16 @@
             <td>{{ item.id }}</td>
             <td>{{ item.date_of_birth }}</td>
             <td>{{ item.place_of_birth }}</td>
-            <td>{{ item.is_mozaola || 0 }}</td>
+            <td *ngIf="item.is_mozaola == '1 true'">1 ناجح</td>
+            <td *ngIf="item.is_mozaola == '1 false'">1 راسب</td>
+            <td *ngIf="item.is_mozaola == '2 true'">2 ناجح</td>
+            <td *ngIf="item.is_mozaola == '2 false'">2 راسب</td>
+            <td *ngIf="item.is_mozaola == '3 true'">3 ناجح</td>
+            <td *ngIf="item.is_mozaola == '3 false'">3 راسب</td>
+            <td *ngIf="!item.is_mozaola || item.is_mozaola == '0' || item.is_mozaola == 0">0</td>
+            <td *ngIf="item.is_mozaola == '1' || item.is_mozaola == 1">1</td>
+            <td *ngIf="item.is_mozaola == '2' || item.is_mozaola == 2">2</td>
+            <td *ngIf="item.is_mozaola == '3' || item.is_mozaola == 3">3</td>
             <td *ngIf="item.image_url">
               <img
                 [src]="item.image_url"

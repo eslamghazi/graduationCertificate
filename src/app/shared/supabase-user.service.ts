@@ -43,16 +43,22 @@ export class SupabaseUserService {
     );
   }
 
-  getStudentForEditAuth(classNumber: string, subClassNumber: string, id: string): Observable<any> {
+  getStudentForEditAuth(classNumber: string | null, subClassNumber: string | null, id: string): Observable<any> {
     if (id) {
-      return from(
-        this.supabase
+      let query = this.supabase
           .from("students")
           .select('*')
-          .eq('class_id', classNumber)
-          .eq('subclass_id', subClassNumber)
-          .eq('id', id)
-          .order('created_at', { ascending: false })
+          .eq('id', id);
+          
+      if (classNumber) {
+        query = query.eq('class_id', classNumber);
+      }
+      if (subClassNumber) {
+        query = query.eq('subclass_id', subClassNumber);
+      }
+
+      return from(
+        query.order('created_at', { ascending: false })
           .single()
           .then(response => response.data)
       );

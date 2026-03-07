@@ -36,7 +36,8 @@ export class EditStudentDataComponent implements OnInit {
   Classes: any[] = [];
   Class = new FormControl(null, [Validators.required]);
   ClassMonth = new FormControl(null, [Validators.required]);
-  is_mozaola = new FormControl(0, [Validators.required, Validators.min(0)]);
+  is_mozaola_attempts = new FormControl('0', [Validators.required]);
+  is_mozaola_result = new FormControl('');
 
   constructor(
     private supabaseEditService: SupabaseEditUserService,
@@ -57,7 +58,8 @@ export class EditStudentDataComponent implements OnInit {
     Image: this.Image,
     Class: this.Class,
     ClassMonth: this.ClassMonth,
-    is_mozaola: this.is_mozaola,
+    is_mozaola_attempts: this.is_mozaola_attempts,
+    is_mozaola_result: this.is_mozaola_result,
   });
 
   async ngOnInit(): Promise<void> {
@@ -126,10 +128,27 @@ export class EditStudentDataComponent implements OnInit {
     this.Image.patchValue(this.data.image_url);
     this.Class.patchValue(this.data.class_id);
     this.ClassMonth.patchValue(this.data.subclass_id);
-    this.is_mozaola.patchValue(this.data.is_mozaola || 0);
 
-    let isImageValid = await this.supabaseEditService
-    .checkImageExists(this.data.image_url)
+    let mozaolaVal = this.data.is_mozaola || '0';
+    mozaolaVal = mozaolaVal.toString();
+    if (mozaolaVal === '0') {
+      this.is_mozaola_attempts.patchValue('0');
+      this.is_mozaola_result.patchValue('');
+    } else {
+      let parts = mozaolaVal.split(' ');
+      if (parts.length === 2) {
+        this.is_mozaola_attempts.patchValue(parts[0]);
+        this.is_mozaola_result.patchValue(parts[1]);
+      } else {
+        this.is_mozaola_attempts.patchValue(parts[0]);
+        this.is_mozaola_result.patchValue('');
+      }
+    }
+
+    let isImageValid = false;
+    if (this.data.image_url) {
+      isImageValid = await this.supabaseEditService.checkImageExists(this.data.image_url);
+    }
     if (isImageValid) {
       this.defaultImage = this.data.image_url
       ? this.data.image_url
@@ -234,13 +253,13 @@ export class EditStudentDataComponent implements OnInit {
 
   async onSubmit() {
     this.spinner.show();
-    let isImageValid = await this.supabaseEditService
-    .checkImageUrl(this.data.image_url)
-    .toPromise();
-  this.spinner.hide();
+    let isImageValid = true;
+    if (this.data.image_url) {
+      isImageValid = await this.supabaseEditService.checkImageExists(this.data.image_url);
+    }
+    this.spinner.hide();
 
         if (
-          (!this.selectedImage && !this.data.image_url) ||
           (this.data.image_url && !isImageValid && !this.selectedImage)
         ) {
           this.swal.toastr('error', 'الرجاء رفع صورة اخري ثم حاول مرة اخري');
@@ -271,7 +290,7 @@ export class EditStudentDataComponent implements OnInit {
               image_url: formValues.Image,
               class_id: formValues.Class,
               subclass_id: formValues.ClassMonth,
-              is_mozaola: formValues.is_mozaola,
+              is_mozaola: (!formValues.is_mozaola_attempts || formValues.is_mozaola_attempts === '0') ? '0' : `${formValues.is_mozaola_attempts} ${formValues.is_mozaola_result}`,
             };
             let imagePromise;
             if (this.selectedImage) {

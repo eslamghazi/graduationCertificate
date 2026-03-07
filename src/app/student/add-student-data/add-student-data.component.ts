@@ -29,7 +29,8 @@ export class AddStudentDataComponent implements OnInit {
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   ClassMonth = new FormControl(0, [Validators.required]);
-  is_mozaola = new FormControl(0, [Validators.required, Validators.min(0)]);
+  is_mozaola_attempts = new FormControl('0', [Validators.required]);
+  is_mozaola_result = new FormControl('');
   Image = new FormControl(null);
 
   constructor(
@@ -49,7 +50,8 @@ export class AddStudentDataComponent implements OnInit {
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
     ClassMonth: this.ClassMonth,
-    is_mozaola: this.is_mozaola,
+    is_mozaola_attempts: this.is_mozaola_attempts,
+    is_mozaola_result: this.is_mozaola_result,
     Image: this.Image,
   });
 
@@ -201,7 +203,7 @@ export class AddStudentDataComponent implements OnInit {
           name_en: formValues.name_en,
           date_of_birth: formValues.DateOfBirth,
           place_of_birth: formValues.PlaceOfBirth,
-          is_mozaola: formValues.is_mozaola,
+          is_mozaola: (!formValues.is_mozaola_attempts || formValues.is_mozaola_attempts === '0') ? '0' : `${formValues.is_mozaola_attempts} ${formValues.is_mozaola_result}`,
           image_url: formValues.Image,
         };
 
@@ -218,7 +220,7 @@ export class AddStudentDataComponent implements OnInit {
               .then((imageUrl: any) => {
                 studentData.image_url = imageUrl;
                 this.supabaseEditUserService.insertImageDetails(studentData, dataPath).then(() => {
-                  this.router.navigateByUrl(`/student/editStudentData/${this.class}/${this.ClassMonth.value}/${this.NationalId.value}`);
+                  this.router.navigateByUrl(`/student/editStudentData/${this.NationalId.value}`);
                   this.spinner.hide();
                 });
               })

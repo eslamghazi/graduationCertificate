@@ -315,7 +315,7 @@ export class GetAllStudentsDataComponent implements OnInit {
 
         if (target === 'deleteStudent') {
           this.supabaseAdminService
-            .removeImagePropertyFromDatabase(dbPath, 'deleteAll')
+            .removeImagePropertyFromDatabase(dbPath, 'deleteAuthor')
             .then(() => {
               this.spinner.hide();
               this.swal.toastr('success', 'تم حذف الطالب بنجاح');
@@ -468,7 +468,7 @@ export class GetAllStudentsDataComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.router.navigateByUrl(
-          `/student/editStudentData/${this.currentClass}/${classMonth}/${id}`
+          `/student/editStudentData/${id}`
         );
       }
     });

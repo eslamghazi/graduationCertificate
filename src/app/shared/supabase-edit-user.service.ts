@@ -173,9 +173,9 @@ export class SupabaseEditUserService {
       name_en: imageDetails.name_en,
       date_of_birth: imageDetails.date_of_birth,
       place_of_birth: imageDetails.place_of_birth,
+      is_mozaola: imageDetails.is_mozaola,
       image_url: imageDetails.image_url,
       created_at: new Date().toISOString(),
-      // Add other fields as necessary based on your table schema
     };
 
     const { error } = await this.supabase
@@ -218,6 +218,7 @@ export class SupabaseEditUserService {
   }
 
   async checkImageExists(imageUrl: string): Promise<boolean> {
+    if (!imageUrl) return false;
     try {
       const response = await fetch(imageUrl, { method: 'HEAD' });
       return response.ok;
