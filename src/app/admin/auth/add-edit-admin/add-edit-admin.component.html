@@ -14,6 +14,9 @@
           <span class="input-group-text" id="">الإسم</span>
         </div>
       </div>
+      <div *ngIf="Name.touched && Name.errors?.['pattern']" class="text-danger small text-right">
+        يجب كتابة الإسم باللغة العربية فقط
+      </div>
 
       <div class="input-group my-3">
         <input id="idInput" [readonly]="data" (keyup)="typingId($event.target)" type="number" class="form-control" formControlName="NationalId">

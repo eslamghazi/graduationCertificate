@@ -17,7 +17,7 @@ export class AddEditAdminComponent implements OnInit, OnDestroy {
   @Input() data: any;
   classes: any[] = [];
 
-  Name = new FormControl(null, [Validators.required]);
+  Name = new FormControl(null, [Validators.required, Validators.pattern('^[\\u0600-\\u06FF\\s]+$')]);
   NationalId = new FormControl(null, [Validators.required]);
   Auth = new FormControl(0, [Validators.required]);
   class = new FormControl(null, [Validators.required]);

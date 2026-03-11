@@ -26,8 +26,8 @@ export class EditStudentDataComponent implements OnInit {
   data: any;
 
   NationalId = new FormControl({ value: null, disabled: true }, [Validators.required]);
-  Name = new FormControl(null, [Validators.required]);
-  name_en = new FormControl(null);
+  Name = new FormControl(null, [Validators.required, Validators.pattern('^[\\u0600-\\u06FF\\s]+$')]);
+  name_en = new FormControl(null, [Validators.required, Validators.pattern('^[a-zA-Z\\s]+$')]);
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   phone = new FormControl(null, [Validators.required, Validators.pattern('^01[0-9]{9}$')]);

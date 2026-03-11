@@ -18,9 +18,12 @@
   </div>
 
   <div class="mb-3 text-right">
-    <label for="username">الإسم (مطابق لشهادة الميلاد)</label>
+    <label for="username">الإسم الرباعى باللغة العربية (مطابق لشهادة الميلاد)</label>
     <div class="input-group">
       <input type="text" class="form-control" id="Name" formControlName="Name" placeholder="الإسم">
+    </div>
+    <div *ngIf="Name.touched && Name.errors?.['pattern']" class="text-danger small">
+      يجب كتابة الإسم باللغة العربية فقط
     </div>
   </div>
 
@@ -29,6 +32,9 @@
     <div class="input-group">
       <input type="text" class="form-control" id="name_en" formControlName="name_en"
         placeholder="الإسم باللغة الإنجليزية">
+    </div>
+    <div *ngIf="name_en.touched && name_en.errors?.['pattern']" class="text-danger small">
+      يجب كتابة الإسم باللغة الإنجليزية فقط
     </div>
   </div>
 
