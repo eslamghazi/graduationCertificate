@@ -25,7 +25,7 @@ export class EditStudentDataComponent implements OnInit {
 
   data: any;
 
-  NationalId = new FormControl(null, [Validators.required]);
+  NationalId = new FormControl({ value: null, disabled: true }, [Validators.required]);
   Name = new FormControl(null, [Validators.required]);
   name_en = new FormControl(null);
   DateOfBirth = new FormControl(null, [Validators.required]);
