@@ -140,6 +140,7 @@ export class GetAllStudentsDataComponent implements OnInit {
       case 'id': return 'البحث بالرقم القومي';
       case 'place_of_birth': return 'البحث بمحل الميلاد';
       case 'phone': return 'البحث برقم الهاتف';
+      case 'email': return 'البحث بالبريد الإلكتروني';
       case 'mozaola': return 'البحث بعدد محاولات مزاولة المهنة';
       case 'all': default: return 'البحث بالإسم و الرقم القومي';
     }
@@ -168,6 +169,8 @@ export class GetAllStudentsDataComponent implements OnInit {
             return matchesMozaola;
           } else if (this.searchType === 'phone') {
             return item.phone && item.phone.toString().includes(this.searchTerm);
+          } else if (this.searchType === 'email') {
+            return item.email && item.email.toLowerCase().includes(this.searchTerm.toLowerCase());
           } else {
             return matchesName || matchesNameEn || matchesId;
           }
@@ -208,6 +211,7 @@ export class GetAllStudentsDataComponent implements OnInit {
           'subclass_id',
           'is_mozaola',
           'phone',
+          'email',
           'image_url',
         ];
 

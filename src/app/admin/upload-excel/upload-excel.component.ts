@@ -85,6 +85,7 @@ export class UploadExcelComponent implements OnInit, OnDestroy {
         DateOfBirth: student.date_of_birth,
         PlaceOfBirth: student.place_of_birth,
         Phone: student.phone,
+        Email: student.email,
         ClassMonth: month,
       });
     });

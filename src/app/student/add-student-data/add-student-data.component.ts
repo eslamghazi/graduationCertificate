@@ -29,6 +29,7 @@ export class AddStudentDataComponent implements OnInit {
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   phone = new FormControl(null, [Validators.required, Validators.pattern('^01[0-9]{9}$')]);
+  email = new FormControl(null, [Validators.required, Validators.email]);
   ClassMonth = new FormControl({ value: 0, disabled: true }, [Validators.required]);
   is_mozaola_attempts = new FormControl('0', [Validators.required]);
   is_mozaola_result = new FormControl('');
@@ -51,6 +52,7 @@ export class AddStudentDataComponent implements OnInit {
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
     phone: this.phone,
+    email: this.email,
     ClassMonth: this.ClassMonth,
     is_mozaola_attempts: this.is_mozaola_attempts,
     is_mozaola_result: this.is_mozaola_result,
@@ -206,6 +208,7 @@ export class AddStudentDataComponent implements OnInit {
           date_of_birth: formValues.DateOfBirth,
           place_of_birth: formValues.PlaceOfBirth,
           phone: formValues.phone,
+          email: formValues.email,
           is_mozaola: (!formValues.is_mozaola_attempts || formValues.is_mozaola_attempts === '0') ? '0' : `${formValues.is_mozaola_attempts} ${formValues.is_mozaola_result}`,
           image_url: formValues.Image,
         };

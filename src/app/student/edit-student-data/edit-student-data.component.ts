@@ -31,6 +31,7 @@ export class EditStudentDataComponent implements OnInit {
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   phone = new FormControl(null, [Validators.required, Validators.pattern('^01[0-9]{9}$')]);
+  email = new FormControl(null, [Validators.required, Validators.email]);
   Image = new FormControl(null);
 
   subClasses: any[] = [];
@@ -57,6 +58,7 @@ export class EditStudentDataComponent implements OnInit {
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
     phone: this.phone,
+    email: this.email,
     Image: this.Image,
     Class: this.Class,
     ClassMonth: this.ClassMonth,
@@ -128,6 +130,7 @@ export class EditStudentDataComponent implements OnInit {
     this.DateOfBirth.patchValue(this.data.date_of_birth);
     this.PlaceOfBirth.patchValue(this.data.place_of_birth);
     this.phone.patchValue(this.data.phone);
+    this.email.patchValue(this.data.email);
     this.Image.patchValue(this.data.image_url);
     this.Class.patchValue(this.data.class_id);
     this.ClassMonth.patchValue(this.data.subclass_id);
@@ -291,6 +294,7 @@ export class EditStudentDataComponent implements OnInit {
           date_of_birth: formValues.DateOfBirth,
           place_of_birth: formValues.PlaceOfBirth,
           phone: formValues.phone,
+          email: formValues.email,
           image_url: formValues.Image,
           class_id: formValues.Class,
           subclass_id: formValues.ClassMonth,

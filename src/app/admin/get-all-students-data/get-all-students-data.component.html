@@ -49,6 +49,7 @@
           <option value="id">الرقم القومي</option>
           <option value="place_of_birth">محل الميلاد</option>
           <option value="phone">رقم الهاتف</option>
+          <option value="email">البريد الإلكتروني</option>
           <option value="mozaola">امتحان مزاولة المهنة</option>
         </select>
       </div>
@@ -95,6 +96,7 @@
             <th>تاريخ الميلاد</th>
             <th>محل الميلاد</th>
             <th>رقم الهاتف</th>
+            <th>البريد الإلكتروني</th>
             <th>عدد محاولات مزاولة المهنة</th>
             <th>الصوره الشخصية</th>
             <th>الإجراءات</th>
@@ -113,6 +115,7 @@
             <td>{{ item.date_of_birth }}</td>
             <td>{{ item.place_of_birth }}</td>
             <td>{{ item.phone }}</td>
+            <td>{{ item.email }}</td>
             <td *ngIf="item.is_mozaola == '1 true'">1 ناجح</td>
             <td *ngIf="item.is_mozaola == '1 false'">1 راسب</td>
             <td *ngIf="item.is_mozaola == '2 true'">2 ناجح</td>

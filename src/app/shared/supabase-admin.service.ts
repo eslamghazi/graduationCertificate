@@ -505,6 +505,7 @@ export class SupabaseAdminService {
       const classMonth = row[5]; // ClassMonth (e.g., June, September)
       const name_en = row[6]; // name_en
       const phone = row[7]; // phone
+      const email = row[8]; // email
 
       result.push({
         id: nationalId, // Use NationalId as the primary key
@@ -514,6 +515,7 @@ export class SupabaseAdminService {
         place_of_birth: placeOfBirth,
         name_en: name_en,
         phone: phone,
+        email: email,
         class_id: this.currentClass,
         subclass_id: `${this.currentClass}-${classMonth}`,
       });

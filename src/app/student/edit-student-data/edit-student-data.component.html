@@ -75,6 +75,19 @@
   </div>
 
   <div class="mb-3 text-right">
+    <label for="email">البريد الإلكتروني</label>
+    <div class="input-group">
+      <input type="email" class="form-control" id="email" formControlName="email" placeholder="البريد الإلكتروني">
+    </div>
+    <div *ngIf="email.touched && email.errors?.['required']" class="text-danger small">
+      يجب ملئ البريد الإلكتروني
+    </div>
+    <div *ngIf="email.touched && email.errors?.['email']" class="text-danger small">
+      الرجاء كتابة البريد الإلكتروني بشكل صحيح
+    </div>
+  </div>
+
+  <!-- <div class="mb-3 text-right">
     <label for="Class">اختر دفعة الطالب</label>
     <div class="input-group">
       <select class="form-control text-right" id="Class" formControlName="Class" (change)="changeClass()">
@@ -90,7 +103,7 @@
         <option *ngFor="let sub of subClasses" [value]="sub.id">{{sub.name}}</option>
       </select>
     </div>
-  </div>
+  </div> -->
 
   <div class="mb-3 text-right">
     <div class="row">
