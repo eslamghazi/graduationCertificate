@@ -28,7 +28,8 @@ export class AddStudentDataComponent implements OnInit {
   name_en = new FormControl(null, [Validators.required, Validators.pattern('^[a-zA-Z\\s]+$')]);
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
-  ClassMonth = new FormControl(0, [Validators.required]);
+  phone = new FormControl(null, [Validators.required, Validators.pattern('^01[0-9]{9}$')]);
+  ClassMonth = new FormControl({ value: 0, disabled: true }, [Validators.required]);
   is_mozaola_attempts = new FormControl('0', [Validators.required]);
   is_mozaola_result = new FormControl('');
   Image = new FormControl(null);
@@ -49,6 +50,7 @@ export class AddStudentDataComponent implements OnInit {
     name_en: this.name_en,
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
+    phone: this.phone,
     ClassMonth: this.ClassMonth,
     is_mozaola_attempts: this.is_mozaola_attempts,
     is_mozaola_result: this.is_mozaola_result,
@@ -196,13 +198,14 @@ export class AddStudentDataComponent implements OnInit {
     modalRef.result.then((result) => {
       if (result) {
         this.spinner.show();
-        const formValues = this.userForm.value;
+        const formValues = this.userForm.getRawValue();
         const studentData = {
           id: formValues.NationalId,
           name: formValues.Name,
           name_en: formValues.name_en,
           date_of_birth: formValues.DateOfBirth,
           place_of_birth: formValues.PlaceOfBirth,
+          phone: formValues.phone,
           is_mozaola: (!formValues.is_mozaola_attempts || formValues.is_mozaola_attempts === '0') ? '0' : `${formValues.is_mozaola_attempts} ${formValues.is_mozaola_result}`,
           image_url: formValues.Image,
         };
@@ -217,23 +220,23 @@ export class AddStudentDataComponent implements OnInit {
         }
         var dataPath = `${this.class}/${this.ClassMonth.value}/${this.NationalId.value}`;
         imagePromise
-              .then((imageUrl: any) => {
-                studentData.image_url = imageUrl;
-                this.supabaseEditUserService.insertImageDetails(studentData, dataPath).then(() => {
-                  this.router.navigateByUrl(`/student/editStudentData/${this.NationalId.value}`);
-                  this.spinner.hide();
-                });
-              })
-              .catch(() => {
-                this.spinner.hide();
-              });
-          // if (
-          //   !this.selectedImage &&
-          //   (this.userForm.dirty || this.selectedDate)
-          // ) {
-          //   this.supabaseEditUserService.insertImageDetails(studentData, dataPath);
-          //   this.spinner.hide();
-          // }
+          .then((imageUrl: any) => {
+            studentData.image_url = imageUrl;
+            this.supabaseEditUserService.insertImageDetails(studentData, dataPath).then(() => {
+              this.router.navigateByUrl(`/student/editStudentData/${this.NationalId.value}`);
+              this.spinner.hide();
+            });
+          })
+          .catch(() => {
+            this.spinner.hide();
+          });
+        // if (
+        //   !this.selectedImage &&
+        //   (this.userForm.dirty || this.selectedDate)
+        // ) {
+        //   this.supabaseEditUserService.insertImageDetails(studentData, dataPath);
+        //   this.spinner.hide();
+        // }
 
       }
     });

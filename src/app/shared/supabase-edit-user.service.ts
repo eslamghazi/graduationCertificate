@@ -173,6 +173,7 @@ export class SupabaseEditUserService {
       name_en: imageDetails.name_en,
       date_of_birth: imageDetails.date_of_birth,
       place_of_birth: imageDetails.place_of_birth,
+      phone: imageDetails.phone,
       is_mozaola: imageDetails.is_mozaola,
       image_url: imageDetails.image_url,
       created_at: new Date().toISOString(),

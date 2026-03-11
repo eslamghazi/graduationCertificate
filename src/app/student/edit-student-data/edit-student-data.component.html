@@ -6,7 +6,8 @@
     <img class="rounded-lg" role="button" src={{defaultImage}} width="200" height="200" id="image"
       (click)="imageUploader.click()">
   </div>
-  <label *ngIf="!data?.Image" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️ (formal - 4*6 - واضحة - خلفية بيضاء)</label>
+  <label *ngIf="!data?.Image" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️ (formal - 4*6 - واضحة
+    - خلفية بيضاء)</label>
 
   <div class="mb-3 text-right" hidden>
     <label for="image">ارفع الصورة (formal - 4*6 - واضحة - خلفية بيضاء)</label>
@@ -26,7 +27,8 @@
   <div class="mb-3 text-right">
     <label for="name_en">الإسم باللغة الإنجليزية (مطابق لجواز السفر)</label>
     <div class="input-group">
-      <input type="text" class="form-control" id="name_en" formControlName="name_en" placeholder="الإسم باللغة الإنجليزية">
+      <input type="text" class="form-control" id="name_en" formControlName="name_en"
+        placeholder="الإسم باللغة الإنجليزية">
     </div>
   </div>
 
@@ -45,8 +47,8 @@
         (dateSelect)="onChangeDate($event)" ngbDatepicker #d="ngbDatepicker"
         [minDate]="{ year: 1900, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 31 }" />
 
-      <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button"><img
-          src="assets/svgs/calendar3.svg" alt="calendar" /></button>
+      <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button"><img src="assets/svgs/calendar3.svg"
+          alt="calendar" /></button>
 
     </div>
   </div>
@@ -56,6 +58,19 @@
     <div class="input-group">
       <input type="text" class="form-control" id="PlaceOfBirth" formControlName="PlaceOfBirth"
         placeholder="محل الميلاد">
+    </div>
+  </div>
+
+  <div class="mb-3 text-right">
+    <label for="phone">رقم الهاتف</label>
+    <div class="input-group">
+      <input type="text" class="form-control" id="phone" formControlName="phone" placeholder="رقم الهاتف">
+    </div>
+    <div *ngIf="phone.touched && phone.errors?.['required']" class="text-danger small">
+      يجب ملئ رقم الهاتف
+    </div>
+    <div *ngIf="phone.touched && phone.errors?.['pattern']" class="text-danger small">
+      يجب ان يبدأ رقم الهاتف بـ 01 ويكون مكون من 11 رقم
     </div>
   </div>
 
@@ -91,7 +106,7 @@
         </div>
       </div>
 
-        <div [ngClass]="is_mozaola_attempts.value != '0' ? 'col-6' : 'col-12'">
+      <div [ngClass]="is_mozaola_attempts.value != '0' ? 'col-6' : 'col-12'">
         <label for="is_mozaola_attempts">عدد محاولات امتحان مزاولة المهنة</label>
         <div class="input-group">
           <select class="form-control text-right" id="is_mozaola_attempts" formControlName="is_mozaola_attempts">

@@ -1,36 +1,20 @@
 <form class="form-signin" [formGroup]="adminForm">
   <div class="form-group my-3">
-    <button
-      type="button"
-      dir="rtl"
-      class="btn btn-outline-success btn-lg btn-block mt-3"
-      aria-haspopup="true"
-      aria-expanded="false"
-      (click)="searchStudent()"
-    >
+    <button type="button" dir="rtl" class="btn btn-outline-success btn-lg btn-block mt-3" aria-haspopup="true"
+      aria-expanded="false" (click)="searchStudent()">
       البحث عن طالب بقاعدة البيانات
     </button>
   </div>
 
   <div class="form-group my-3">
-    <button
-      type="button"
-      dir="rtl"
-      class="btn btn-outline-primary btn-lg btn-block mt-3"
-      aria-haspopup="true"
-      aria-expanded="false"
-      routerLink="/student/addStudentData/{{ currentClass }}"
-    >
+    <button type="button" dir="rtl" class="btn btn-outline-primary btn-lg btn-block mt-3" aria-haspopup="true"
+      aria-expanded="false" routerLink="/student/addStudentData/{{ currentClass }}">
       اضافة طالب غير موجود بقاعدة البيانات
     </button>
   </div>
 
   <div class="form-group my-3">
-    <select
-      class="form-control"
-      formControlName="selectClass"
-      (change)="selectClassFunc()"
-    >
+    <select class="form-control" formControlName="selectClass" (change)="selectClassFunc()">
       <option value="0" selected>الرجاء اختيار الدفعه</option>
       <option *ngFor="let subClass of subClasses" [value]="subClass.key">
         {{ subClass.value.name }}
@@ -38,11 +22,7 @@
     </select>
   </div>
 
-  <div
-    class="form-group my-3"
-    *ngIf="selectClass.value && selectClass.value != '0'"
-    (change)="selectUserTypeFunc()"
-  >
+  <div class="form-group my-3" *ngIf="selectClass.value && selectClass.value != '0'" (change)="selectUserTypeFunc()">
     <select class="form-control" formControlName="selectUserType">
       <option value="0" selected>الرجاء اختيار حالة الطلاب</option>
       <option *ngFor="let option of options" [value]="option.key">
@@ -52,43 +32,32 @@
   </div>
 </form>
 
-<div
-  *ngIf="
+<div *ngIf="
     selectClass.value &&
     selectClass.value != '0' &&
     selectUserType.value &&
     selectUserType.value != '0'
-  "
->
+  ">
   <!-- Search input -->
-  <div
-    class="form-group my-3 mt-5"
-    *ngIf="filteredData.length > 0 || searchTerm"
-  >
+  <div class="form-group my-3 mt-5" *ngIf="filteredData.length > 0 || searchTerm">
     <div class="input-group" dir="rtl">
       <div class="input-group-prepend">
-        <select class="custom-select form-control" style="border-radius: 0 0.25rem 0.25rem 0;" [(ngModel)]="searchType" (change)="search()">
+        <select class="custom-select form-control" style="border-radius: 0 0.25rem 0.25rem 0;" [(ngModel)]="searchType"
+          (change)="search()">
           <option value="all">الكل (إسم، رقم قومي)</option>
           <option value="name">الإسم</option>
           <option value="id">الرقم القومي</option>
           <option value="place_of_birth">محل الميلاد</option>
+          <option value="phone">رقم الهاتف</option>
           <option value="mozaola">امتحان مزاولة المهنة</option>
         </select>
       </div>
-      <input
-        type="text"
-        class="form-control"
-        [placeholder]="getSearchPlaceholder()"
-        [(ngModel)]="searchTerm"
-        (input)="search()"
-      />
+      <input type="text" class="form-control" [placeholder]="getSearchPlaceholder()" [(ngModel)]="searchTerm"
+        (input)="search()" />
     </div>
   </div>
 
-  <div
-    class="container text-center mt-4"
-    *ngIf="filteredData && filteredData.length > 0; else NoData"
-  >
+  <div class="container text-center mt-4" *ngIf="filteredData && filteredData.length > 0; else NoData">
     <h3 *ngIf="selectUserType.value == currentClass + '-UploadedImages'">
       الطلاب الذين قاموا بوضع صورهم
       <span class="text-danger">وعددهم: {{ filteredData.length }}</span>
@@ -99,39 +68,20 @@
     </h3>
 
     <button (click)="exportToExcel()" class="btn btn-outline-info my-4">
-      <img
-        src="assets/svgs/excel.svg"
-        style="max-width: 100px;"
-        alt="excel"
-      />
+      <img src="assets/svgs/excel.svg" style="max-width: 100px;" alt="excel" />
     </button>
 
-    <button
-      *ngIf="
+    <button *ngIf="
         superAdminCheck &&
         actualData.length > 0 &&
         selectUserType.value == currentClass + '-UploadedImages'
-      "
-      (click)="checkAndRemoveBrokenImages()"
-      class="btn btn-outline-info my-4 ml-4"
-    >
-      <img
-        src="assets/svgs/fix.svg"
-        style="max-width: 48px;"
-        alt="fixBrokenPhotos"
-      />
+      " (click)="checkAndRemoveBrokenImages()" class="btn btn-outline-info my-4 ml-4">
+      <img src="assets/svgs/fix.svg" style="max-width: 48px;" alt="fixBrokenPhotos" />
     </button>
 
-    <button
-      *ngIf="selectUserType.value == currentClass + '-UploadedImages'"
-      (click)="exportAllPhotos()"
-      class="btn btn-outline-info my-4 ml-4"
-    >
-      <img
-        src="assets/svgs/gallery.svg"
-        style="max-width: 48px;"
-        alt="gallery"
-      />
+    <button *ngIf="selectUserType.value == currentClass + '-UploadedImages'" (click)="exportAllPhotos()"
+      class="btn btn-outline-info my-4 ml-4">
+      <img src="assets/svgs/gallery.svg" style="max-width: 48px;" alt="gallery" />
     </button>
 
     <div style="overflow: auto;">
@@ -144,25 +94,25 @@
             <th>الرقم القومي</th>
             <th>تاريخ الميلاد</th>
             <th>محل الميلاد</th>
+            <th>رقم الهاتف</th>
             <th>عدد محاولات مزاولة المهنة</th>
             <th>الصوره الشخصية</th>
             <th>الإجراءات</th>
           </tr>
         </thead>
         <tbody>
-          <tr
-            *ngFor="
+          <tr *ngFor="
               let item of filteredData
                 | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage };
               let i = index
-            "
-          >
+            ">
             <td>{{ getIndex(i) }}</td>
             <td>{{ item.name }}</td>
             <td>{{ item.name_en }}</td>
             <td>{{ item.id }}</td>
             <td>{{ item.date_of_birth }}</td>
             <td>{{ item.place_of_birth }}</td>
+            <td>{{ item.phone }}</td>
             <td *ngIf="item.is_mozaola == '1 true'">1 ناجح</td>
             <td *ngIf="item.is_mozaola == '1 false'">1 راسب</td>
             <td *ngIf="item.is_mozaola == '2 true'">2 ناجح</td>
@@ -174,38 +124,19 @@
             <td *ngIf="item.is_mozaola == '2' || item.is_mozaola == 2">2</td>
             <td *ngIf="item.is_mozaola == '3' || item.is_mozaola == 3">3</td>
             <td *ngIf="item.image_url">
-              <img
-                [src]="item.image_url"
-                alt="{{ item.id }}"
-                role="button"
-                class="img-thumbnail"
-                style="max-width: 100px; max-height: 60px;"
-                (click)="openImage(item)"
-              />
+              <img [src]="item.image_url" alt="{{ item.id }}" role="button" class="img-thumbnail"
+                style="max-width: 100px; max-height: 60px;" (click)="openImage(item)" />
             </td>
             <td *ngIf="!item.image_url">لم يقم الطالب بوضع صورة بعد !</td>
             <td>
-              <button
-                (click)="goEdit(item.subclass_id, item.id)"
-                class="btn btn-outline-warning btn-sm"
-              >
+              <button (click)="goEdit(item.subclass_id, item.id)" class="btn btn-outline-warning btn-sm">
                 <img src="assets/svgs/edit.svg" alt="edit" width="40" />
               </button>
-              <button
-                *ngIf="selectUserType.value == currentClass + '-UploadedImages'"
-                (click)="deleteStudent(item, 'deleteImage')"
-                class="btn btn-outline-danger btn-sm mr-3"
-              >
-                <img
-                  src="assets/svgs/deletePhoto.svg"
-                  alt="delete"
-                  width="40"
-                />
+              <button *ngIf="selectUserType.value == currentClass + '-UploadedImages'"
+                (click)="deleteStudent(item, 'deleteImage')" class="btn btn-outline-danger btn-sm mr-3">
+                <img src="assets/svgs/deletePhoto.svg" alt="delete" width="40" />
               </button>
-              <button
-                (click)="deleteStudent(item, 'deleteStudent')"
-                class="btn btn-outline-danger btn-sm mr-3"
-              >
+              <button (click)="deleteStudent(item, 'deleteStudent')" class="btn btn-outline-danger btn-sm mr-3">
                 <img src="assets/svgs/trash.svg" alt="delete" width="40" />
               </button>
             </td>
@@ -214,35 +145,21 @@
       </table>
     </div>
 
-        <!-- Page number input above pagination as input group -->
-        <div class="input-group mb-3 justify-content-center" style="max-width: 300px; margin: 0 auto;">
-          <div class="input-group-prepend">
-            <span class="btn btn-outline-primary" type="button" id="go-to-page-btn" (click)="goToPage()">اذهب</span>
-          </div>
-          <input
-            dir="rtl"
-            type="number"
-            min="1"
-            [max]="totalPages"
-            [(ngModel)]="goToPageNumber"
-            class="form-control"
-            placeholder="رقم الصفحة"
-            aria-label="رقم الصفحة"
-            aria-describedby="go-to-page-btn"
-          />
+    <!-- Page number input above pagination as input group -->
+    <div class="input-group mb-3 justify-content-center" style="max-width: 300px; margin: 0 auto;">
+      <div class="input-group-prepend">
+        <span class="btn btn-outline-primary" type="button" id="go-to-page-btn" (click)="goToPage()">اذهب</span>
+      </div>
+      <input dir="rtl" type="number" min="1" [max]="totalPages" [(ngModel)]="goToPageNumber" class="form-control"
+        placeholder="رقم الصفحة" aria-label="رقم الصفحة" aria-describedby="go-to-page-btn" />
 
-        </div>
-        <div *ngIf="showPageNotFound" class="text-danger text-center mb-2">
-          الصفحة غير موجودة
-        </div>
+    </div>
+    <div *ngIf="showPageNotFound" class="text-danger text-center mb-2">
+      الصفحة غير موجودة
+    </div>
 
-    <pagination-controls
-      dir="rtl"
-      (pageChange)="currentPage = $event"
-      class="my-4 d-flex justify-content-center custom-pagination"
-      previousLabel="السابق"
-      nextLabel="التالي"
-    >
+    <pagination-controls dir="rtl" (pageChange)="currentPage = $event"
+      class="my-4 d-flex justify-content-center custom-pagination" previousLabel="السابق" nextLabel="التالي">
     </pagination-controls>
 
   </div>
@@ -251,13 +168,13 @@
   <ng-template #NoData>
     <p class="h5 text-center text-danger">
       {{
-        searchTerm
-          ? "عفوًا لا توجد بيانات للطلاب الذي تم البحث عنهم"
-          : selectUserType.value == currentClass + "-UploadedImages"
-          ? "لا توجد بيانات للطلاب الذين قاموا بوضع صورهم"
-          : selectUserType.value == currentClass + "-NotUpload"
-          ? "لا توجد بيانات للطلاب الذين لم يقوموا بوضع صورهم"
-          : ""
+      searchTerm
+      ? "عفوًا لا توجد بيانات للطلاب الذي تم البحث عنهم"
+      : selectUserType.value == currentClass + "-UploadedImages"
+      ? "لا توجد بيانات للطلاب الذين قاموا بوضع صورهم"
+      : selectUserType.value == currentClass + "-NotUpload"
+      ? "لا توجد بيانات للطلاب الذين لم يقوموا بوضع صورهم"
+      : ""
       }}
     </p>
   </ng-template>

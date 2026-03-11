@@ -35,6 +35,7 @@
             <th>الرقم القومي</th>
             <th>تاريخ الميلاد</th>
             <th>محل الميلاد</th>
+            <th>رقم الهاتف</th>
             <th>الدور</th>
           </tr>
         </thead>
@@ -42,7 +43,7 @@
           <tr
             *ngFor="let entry of filteredData | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; let i = index;">
             <ng-container *ngIf="entry.isMonthBreak; else dataRow">
-              <td colspan="6" class="month-separator">
+              <td colspan="7" class="month-separator">
                 <strong>{{ entry.month }} Class</strong>
               </td>
             </ng-container>
@@ -52,6 +53,7 @@
               <td>{{ entry.NationalId }}</td>
               <td>{{ entry.DateOfBirth }}</td>
               <td>{{ entry.PlaceOfBirth }}</td>
+              <td>{{ entry.Phone }}</td>
               <td>{{ entry.ClassMonth }}</td>
             </ng-template>
           </tr>
@@ -70,7 +72,8 @@
 
 <div class="modal-footer">
   <button (click)="closeModal()" class="btn btn-outline-danger btn-lg" style="width: 150px;">إلغاء</button>
-  <button (click)="confirm()" *ngIf="data" class="btn btn-lg" [ngClass]="model == 'upload' ? 'btn-outline-primary' : 'btn-outline-danger'" style="width: 150px;">
+  <button (click)="confirm()" *ngIf="data" class="btn btn-lg"
+    [ngClass]="model == 'upload' ? 'btn-outline-primary' : 'btn-outline-danger'" style="width: 150px;">
     {{model == "upload" ? "رفع البيانات" : "حذف البيانات"}}
   </button>
 </div>

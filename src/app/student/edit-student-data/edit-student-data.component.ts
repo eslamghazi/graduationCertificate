@@ -30,12 +30,13 @@ export class EditStudentDataComponent implements OnInit {
   name_en = new FormControl(null);
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
+  phone = new FormControl(null, [Validators.required, Validators.pattern('^01[0-9]{9}$')]);
   Image = new FormControl(null);
 
   subClasses: any[] = [];
   Classes: any[] = [];
-  Class = new FormControl(null, [Validators.required]);
-  ClassMonth = new FormControl(null, [Validators.required]);
+  Class = new FormControl({ value: null, disabled: true }, [Validators.required]);
+  ClassMonth = new FormControl({ value: null, disabled: true }, [Validators.required]);
   is_mozaola_attempts = new FormControl('0', [Validators.required]);
   is_mozaola_result = new FormControl('');
 
@@ -55,6 +56,7 @@ export class EditStudentDataComponent implements OnInit {
     name_en: this.name_en,
     DateOfBirth: this.DateOfBirth,
     PlaceOfBirth: this.PlaceOfBirth,
+    phone: this.phone,
     Image: this.Image,
     Class: this.Class,
     ClassMonth: this.ClassMonth,
@@ -107,11 +109,11 @@ export class EditStudentDataComponent implements OnInit {
           this.data = data;
           this.class = data.class_id;
           this.subClass = data.subclass_id;
-          
+
           if (this.class) {
             this.subClasses = await this.supabaseEditService.getDataTable('subclasses', { class_id: this.class });
           }
-          
+
           this.patchValues();
           this.spinner.hide();
         }
@@ -125,6 +127,7 @@ export class EditStudentDataComponent implements OnInit {
     this.name_en.patchValue(this.data.name_en);
     this.DateOfBirth.patchValue(this.data.date_of_birth);
     this.PlaceOfBirth.patchValue(this.data.place_of_birth);
+    this.phone.patchValue(this.data.phone);
     this.Image.patchValue(this.data.image_url);
     this.Class.patchValue(this.data.class_id);
     this.ClassMonth.patchValue(this.data.subclass_id);
@@ -151,8 +154,8 @@ export class EditStudentDataComponent implements OnInit {
     }
     if (isImageValid) {
       this.defaultImage = this.data.image_url
-      ? this.data.image_url
-      : 'assets/Images/DefaultImage.jpg';
+        ? this.data.image_url
+        : 'assets/Images/DefaultImage.jpg';
     } else {
       this.defaultImage = 'assets/Images/DefaultImage.jpg'
     }
@@ -259,70 +262,71 @@ export class EditStudentDataComponent implements OnInit {
     }
     this.spinner.hide();
 
-        if (
-          (this.data.image_url && !isImageValid && !this.selectedImage)
-        ) {
-          this.swal.toastr('error', 'الرجاء رفع صورة اخري ثم حاول مرة اخري');
-          this.spinner.hide();
-          return;
+    if (
+      (this.data.image_url && !isImageValid && !this.selectedImage)
+    ) {
+      this.swal.toastr('error', 'الرجاء رفع صورة اخري ثم حاول مرة اخري');
+      this.spinner.hide();
+      return;
+    }
+
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message = 'هل انت متأكد من تعديل البيانات ؟';
+
+    modalRef.result.then((result) => {
+      if (result) {
+        this.spinner.show();
+        const formValues = this.userForm.getRawValue();
+        const studentData = {
+          ...this.data,
+          id: formValues.NationalId,
+          name: formValues.Name,
+          name_en: formValues.name_en,
+          date_of_birth: formValues.DateOfBirth,
+          place_of_birth: formValues.PlaceOfBirth,
+          phone: formValues.phone,
+          image_url: formValues.Image,
+          class_id: formValues.Class,
+          subclass_id: formValues.ClassMonth,
+          is_mozaola: (!formValues.is_mozaola_attempts || formValues.is_mozaola_attempts === '0') ? '0' : `${formValues.is_mozaola_attempts} ${formValues.is_mozaola_result}`,
+        };
+        let imagePromise;
+        if (this.selectedImage) {
+          const filePath = `${formValues.Class}/${formValues.ClassMonth}/${this.supabaseEditService.encryptFileName(formValues.NationalId + "_" + formValues.Name + ".jpg")}`;
+          imagePromise = this.supabaseEditService.uploadFile(filePath, this.selectedImage);
+          this.selectedImage = null
+        } else if ((this.data.subclass_id !== formValues.ClassMonth || this.data.class_id !== formValues.Class) && this.data.image_url) {
+          // Move image if subclass or class changed and no new image uploaded
+          const oldPath = `${this.data.class_id}/${this.data.subclass_id}/${this.data.image_url.split('/').pop().split('?')[0]}`;
+          const newPath = `${formValues.Class}/${formValues.ClassMonth}/${this.data.image_url.split('/').pop().split('?')[0]}`;
+          imagePromise = this.supabaseEditService.moveFile(oldPath, newPath);
+        } else {
+          imagePromise = Promise.resolve(studentData.image_url);
         }
+        imagePromise
+          .then((imageUrl) => {
+            studentData.image_url = imageUrl;
+            this.supabaseEditService.insertImageDetails(studentData, `${formValues.Class}/${formValues.ClassMonth}/${formValues.NationalId}`).then(() => {
 
-        const modalRef = this.modalService.open(SharedModalComponent, {
-          centered: true,
-          backdrop: 'static',
-          keyboard: false,
-        });
+              // Also delete the old record if the path changed
+              if (this.data.class_id !== formValues.Class || this.data.subclass_id !== formValues.ClassMonth) {
+                this.supabaseEditService.deleteOldRecord(`${this.data.class_id}/${this.data.subclass_id}/${this.data.id}`);
+              }
 
-        modalRef.componentInstance.warningSvg = true;
-        modalRef.componentInstance.message = 'هل انت متأكد من تعديل البيانات ؟';
-
-        modalRef.result.then((result) => {
-          if (result) {
-            this.spinner.show();
-            const formValues = this.userForm.value;
-            const studentData = {
-              ...this.data,
-              id: formValues.NationalId,
-              name: formValues.Name,
-              name_en: formValues.name_en,
-              date_of_birth: formValues.DateOfBirth,
-              place_of_birth: formValues.PlaceOfBirth,
-              image_url: formValues.Image,
-              class_id: formValues.Class,
-              subclass_id: formValues.ClassMonth,
-              is_mozaola: (!formValues.is_mozaola_attempts || formValues.is_mozaola_attempts === '0') ? '0' : `${formValues.is_mozaola_attempts} ${formValues.is_mozaola_result}`,
-            };
-            let imagePromise;
-            if (this.selectedImage) {
-              const filePath = `${formValues.Class}/${formValues.ClassMonth}/${this.supabaseEditService.encryptFileName(formValues.NationalId + "_" + formValues.Name + ".jpg")}`;
-              imagePromise = this.supabaseEditService.uploadFile(filePath, this.selectedImage);
-              this.selectedImage = null
-            } else if ((this.data.subclass_id !== formValues.ClassMonth || this.data.class_id !== formValues.Class) && this.data.image_url) {
-              // Move image if subclass or class changed and no new image uploaded
-              const oldPath = `${this.data.class_id}/${this.data.subclass_id}/${this.data.image_url.split('/').pop().split('?')[0]}`;
-              const newPath = `${formValues.Class}/${formValues.ClassMonth}/${this.data.image_url.split('/').pop().split('?')[0]}`;
-              imagePromise = this.supabaseEditService.moveFile(oldPath, newPath);
-            } else {
-              imagePromise = Promise.resolve(studentData.image_url);
-            }
-            imagePromise
-              .then((imageUrl) => {
-                studentData.image_url = imageUrl;
-                this.supabaseEditService.insertImageDetails(studentData, `${formValues.Class}/${formValues.ClassMonth}/${formValues.NationalId}`).then(() => {
-                  
-                  // Also delete the old record if the path changed
-                  if (this.data.class_id !== formValues.Class || this.data.subclass_id !== formValues.ClassMonth) {
-                     this.supabaseEditService.deleteOldRecord(`${this.data.class_id}/${this.data.subclass_id}/${this.data.id}`);
-                  }
-                  
-                  this.spinner.hide();
-                });
-              })
-              .catch(() => {
-                this.spinner.hide();
-              });
-          }
-        });
+              this.spinner.hide();
+            });
+          })
+          .catch(() => {
+            this.spinner.hide();
+          });
+      }
+    });
 
   }
 

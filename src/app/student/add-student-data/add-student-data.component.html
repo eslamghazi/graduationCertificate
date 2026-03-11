@@ -6,7 +6,8 @@
     <img class="rounded-lg" role="button" src={{defaultImage}} width="200" height="200" id="image"
       (click)="imageUploader.click()">
   </div>
-  <label *ngIf="!selectedImage" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️ (formal - 4*6 - واضحة - خلفية بيضاء)</label>
+  <label *ngIf="!selectedImage" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️ (formal - 4*6 -
+    واضحة - خلفية بيضاء)</label>
 
   <div class="mb-3 text-right" hidden>
     <label for="image">ارفع الصورة (formal - 4*6 - واضحة - خلفية بيضاء)</label>
@@ -72,9 +73,23 @@
   </div>
 
   <div class="mb-3 text-right">
+    <label for="phone">رقم الهاتف</label>
+    <div class="input-group">
+      <input type="text" class="form-control" id="phone" formControlName="phone" placeholder="رقم الهاتف">
+    </div>
+    <div *ngIf="phone.touched && phone.errors?.['required']" class="text-danger small">
+      يجب ملئ رقم الهاتف
+    </div>
+    <div *ngIf="phone.touched && phone.errors?.['pattern']" class="text-danger small">
+      يجب ان يبدأ رقم الهاتف بـ 01 ويكون مكون من 11 رقم
+    </div>
+  </div>
+
+  <div class="mb-3 text-right">
     <label for="PlaceOfBirth">اختر دور الطالب</label>
     <div class="input-group">
-      <select (change)="changeSubClass()" class="form-control text-right" id="exampleFormControlSelect1" formControlName="ClassMonth">
+      <select (change)="changeSubClass()" class="form-control text-right" id="exampleFormControlSelect1"
+        formControlName="ClassMonth">
         <option value="0">اختر دور الطالب</option>
         <option *ngFor="let subClass of subclasses" value="{{subClass.id}}">{{subClass.name}}</option>
 

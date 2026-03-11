@@ -253,76 +253,76 @@ export class SupabaseAdminService {
   }
 
   // Download a folder of images as a ZIP file
-async downloadFolderAsZip(path: string, zipNameWillBe: string): Promise<void> {
-  this.swal.toastr('info', 'جار تجهيز الصور ...');
-  this.spinner.show();
+  async downloadFolderAsZip(path: string, zipNameWillBe: string): Promise<void> {
+    this.swal.toastr('info', 'جار تجهيز الصور ...');
+    this.spinner.show();
 
-  try {
-    // Fetch all files with pagination
-    let allFiles: any[] = [];
-    let offset = 0;
-    const limit = 1500;
+    try {
+      // Fetch all files with pagination
+      let allFiles: any[] = [];
+      let offset = 0;
+      const limit = 1500;
 
-    while (true) {
-      const { data: files, error } = await this.supabase
-        .storage
-        .from('images')
-        .list(path, { limit, offset });
-
-      if (error) throw new Error(error.message);
-      if (!files || files.length === 0) break;
-
-      allFiles = allFiles.concat(files);
-      offset += limit;
-      if (files.length < limit) break; // No more files to fetch
-    }
-
-    if (allFiles.length === 0) throw new Error('No files found');
-
-    const zip = new JSZip();
-    const batchSize = 5; // Process 5 files at a time to avoid resource issues
-
-    // Process files in batches
-    for (let i = 0; i < allFiles.length; i += batchSize) {
-      const batch = allFiles.slice(i, i + batchSize);
-      const promises = batch.map(async (file) => {
-        const { data: fileData, error: fileError } = await this.supabase
+      while (true) {
+        const { data: files, error } = await this.supabase
           .storage
           .from('images')
-          .download(`${path}/${file.name}`);
+          .list(path, { limit, offset });
 
-        if (fileError) throw new Error(fileError.message);
-        const arrayBuffer = await fileData.arrayBuffer();
-        const decryptedFileName = this.decryptFileName(file.name);
-        zip.file(decryptedFileName, arrayBuffer);
+        if (error) throw new Error(error.message);
+        if (!files || files.length === 0) break;
+
+        allFiles = allFiles.concat(files);
+        offset += limit;
+        if (files.length < limit) break; // No more files to fetch
+      }
+
+      if (allFiles.length === 0) throw new Error('No files found');
+
+      const zip = new JSZip();
+      const batchSize = 5; // Process 5 files at a time to avoid resource issues
+
+      // Process files in batches
+      for (let i = 0; i < allFiles.length; i += batchSize) {
+        const batch = allFiles.slice(i, i + batchSize);
+        const promises = batch.map(async (file) => {
+          const { data: fileData, error: fileError } = await this.supabase
+            .storage
+            .from('images')
+            .download(`${path}/${file.name}`);
+
+          if (fileError) throw new Error(fileError.message);
+          const arrayBuffer = await fileData.arrayBuffer();
+          const decryptedFileName = this.decryptFileName(file.name);
+          zip.file(decryptedFileName, arrayBuffer);
+        });
+
+        await Promise.all(promises); // Wait for the batch to complete
+      }
+
+      // Generate ZIP with compression to reduce memory usage
+      const content = await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 }
       });
 
-      await Promise.all(promises); // Wait for the batch to complete
+      // Trigger download
+      const url = window.URL.createObjectURL(content);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${zipNameWillBe}.zip`;
+      link.click();
+      window?.URL?.revokeObjectURL(url);
+
+      this.spinner.hide();
+      this.swal.toastr('success', 'تم تحضير الصور بنجاح');
+    } catch (error: any) {
+      this.spinner.hide();
+      this.swal.toastr('error', `حدث خطأ أثناء تحضير الصور: ${error.message}`);
+      throw error;
     }
-
-    // Generate ZIP with compression to reduce memory usage
-    const content = await zip.generateAsync({
-      type: 'blob',
-      compression: 'DEFLATE',
-      compressionOptions: { level: 6 }
-    });
-
-    // Trigger download
-    const url = window.URL.createObjectURL(content);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${zipNameWillBe}.zip`;
-    link.click();
-    window?.URL?.revokeObjectURL(url);
-
-    this.spinner.hide();
-    this.swal.toastr('success', 'تم تحضير الصور بنجاح');
-  } catch (error: any) {
-    this.spinner.hide();
-    this.swal.toastr('error', `حدث خطأ أثناء تحضير الصور: ${error.message}`);
-    throw error;
   }
-}
 
   // Delete a file from Supabase Storage and remove the 'image_url' property
   deleteFileAndImageProperty(
@@ -504,6 +504,7 @@ async downloadFolderAsZip(path: string, zipNameWillBe: string): Promise<void> {
       const placeOfBirth = row[4]; // Place of Birth
       const classMonth = row[5]; // ClassMonth (e.g., June, September)
       const name_en = row[6]; // name_en
+      const phone = row[7]; // phone
 
       result.push({
         id: nationalId, // Use NationalId as the primary key
@@ -512,6 +513,7 @@ async downloadFolderAsZip(path: string, zipNameWillBe: string): Promise<void> {
         date_of_birth: dateOfBirth,
         place_of_birth: placeOfBirth,
         name_en: name_en,
+        phone: phone,
         class_id: this.currentClass,
         subclass_id: `${this.currentClass}-${classMonth}`,
       });

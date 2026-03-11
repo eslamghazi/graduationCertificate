@@ -31,7 +31,7 @@ export class UploadExcelComponent implements OnInit, OnDestroy {
     private modalService: NgbModal,
     private spinner: NgxSpinnerService,
     private swal: SwalService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.data = null;
@@ -84,6 +84,7 @@ export class UploadExcelComponent implements OnInit, OnDestroy {
         NationalId: student.national_id,
         DateOfBirth: student.date_of_birth,
         PlaceOfBirth: student.place_of_birth,
+        Phone: student.phone,
         ClassMonth: month,
       });
     });
@@ -112,12 +113,12 @@ export class UploadExcelComponent implements OnInit, OnDestroy {
     modalRef.result.then((result) => {
       if (result) {
 
-        let updatedData = this.data.map((item: { national_id?: string; [key: string]: any }) => {
+        let updatedData = this.data.map((item: { national_id?: string;[key: string]: any }) => {
           const { national_id, ...rest } = item;
           return rest;
         });
 
-          const sub = this.supabaseAdminService
+        const sub = this.supabaseAdminService
           .getAllData('students', { class_id: this.currentClass })
           .subscribe({
             next: async (existingStudents: any[]) => {

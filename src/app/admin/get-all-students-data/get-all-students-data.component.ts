@@ -46,7 +46,7 @@ export class GetAllStudentsDataComponent implements OnInit {
     private swal: SwalService,
     private modalService: NgbModal,
     private router: Router
-  ) {}
+  ) { }
 
   adminForm = new FormGroup({
     selectClass: this.selectClass,
@@ -55,12 +55,12 @@ export class GetAllStudentsDataComponent implements OnInit {
 
   ngOnInit() {
     this.getRowClass()
-      if (this.currentClass) {
-        this.getSubClassesOptions();
-      }
+    if (this.currentClass) {
+      this.getSubClassesOptions();
+    }
   }
 
-  getRowClass () {
+  getRowClass() {
     this.spinner.show();
     this.supabaseAdminService.getAllData('classes').subscribe((result) => {
       this.rowClass = result.find((x: any) => x.id === this.currentClass);
@@ -102,7 +102,7 @@ export class GetAllStudentsDataComponent implements OnInit {
         this.spinner.hide();
       });
 
-    }
+  }
 
   selectUserTypeFunc() {
     this.spinner.show();
@@ -139,6 +139,7 @@ export class GetAllStudentsDataComponent implements OnInit {
       case 'name': return 'البحث بالإسم';
       case 'id': return 'البحث بالرقم القومي';
       case 'place_of_birth': return 'البحث بمحل الميلاد';
+      case 'phone': return 'البحث برقم الهاتف';
       case 'mozaola': return 'البحث بعدد محاولات مزاولة المهنة';
       case 'all': default: return 'البحث بالإسم و الرقم القومي';
     }
@@ -153,7 +154,7 @@ export class GetAllStudentsDataComponent implements OnInit {
           const matchesNameEn = item.name_en && item.name_en.toLowerCase().includes(this.searchTerm.toLowerCase());
           const matchesId = item.id && item.id.toString().includes(this.searchTerm);
           const matchesPlaceOfBirth = item.place_of_birth && item.place_of_birth.toLowerCase().includes(this.searchTerm.toLowerCase());
-          
+
           let isMozaolaValue = item.is_mozaola == 0 || !item.is_mozaola ? '0' : item.is_mozaola.toString();
           const matchesMozaola = isMozaolaValue.includes(this.searchTerm);
 
@@ -164,7 +165,9 @@ export class GetAllStudentsDataComponent implements OnInit {
           } else if (this.searchType === 'place_of_birth') {
             return matchesPlaceOfBirth;
           } else if (this.searchType === 'mozaola') {
-             return matchesMozaola;
+            return matchesMozaola;
+          } else if (this.searchType === 'phone') {
+            return item.phone && item.phone.toString().includes(this.searchTerm);
           } else {
             return matchesName || matchesNameEn || matchesId;
           }
@@ -175,8 +178,8 @@ export class GetAllStudentsDataComponent implements OnInit {
       this.selectUserType.value === `${this.currentClass}-UploadedImages`
         ? this.filterDataWithImages()
         : this.selectUserType.value === `${this.currentClass}-NotUpload`
-        ? this.filterDataWithOutImages()
-        : (this.filteredData = this.data);
+          ? this.filterDataWithOutImages()
+          : (this.filteredData = this.data);
       this.spinner.hide();
     }
     this.currentPage = 1;
@@ -204,6 +207,7 @@ export class GetAllStudentsDataComponent implements OnInit {
           'class_id',
           'subclass_id',
           'is_mozaola',
+          'phone',
           'image_url',
         ];
 
@@ -224,10 +228,9 @@ export class GetAllStudentsDataComponent implements OnInit {
 
         XLSX.writeFile(
           wb,
-          `${
-            this.selectUserType.value === `${this.currentClass}-UploadedImages`
-              ? 'بيانات الطلاب الذين قاموا بوضع صورهم.xlsx'
-              : this.selectUserType.value === `${this.currentClass}-NotUpload`
+          `${this.selectUserType.value === `${this.currentClass}-UploadedImages`
+            ? 'بيانات الطلاب الذين قاموا بوضع صورهم.xlsx'
+            : this.selectUserType.value === `${this.currentClass}-NotUpload`
               ? 'بيانات الطلاب الذين لم يقوموا بوضع صورهم.xlsx'
               : 'بيانات_الطلاب.xlsx'
           }`
