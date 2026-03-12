@@ -117,10 +117,10 @@
   <div class="mb-3 text-right">
     <div class="row">
 
-      <div class="col-6" *ngIf="is_mozaola_attempts.value != '0'">
-        <label for="is_mozaola_result">النتيجة</label>
+      <div class="col-6" *ngIf="mozaola_attempts.value != '0'">
+        <label for="mozaola_result">النتيجة</label>
         <div class="input-group">
-          <select class="form-control text-right" id="is_mozaola_result" formControlName="is_mozaola_result">
+          <select class="form-control text-right" id="mozaola_result" formControlName="mozaola_result">
             <option value="" disabled selected>اختر الحالة</option>
             <option value="true">ناجح</option>
             <option value="false">راسب</option>
@@ -128,10 +128,10 @@
         </div>
       </div>
 
-      <div [ngClass]="is_mozaola_attempts.value != '0' ? 'col-6' : 'col-12'">
-        <label for="is_mozaola_attempts">عدد محاولات امتحان مزاولة المهنة</label>
+      <div [ngClass]="mozaola_attempts.value != '0' ? 'col-6' : 'col-12'">
+        <label for="mozaola_attempts">عدد محاولات امتحان مزاولة المهنة</label>
         <div class="input-group">
-          <select class="form-control text-right" id="is_mozaola_attempts" formControlName="is_mozaola_attempts">
+          <select class="form-control text-right" id="mozaola_attempts" formControlName="mozaola_attempts">
             <option value="0">لم يسبق لى</option>
             <option value="1">1</option>
             <option value="2">2</option>
@@ -145,6 +145,6 @@
 
 
   <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
-    [disabled]="!userForm.valid || !selectedDate || !ClassMonth.value || ClassMonth.value == 0 || (is_mozaola_attempts.value != '0' && !is_mozaola_result.value)">ارسال</button>
+    [disabled]="!userForm.valid || !selectedDate || !ClassMonth.value || ClassMonth.value == 0 || (mozaola_attempts.value != '0' && !mozaola_result.value)">ارسال</button>
   <button class="btn btn-lg btn-danger btn-block mt-4" (click)="goBack()" type="button">العوده</button>
 </form>

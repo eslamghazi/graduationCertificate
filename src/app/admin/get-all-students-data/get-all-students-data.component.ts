@@ -156,8 +156,8 @@ export class GetAllStudentsDataComponent implements OnInit {
           const matchesId = item.id && item.id.toString().includes(this.searchTerm);
           const matchesPlaceOfBirth = item.place_of_birth && item.place_of_birth.toLowerCase().includes(this.searchTerm.toLowerCase());
 
-          let isMozaolaValue = item.is_mozaola == 0 || !item.is_mozaola ? '0' : item.is_mozaola.toString();
-          const matchesMozaola = isMozaolaValue.includes(this.searchTerm);
+          let mozaolaValue = item.mozaola == 0 || !item.mozaola ? '0' : item.mozaola.toString();
+          const matchesMozaola = mozaolaValue.includes(this.searchTerm);
 
           if (this.searchType === 'name') {
             return matchesName || matchesNameEn;
@@ -209,7 +209,7 @@ export class GetAllStudentsDataComponent implements OnInit {
           'place_of_birth',
           'class_id',
           'subclass_id',
-          'is_mozaola',
+          'mozaola',
           'phone',
           'email',
           'image_url',

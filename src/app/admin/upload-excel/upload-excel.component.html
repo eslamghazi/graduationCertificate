@@ -32,11 +32,13 @@
           <tr>
             <th>م</th>
             <th>الإسم</th>
+            <th>الإسم بالإنجليزية</th>
             <th>الرقم القومي</th>
             <th>تاريخ الميلاد</th>
             <th>محل الميلاد</th>
             <th>رقم الهاتف</th>
             <th>البريد الإلكتروني</th>
+            <th>مزاولة المهنة</th>
             <th>الدور</th>
           </tr>
         </thead>
@@ -44,18 +46,20 @@
           <tr
             *ngFor="let entry of filteredData | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; let i = index;">
             <ng-container *ngIf="entry.isMonthBreak; else dataRow">
-              <td colspan="8" class="month-separator">
+              <td colspan="10" class="month-separator">
                 <strong>{{ entry.month }} Class</strong>
               </td>
             </ng-container>
             <ng-template #dataRow>
               <td>{{ entry.id }}</td>
               <td>{{ entry.Name }}</td>
+              <td>{{ entry.NameEn }}</td>
               <td>{{ entry.NationalId }}</td>
               <td>{{ entry.DateOfBirth }}</td>
               <td>{{ entry.PlaceOfBirth }}</td>
               <td>{{ entry.Phone }}</td>
               <td>{{ entry.Email }}</td>
+              <td>{{ entry.Mozaola }}</td>
               <td>{{ entry.ClassMonth }}</td>
             </ng-template>
           </tr>

@@ -497,28 +497,39 @@ export class SupabaseAdminService {
 
     for (let i = 1; i < rawData.length; i++) {
       const row = rawData[i];
-      const id = row[0]; // ID
-      const name = row[1]; // Name
-      const nationalId = row[2]; // NationalId
-      const dateOfBirth = row[3]; // Date of Birth
-      const placeOfBirth = row[4]; // Place of Birth
-      const classMonth = row[5]; // ClassMonth (e.g., June, September)
-      const name_en = row[6]; // name_en
-      const phone = row[7]; // phone
-      const email = row[8]; // email
+      if (!row || row.length === 0) continue;
 
-      result.push({
-        id: nationalId, // Use NationalId as the primary key
-        name: name,
-        national_id: nationalId,
-        date_of_birth: dateOfBirth,
-        place_of_birth: placeOfBirth,
-        name_en: name_en,
-        phone: phone,
-        email: email,
+      // "the id is the nid" -> Column 0 is the National ID
+      const nationalId = row[0]; 
+      if (!nationalId) continue; // Skip if nid is missing (REQUIRED)
+
+      const student: any = {
+        id: nationalId.toString(), // Use NationalId as the primary key (id)
         class_id: this.currentClass,
-        subclass_id: `${this.currentClass}-${classMonth}`,
-      });
+      };
+
+      // Optional fields
+      if (row[1]) student.name = row[1];
+      if (row[2]) student.date_of_birth = row[2];
+      if (row[3]) student.place_of_birth = row[3];
+      
+      const classMonth = row[4];
+      if (classMonth) {
+        student.subclass_id = `${this.currentClass}-${classMonth}`;
+      }
+
+      if (row[5]) student.name_en = row[5];
+      if (row[6]) student.phone = row[6]?.toString();
+      if (row[7]) student.email = row[7];
+      
+      // Additional columns from students table
+      if (row[8]) student.mozaola = row[8].toString();
+      if (row[9]) student.image_url = row[9];
+      if (row[10]) student.subclass_id = row[10]; // Direct subclass_id if provided
+      if (row[11]) student.class_id = row[11]; // Direct class_id if provided
+      if (row[12]) student.created_at = row[12];
+
+      result.push(student);
     }
 
     return result;
@@ -529,7 +540,7 @@ export class SupabaseAdminService {
 
     const updatedData = data.map((item: any) => ({
       ...item,
-      created_at: new Date().toISOString()
+      created_at: item.created_at || new Date().toISOString()
     }));
 
 

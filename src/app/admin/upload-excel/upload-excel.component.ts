@@ -73,20 +73,23 @@ export class UploadExcelComponent implements OnInit, OnDestroy {
     const result: any[] = [];
     const monthMap: { [key: string]: any[] } = {};
 
-    structuredData.forEach((student, index) => {
-      const month = student.subclass_id.split('-').pop();
+    structuredData.forEach((student) => {
+      const month = student.subclass_id ? student.subclass_id.split('-').pop() : 'Other';
       if (!monthMap[month]) {
         monthMap[month] = [];
       }
       monthMap[month].push({
-        id: index + 1,
-        Name: student.name,
-        NationalId: student.national_id,
-        DateOfBirth: student.date_of_birth,
-        PlaceOfBirth: student.place_of_birth,
-        Phone: student.phone,
-        Email: student.email,
+        id: student.id || '', // National ID displayed as ID
+        Name: student.name || '',
+        NationalId: student.id || '', // National ID column
+        DateOfBirth: student.date_of_birth || '',
+        PlaceOfBirth: student.place_of_birth || '',
+        Phone: student.phone || '',
+        Email: student.email || '',
         ClassMonth: month,
+        NameEn: student.name_en || '',
+        Mozaola: student.mozaola || '',
+        ImageUrl: student.image_url || '',
       });
     });
 
@@ -114,10 +117,7 @@ export class UploadExcelComponent implements OnInit, OnDestroy {
     modalRef.result.then((result) => {
       if (result) {
 
-        let updatedData = this.data.map((item: { national_id?: string;[key: string]: any }) => {
-          const { national_id, ...rest } = item;
-          return rest;
-        });
+        let updatedData = this.data;
 
         const sub = this.supabaseAdminService
           .getAllData('students', { class_id: this.currentClass })

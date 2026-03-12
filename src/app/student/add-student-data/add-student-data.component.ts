@@ -31,8 +31,8 @@ export class AddStudentDataComponent implements OnInit {
   phone = new FormControl(null, [Validators.required, Validators.pattern('^01[0-9]{9}$')]);
   email = new FormControl(null, [Validators.required, Validators.email]);
   ClassMonth = new FormControl({ value: 0, disabled: true }, [Validators.required]);
-  is_mozaola_attempts = new FormControl('0', [Validators.required]);
-  is_mozaola_result = new FormControl('');
+  mozaola_attempts = new FormControl('0', [Validators.required]);
+  mozaola_result = new FormControl('');
   Image = new FormControl(null);
 
   constructor(
@@ -54,8 +54,8 @@ export class AddStudentDataComponent implements OnInit {
     phone: this.phone,
     email: this.email,
     ClassMonth: this.ClassMonth,
-    is_mozaola_attempts: this.is_mozaola_attempts,
-    is_mozaola_result: this.is_mozaola_result,
+    mozaola_attempts: this.mozaola_attempts,
+    mozaola_result: this.mozaola_result,
     Image: this.Image,
   });
 
@@ -209,7 +209,7 @@ export class AddStudentDataComponent implements OnInit {
           place_of_birth: formValues.PlaceOfBirth,
           phone: formValues.phone,
           email: formValues.email,
-          is_mozaola: (!formValues.is_mozaola_attempts || formValues.is_mozaola_attempts === '0') ? '0' : `${formValues.is_mozaola_attempts} ${formValues.is_mozaola_result}`,
+          mozaola: (!formValues.mozaola_attempts || formValues.mozaola_attempts === '0') ? '0' : `${formValues.mozaola_attempts} ${formValues.mozaola_result}`,
           image_url: formValues.Image,
         };
 

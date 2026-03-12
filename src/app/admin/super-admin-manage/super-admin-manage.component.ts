@@ -7,6 +7,7 @@ import { SharedModalComponent } from 'src/app/shared/shared-modal/shared-modal.c
 import { SwalService } from 'src/app/shared/swal.service';
 import { UploadExcelComponent } from '../upload-excel/upload-excel.component';
 import { Subscription } from 'rxjs';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-super-admin-manage',
@@ -382,16 +383,43 @@ export class SuperAdminManageComponent implements OnInit, OnDestroy {
 
     modalRef.componentInstance.warningSvg = true;
     modalRef.componentInstance.message =
-      'هل تريد تحميل شيت الرفع (excel) الافتراضي؟';
+      'هل تريد تحميل شيت الرفع (excel) الافتراضي؟ (علماً بأن جميع الحقول اختيارية ماعدا الرقم القومي)';
 
     modalRef.result.then((result) => {
       if (result) {
-        const downloadLink = document.createElement('a');
-        downloadLink.setAttribute('download', 'مسودة لشيت الرفع.xlsx');
-        downloadLink.href = 'assets/Graduation-Certificate-Sample.xlsx';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        const header = [
+          'الرقم القومي (ID) إلزامي',
+          'الإسم',
+          'تاريخ الميلاد',
+          'محل الميلاد',
+          'اسم الدور (June/September/...)',
+          'الإسم بالإنجليزية',
+          'رقم الهاتف',
+          'البريد الإلكتروني',
+          'مزاولة المهنة',
+          'رابط الصورة',
+          'معرف الدور الكامل (اختياري)',
+          'معرف الفرقة (اختياري)',
+          'تاريخ الإضافة (اختياري)'
+        ];
+
+        const data = [
+          ['29901010101234', 'محمد احمد', '1999-01-01', 'القاهرة', 'September', 'Mohamed Ahmed', '01012345678', 'test@example.com', '0', '', '', '', '']
+        ];
+
+        const worksheet = XLSX.utils.aoa_to_sheet([header, ...data]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Students Template');
+
+        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob: Blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+        
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'نموذج شيت رفع الطلاب.xlsx';
+        link.click();
+        window.URL.revokeObjectURL(url);
 
         this.activeModal.dismiss();
       }
