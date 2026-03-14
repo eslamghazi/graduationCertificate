@@ -234,23 +234,6 @@ export class SupabaseAdminService {
     });
   }
 
-  encryptFileName(filename: string): string {
-    const parts = filename.split(".");
-    const name = btoa(unescape(encodeURIComponent(parts.slice(0, -1).join("."))));
-    const ext = parts.slice(-1)[0];
-    return `${name}.${ext}`;
-  }
-
-  decryptFileName(encrypted: string): string {
-    const parts = encrypted.split(".");
-    const base64 = parts.slice(0, -1).join(".")
-      .replace(/-/g, "+")
-      .replace(/_/g, "/")
-      + "===".slice((parts[0].length + 3) % 4); // Restore padding
-    const name = decodeURIComponent(escape(atob(base64)));
-    const ext = parts.slice(-1)[0];
-    return `${name}.${ext}`;
-  }
 
   // Download a folder of images as a ZIP file
   async downloadFolderAsZip(path: string, zipNameWillBe: string): Promise<void> {
@@ -293,8 +276,7 @@ export class SupabaseAdminService {
 
           if (fileError) throw new Error(fileError.message);
           const arrayBuffer = await fileData.arrayBuffer();
-          const decryptedFileName = this.decryptFileName(file.name);
-          zip.file(decryptedFileName, arrayBuffer);
+          zip.file(file.name, arrayBuffer);
         });
 
         await Promise.all(promises); // Wait for the batch to complete

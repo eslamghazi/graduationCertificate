@@ -68,7 +68,16 @@ export class AddStudentDataComponent implements OnInit {
     }
 
     const classData = await this.supabaseEditUserService.getDataTable("classes", { id: this.class });
+    const sessionSettings = sessionStorage.getItem('app_settings');
+    const viewStatus = sessionSettings ? JSON.parse(sessionSettings).viewStatus : 'edit';
     const isAdmin = !!localStorage.getItem('adminCheck');
+
+    if (viewStatus === 'view' && !isAdmin) {
+      this.router.navigateByUrl('/student/getStudentData');
+      this.swal.toastr('error', 'عفوًا، التقديم المباشر غير متاح حاليًا');
+      this.spinner.hide();
+      return;
+    }
 
     if (classData && classData.length > 0) {
       const currentClassData = classData[0];
@@ -215,7 +224,7 @@ export class AddStudentDataComponent implements OnInit {
 
         let imagePromise;
         if (this.selectedImage) {
-          const filePath = `${this.class}/${this.ClassMonth.value}/${this.supabaseEditUserService.encryptFileName(studentData.id + "_" + formValues.Name + ".jpg")}`;
+          const filePath = `${this.class}/${this.ClassMonth.value}/${studentData.id}.jpg`;
           imagePromise = this.supabaseEditUserService.uploadFile(filePath, this.selectedImage);
           this.selectedImage = null
         } else {

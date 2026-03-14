@@ -122,8 +122,17 @@ export class EditStudentDataComponent implements OnInit {
       });
   }
 
+  viewStatus = 'edit';
+  canEdit = true;
+
   async patchValues() {
     this.spinner.show();
+
+    const sessionSettings = sessionStorage.getItem('app_settings');
+    this.viewStatus = sessionSettings ? JSON.parse(sessionSettings).viewStatus : 'edit';
+    const isAdmin = !!localStorage.getItem('adminCheck');
+    this.canEdit = (this.viewStatus === 'edit' || isAdmin);
+
     this.NationalId.patchValue(this.data.id);
     this.Name.patchValue(this.data.name);
     this.name_en.patchValue(this.data.name_en);
@@ -134,6 +143,10 @@ export class EditStudentDataComponent implements OnInit {
     this.Image.patchValue(this.data.image_url);
     this.Class.patchValue(this.data.class_id);
     this.ClassMonth.patchValue(this.data.subclass_id);
+
+    if (!this.canEdit) {
+      this.userForm.disable();
+    }
 
     let mozaolaVal = this.data.mozaola || '0';
     mozaolaVal = mozaolaVal.toString();
@@ -302,7 +315,12 @@ export class EditStudentDataComponent implements OnInit {
         };
         let imagePromise;
         if (this.selectedImage) {
-          const filePath = `${formValues.Class}/${formValues.ClassMonth}/${this.supabaseEditService.encryptFileName(formValues.NationalId + "_" + formValues.Name + ".jpg")}`;
+          // Delete old image if exists
+          if (this.data.image_url) {
+            const oldFilePath = `${this.data.class_id}/${this.data.subclass_id}/${this.data.id}.jpg`;
+            this.supabaseEditService.deleteFile(oldFilePath);
+          }
+          const filePath = `${formValues.Class}/${formValues.ClassMonth}/${formValues.NationalId}.jpg`;
           imagePromise = this.supabaseEditService.uploadFile(filePath, this.selectedImage);
           this.selectedImage = null
         } else if ((this.data.subclass_id !== formValues.ClassMonth || this.data.class_id !== formValues.Class) && this.data.image_url) {

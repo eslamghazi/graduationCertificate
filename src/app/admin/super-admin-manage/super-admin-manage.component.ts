@@ -294,11 +294,6 @@ export class SuperAdminManageComponent implements OnInit, OnDestroy {
         const sub = this.supabaseAdminService.getFileNames(folderPath).subscribe({
           next: (fileNames) => {
             let decodedFileNames = fileNames;
-            if (target === 'subFiles') {
-              decodedFileNames = fileNames.map((name: string) =>
-                this.supabaseAdminService.decryptFileName(name)
-              );
-            }
             this.downloadTxtFile(decodedFileNames, fileName);
             this.spinner.hide();
             this.swal.toastr('success', 'تم تجهيز الملف بنجاح');

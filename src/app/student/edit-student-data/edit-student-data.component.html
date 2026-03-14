@@ -1,12 +1,13 @@
+<ng-container *ngIf="data && Classes.length > 0; else loading">
 <form class="form-signin text-center" [formGroup]="userForm" (submit)="onSubmit()">
 
   <label for="image" class="h3 mb-4 text-info">تعديل بيانات الطالب ({{data?.id}})</label>
 
   <div class="input-group mb-2 justify-content-center text-center">
     <img class="rounded-lg" role="button" src={{defaultImage}} width="200" height="200" id="image"
-      (click)="imageUploader.click()">
+      (click)="canEdit ? imageUploader.click() : null">
   </div>
-  <label *ngIf="!data?.Image" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️ (formal - 4*6 - واضحة
+  <label *ngIf="!data?.image_url && canEdit" for="image" class="h5 mb-4 text-warning">اضغط اعلي لرفع الصورة☝️☝️☝️ (formal - 4*6 - واضحة
     - خلفية بيضاء)</label>
 
   <div class="mb-3 text-right" hidden>
@@ -143,7 +144,18 @@
     </div>
   </div>
 
-  <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+  <label *ngIf="!canEdit" class="h5 mb-4 text-warning">عفوًا، النظام في وضع المشاهدة فقط حاليًا</label>
+
+  <button *ngIf="canEdit" class="btn btn-lg btn-primary btn-block mt-4" type="submit"
     [disabled]="!userForm.valid || (!selectedImage && !userForm.dirty && !selectedDate) || (mozaola_attempts.value != '0' && !mozaola_result.value)">ارسال</button>
   <button class="btn btn-lg btn-danger btn-block mt-4" (click)="goBack()" type="button">العوده</button>
 </form>
+</ng-container>
+
+<ng-template #loading>
+    <div class="d-flex justify-content-center align-items-center flex-column mt-5" style="min-height: 400px;">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+        </div>
+        <h4 class="text-primary">جاري تحميل البيانات...</h4>
+    </div>
+</ng-template>

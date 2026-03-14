@@ -16,86 +16,106 @@ export class AppComponent implements OnInit {
   constructor(private supabaseAuthService: SupabaseAuthService) {}
 
   ngOnInit(): void {
-    this.getAuth();
+    this.checkAdminAndLoadSettings();
   }
 
-  getAuth() {
-    if (this.auth && this.authPrevilige) {
-      // Fetch the user's auth data
-      this.supabaseAuthService
-        .getDataByPath(`auth/${this.authPrevilige}`)
-        .subscribe((userData) => {
-          if (userData) {
-            this.userData = userData;
-            // Handle superadmin case
-            if (this.authPrevilige === environment.authorize) {
-              this.comingSoon = true;
-              localStorage.setItem('adminCheck', `superadmin-${environment.authorize}`);
+  checkAdminAndLoadSettings() {
+    // 1. Ensure admin exists (get NID from local storage)
+    const adminCheck = localStorage.getItem('adminCheck');
+    const adminNid = adminCheck?.split('-')[1];
 
-              // Fetch class data to set currentClass
-              this.supabaseAuthService
-                .getDataByPath('classes')
-                .subscribe((classData) => {
-                  if (classData) {
-                    const userClass = userData.class_id;
-                    if (classData[userClass]) {
-                      localStorage.setItem('currentClass', userClass);
-                    } else {
-
-                      this.supabaseAuthService
-                .getDataByPath('settings')
-                .subscribe((settingsData) => {
-                  if (settingsData) {
-                    localStorage.setItem('currentClass', settingsData.find((x: any) => x.id === 'default_class').value);
-                  }
-                });
-
-                    }
-                  }
-                });
-              return;
-            }
-
-            // Update adminCheck with the user's auth_level and id
-            localStorage.setItem(
-              'adminCheck',
-              `${userData.auth_level}-${userData.id}`
-            );
-
-            // Fetch class data to set currentClass
-            this.supabaseAuthService
-              .getDataByPath('classes')
-              .subscribe((classData) => {
-                if (classData) {
-                  const userClass = userData.class_id;
-                  if (classData[userClass]) {
-                    localStorage.setItem('currentClass', userClass);
-                  } else {
-                    this.supabaseAuthService
-              .getDataByPath('settings')
-              .subscribe((settingsData) => {
-                if (settingsData) {
-                  localStorage.setItem('currentClass', settingsData.find((x: any) => x.id === 'default_class').value);
-                }
-              });
-
-                  }
-                }
-              });
-          } else {
-            // If user data doesn't exist, clear adminCheck
-            localStorage.removeItem('adminCheck');
-          }
-        });
+    if (adminCheck && adminNid) {
+      // Check if we have settings in sessionStorage
+      const sessionSettings = sessionStorage.getItem('app_settings');
+      if (sessionSettings) {
+        const settings = JSON.parse(sessionSettings);
+        this.userData = settings.userData;
+        this.comingSoon = settings.comingSoon;
+        // Optionally update localStorage currentClass if needed elsewhere
+        localStorage.setItem('currentClass', settings.currentClass);
+      } else {
+        // Fetch and initialize
+        this.fetchAndCacheSettings(adminNid, adminCheck.split('-')[0]);
+      }
     } else {
-      // If no auth, check the comingSoon setting
-      this.supabaseAuthService
-        .getDataByPath('settings/coming_soon')
-        .subscribe((data) => {
-          if (data) {
-            data.value === "true" ? (this.comingSoon = true) : (this.comingSoon = false);
+      // If no admin, clear and check comingSoon
+      localStorage.removeItem('adminCheck');
+      sessionStorage.removeItem('app_settings');
+      this.loadComingSoonOnly();
+    }
+  }
+
+  private fetchAndCacheSettings(adminNid: string, authLevel: string) {
+    this.supabaseAuthService.getDataByPath(`auth/${adminNid}`).subscribe((userData) => {
+      if (userData) {
+        this.userData = userData;
+
+        // Handle superadmin setting
+        if (authLevel === 'superadmin' || userData.auth_level === 'superadmin' || adminNid === environment.authorize) {
+          this.comingSoon = true;
+          localStorage.setItem('adminCheck', `superadmin-${adminNid}`);
+        } else {
+          localStorage.setItem('adminCheck', `${userData.auth_level}-${userData.id}`);
+        }
+
+        // Fetch classes and other global settings
+        this.supabaseAuthService.getDataByPath('classes').subscribe((classData) => {
+          if (classData) {
+            const userClass = userData.class_id;
+            let finalClass = classData[userClass] ? userClass : null;
+
+            // Fetch global settings
+            this.supabaseAuthService.getDataByPath('settings/view_status').subscribe((viewStatusData) => {
+              const viewStatus = viewStatusData?.value || 'edit';
+
+              if (finalClass) {
+                this.finalizeSession(userData, finalClass, viewStatus);
+              } else {
+                // Fallback to default class from settings
+                this.supabaseAuthService.getDataByPath('settings/default_class').subscribe((defaultClass) => {
+                  finalClass = defaultClass?.value || classData.default_class;
+                  this.finalizeSession(userData, finalClass, viewStatus);
+                });
+              }
+            });
           }
         });
+      } else {
+        localStorage.removeItem('adminCheck');
+        this.loadComingSoonOnly();
+      }
+    });
+  }
+
+  private finalizeSession(userData: any, currentClass: string, viewStatus: string) {
+    if (currentClass) {
+      localStorage.setItem('currentClass', currentClass);
     }
+
+    // Save all to sessionStorage
+    const settings = {
+      userData: userData,
+      currentClass: currentClass,
+      comingSoon: this.comingSoon,
+      viewStatus: viewStatus,
+      timestamp: new Date().getTime()
+    };
+    sessionStorage.setItem('app_settings', JSON.stringify(settings));
+  }
+
+  private loadComingSoonOnly() {
+    this.supabaseAuthService.getDataByPath('settings/coming_soon').subscribe((comingSoonData) => {
+      if (comingSoonData) {
+        this.comingSoon = comingSoonData.value === 'true';
+      }
+      this.supabaseAuthService.getDataByPath('settings/view_status').subscribe((viewStatusData) => {
+        const settings = {
+          comingSoon: this.comingSoon,
+          viewStatus: viewStatusData?.value || 'edit',
+          timestamp: new Date().getTime()
+        };
+        sessionStorage.setItem('app_settings', JSON.stringify(settings));
+      });
+    });
   }
 }

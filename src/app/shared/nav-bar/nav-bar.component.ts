@@ -36,6 +36,7 @@ export class NavBarComponent {
           if (result) {
             localStorage.removeItem('adminCheck');
             localStorage.removeItem('currentClass');
+            sessionStorage.removeItem('app_settings');
             this.collapseNav();
             window.location.reload();
           }

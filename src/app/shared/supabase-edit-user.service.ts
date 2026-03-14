@@ -114,16 +114,6 @@ export class SupabaseEditUserService {
     );
   }
 
-  encryptFileName(filename: string): string {
-    const parts = filename.split(".");
-    const name = btoa(unescape(encodeURIComponent(parts.slice(0, -1).join("."))))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, ""); // optionally remove padding
-    const ext = parts.slice(-1)[0];
-    return `${name}.${ext}`;
-  }
-
   async uploadFile(filePath: string, file: File): Promise<string> {
     this.spinner.show();
 
@@ -153,6 +143,20 @@ export class SupabaseEditUserService {
       throw error; // Rethrow error to be caught elsewhere if needed
     } finally {
       this.spinner.hide();
+    }
+  }
+
+  async deleteFile(filePath: string): Promise<void> {
+    try {
+      const { error } = await this.supabase.storage
+        .from('images')
+        .remove([filePath]);
+
+      if (error) {
+        console.error('Delete error:', error);
+      }
+    } catch (error) {
+      console.error('Error during file delete process:', error);
     }
   }
 

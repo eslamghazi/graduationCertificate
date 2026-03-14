@@ -1,3 +1,4 @@
+<ng-container *ngIf="subclasses; else loading">
 <form class="form-signin text-center" [formGroup]="userForm" (submit)="onSubmit()">
 
   <label for="image" class="h3 mb-4 text-info">اضافة طالب جديد غير موجود بقاعدة البيانات</label>
@@ -148,3 +149,12 @@
     [disabled]="!userForm.valid || !selectedDate || !ClassMonth.value || ClassMonth.value == 0 || (mozaola_attempts.value != '0' && !mozaola_result.value)">ارسال</button>
   <button class="btn btn-lg btn-danger btn-block mt-4" (click)="goBack()" type="button">العوده</button>
 </form>
+</ng-container>
+
+<ng-template #loading>
+    <div class="d-flex justify-content-center align-items-center flex-column mt-5" style="min-height: 400px;">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+        </div>
+        <h4 class="text-primary">جاري تحميل البيانات...</h4>
+    </div>
+</ng-template>
