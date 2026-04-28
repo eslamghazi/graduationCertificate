@@ -17,6 +17,7 @@ export class SettingsComponent implements OnInit {
   superAdminCheck =
     localStorage.getItem('adminCheck')?.split('-')[0] === 'superadmin';
   authPrevilige = localStorage.getItem('adminCheck')?.split('-')[1];
+  viewStatus = 'edit';
   comingSoonStatus = false;
   allowAnonymousStatus = false;
   allowAnonymousSubClassStatus = false;
@@ -31,6 +32,7 @@ export class SettingsComponent implements OnInit {
   option = new FormControl('0');
   currentClass = new FormControl('0');
   defaultClass = new FormControl('0');
+  view_status = new FormControl('edit');
 
   settingsForm = new FormGroup({
     class: this.class,
@@ -38,6 +40,7 @@ export class SettingsComponent implements OnInit {
     option: this.option,
     currentClass: this.currentClass,
     defaultClass: this.defaultClass,
+    view_status: this.view_status,
   });
 
   constructor(
@@ -106,6 +109,13 @@ export class SettingsComponent implements OnInit {
           }
           this.spinner.hide();
         });
+
+      this.supabaseSettingsService
+        .getDataByPath('settings', { id: 'view_status' })
+        .subscribe((statusData) => {
+          this.viewStatus = statusData?.[0]?.value || 'edit';
+          this.view_status.setValue(this.viewStatus);
+        });
     });
   }
 
@@ -170,6 +180,42 @@ export class SettingsComponent implements OnInit {
           )
           .then(() => {
             window.location.reload();
+          });
+      }
+    });
+  }
+
+  changeViewStatus() {
+    const modalRef = this.modalService.open(SharedModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    modalRef.componentInstance.warningSvg = true;
+    modalRef.componentInstance.message = this.viewStatus === 'view'
+      ? 'هل انت متأكد من تغيير النظام الي وضع التعديل ؟'
+      : 'هل انت متأكد من تغيير النظام الي وضع المشاهدة فقط ؟';
+
+    modalRef.result.then((result) => {
+      if (result) {
+        const newStatus = this.viewStatus === 'view' ? 'edit' : 'view';
+        this.spinner.show();
+        this.supabaseSettingsService
+          .insertIntoDb(
+            'settings',
+            { id: 'view_status', value: newStatus },
+            true
+          )
+          .then(() => {
+            this.spinner.hide();
+            this.swal.toastr('success', 'تم تغيير حالة النظام بنجاح');
+            window.location.reload();
+          })
+          .catch((error) => {
+            this.spinner.hide();
+            this.swal.toastr('error', 'حدث خطأ أثناء تغيير حالة النظام');
+            console.log(error);
           });
       }
     });

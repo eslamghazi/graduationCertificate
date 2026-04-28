@@ -17,7 +17,7 @@ export class AddEditAdminComponent implements OnInit, OnDestroy {
   @Input() data: any;
   classes: any[] = [];
 
-  Name = new FormControl(null, [Validators.required]);
+  Name = new FormControl(null, [Validators.required, Validators.pattern('^[\\u0600-\\u06FF\\s]+$')]);
   NationalId = new FormControl(null, [Validators.required]);
   Auth = new FormControl(0, [Validators.required]);
   class = new FormControl(null, [Validators.required]);
@@ -52,7 +52,7 @@ export class AddEditAdminComponent implements OnInit, OnDestroy {
             : 3,
         class: this.data.Class,
       });
-      document.getElementById('idInput')?.setAttribute('readonly', "true");
+      this.NationalId.disable();
     }
     this.getClassesData();
   }
@@ -63,7 +63,7 @@ export class AddEditAdminComponent implements OnInit, OnDestroy {
 
   confirm() {
     const data = {
-      id: this.NationalId.value,
+      id: this.NationalId.getRawValue(),
       name: this.Name.value,
       auth_level:
         this.Auth.value == 1

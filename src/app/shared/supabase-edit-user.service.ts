@@ -114,16 +114,6 @@ export class SupabaseEditUserService {
     );
   }
 
-  encryptFileName(filename: string): string {
-    const parts = filename.split(".");
-    const name = btoa(unescape(encodeURIComponent(parts.slice(0, -1).join("."))))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, ""); // optionally remove padding
-    const ext = parts.slice(-1)[0];
-    return `${name}.${ext}`;
-  }
-
   async uploadFile(filePath: string, file: File): Promise<string> {
     this.spinner.show();
 
@@ -156,6 +146,20 @@ export class SupabaseEditUserService {
     }
   }
 
+  async deleteFile(filePath: string): Promise<void> {
+    try {
+      const { error } = await this.supabase.storage
+        .from('images')
+        .remove([filePath]);
+
+      if (error) {
+        console.error('Delete error:', error);
+      }
+    } catch (error) {
+      console.error('Error during file delete process:', error);
+    }
+  }
+
 
   async insertImageDetails(imageDetails: any, path: string): Promise<void> {
     const parsed = this.parsePath(path);
@@ -175,7 +179,7 @@ export class SupabaseEditUserService {
       place_of_birth: imageDetails.place_of_birth,
       phone: imageDetails.phone,
       email: imageDetails.email,
-      is_mozaola: imageDetails.is_mozaola,
+      mozaola: imageDetails.mozaola,
       image_url: imageDetails.image_url,
       created_at: new Date().toISOString(),
     };

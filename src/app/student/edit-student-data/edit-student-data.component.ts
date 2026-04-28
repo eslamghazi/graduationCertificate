@@ -25,9 +25,9 @@ export class EditStudentDataComponent implements OnInit {
 
   data: any;
 
-  NationalId = new FormControl(null, [Validators.required]);
-  Name = new FormControl(null, [Validators.required]);
-  name_en = new FormControl(null);
+  NationalId = new FormControl({ value: null, disabled: true }, [Validators.required]);
+  Name = new FormControl(null, [Validators.required, Validators.pattern('^[\\u0600-\\u06FF\\s]+$')]);
+  name_en = new FormControl(null, [Validators.required, Validators.pattern('^[a-zA-Z\\s]+$')]);
   DateOfBirth = new FormControl(null, [Validators.required]);
   PlaceOfBirth = new FormControl(null, [Validators.required]);
   phone = new FormControl(null, [Validators.required, Validators.pattern('^01[0-9]{9}$')]);
@@ -38,8 +38,8 @@ export class EditStudentDataComponent implements OnInit {
   Classes: any[] = [];
   Class = new FormControl({ value: null, disabled: true }, [Validators.required]);
   ClassMonth = new FormControl({ value: null, disabled: true }, [Validators.required]);
-  is_mozaola_attempts = new FormControl('0', [Validators.required]);
-  is_mozaola_result = new FormControl('');
+  mozaola_attempts = new FormControl('0', [Validators.required]);
+  mozaola_result = new FormControl('');
 
   constructor(
     private supabaseEditService: SupabaseEditUserService,
@@ -62,8 +62,8 @@ export class EditStudentDataComponent implements OnInit {
     Image: this.Image,
     Class: this.Class,
     ClassMonth: this.ClassMonth,
-    is_mozaola_attempts: this.is_mozaola_attempts,
-    is_mozaola_result: this.is_mozaola_result,
+    mozaola_attempts: this.mozaola_attempts,
+    mozaola_result: this.mozaola_result,
   });
 
   async ngOnInit(): Promise<void> {
@@ -122,8 +122,17 @@ export class EditStudentDataComponent implements OnInit {
       });
   }
 
+  viewStatus = 'edit';
+  canEdit = true;
+
   async patchValues() {
     this.spinner.show();
+
+    const sessionSettings = sessionStorage.getItem('app_settings');
+    this.viewStatus = sessionSettings ? JSON.parse(sessionSettings).viewStatus : 'edit';
+    const isAdmin = !!localStorage.getItem('adminCheck');
+    this.canEdit = (this.viewStatus === 'edit' || isAdmin);
+
     this.NationalId.patchValue(this.data.id);
     this.Name.patchValue(this.data.name);
     this.name_en.patchValue(this.data.name_en);
@@ -135,19 +144,23 @@ export class EditStudentDataComponent implements OnInit {
     this.Class.patchValue(this.data.class_id);
     this.ClassMonth.patchValue(this.data.subclass_id);
 
-    let mozaolaVal = this.data.is_mozaola || '0';
+    if (!this.canEdit) {
+      this.userForm.disable();
+    }
+
+    let mozaolaVal = this.data.mozaola || '0';
     mozaolaVal = mozaolaVal.toString();
     if (mozaolaVal === '0') {
-      this.is_mozaola_attempts.patchValue('0');
-      this.is_mozaola_result.patchValue('');
+      this.mozaola_attempts.patchValue('0');
+      this.mozaola_result.patchValue('');
     } else {
       let parts = mozaolaVal.split(' ');
       if (parts.length === 2) {
-        this.is_mozaola_attempts.patchValue(parts[0]);
-        this.is_mozaola_result.patchValue(parts[1]);
+        this.mozaola_attempts.patchValue(parts[0]);
+        this.mozaola_result.patchValue(parts[1]);
       } else {
-        this.is_mozaola_attempts.patchValue(parts[0]);
-        this.is_mozaola_result.patchValue('');
+        this.mozaola_attempts.patchValue(parts[0]);
+        this.mozaola_result.patchValue('');
       }
     }
 
@@ -298,11 +311,16 @@ export class EditStudentDataComponent implements OnInit {
           image_url: formValues.Image,
           class_id: formValues.Class,
           subclass_id: formValues.ClassMonth,
-          is_mozaola: (!formValues.is_mozaola_attempts || formValues.is_mozaola_attempts === '0') ? '0' : `${formValues.is_mozaola_attempts} ${formValues.is_mozaola_result}`,
+          mozaola: (!formValues.mozaola_attempts || formValues.mozaola_attempts === '0') ? '0' : `${formValues.mozaola_attempts} ${formValues.mozaola_result}`,
         };
         let imagePromise;
         if (this.selectedImage) {
-          const filePath = `${formValues.Class}/${formValues.ClassMonth}/${this.supabaseEditService.encryptFileName(formValues.NationalId + "_" + formValues.Name + ".jpg")}`;
+          // Delete old image if exists
+          if (this.data.image_url) {
+            const oldFilePath = `${this.data.class_id}/${this.data.subclass_id}/${this.data.id}.jpg`;
+            this.supabaseEditService.deleteFile(oldFilePath);
+          }
+          const filePath = `${formValues.Class}/${formValues.ClassMonth}/${formValues.NationalId}.jpg`;
           imagePromise = this.supabaseEditService.uploadFile(filePath, this.selectedImage);
           this.selectedImage = null
         } else if ((this.data.subclass_id !== formValues.ClassMonth || this.data.class_id !== formValues.Class) && this.data.image_url) {

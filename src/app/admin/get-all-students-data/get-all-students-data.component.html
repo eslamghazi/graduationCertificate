@@ -116,16 +116,16 @@
             <td>{{ item.place_of_birth }}</td>
             <td>{{ item.phone }}</td>
             <td>{{ item.email }}</td>
-            <td *ngIf="item.is_mozaola == '1 true'">1 ناجح</td>
-            <td *ngIf="item.is_mozaola == '1 false'">1 راسب</td>
-            <td *ngIf="item.is_mozaola == '2 true'">2 ناجح</td>
-            <td *ngIf="item.is_mozaola == '2 false'">2 راسب</td>
-            <td *ngIf="item.is_mozaola == '3 true'">3 ناجح</td>
-            <td *ngIf="item.is_mozaola == '3 false'">3 راسب</td>
-            <td *ngIf="!item.is_mozaola || item.is_mozaola == '0' || item.is_mozaola == 0">0</td>
-            <td *ngIf="item.is_mozaola == '1' || item.is_mozaola == 1">1</td>
-            <td *ngIf="item.is_mozaola == '2' || item.is_mozaola == 2">2</td>
-            <td *ngIf="item.is_mozaola == '3' || item.is_mozaola == 3">3</td>
+            <td *ngIf="item.mozaola == '1 true'">1 ناجح</td>
+            <td *ngIf="item.mozaola == '1 false'">1 راسب</td>
+            <td *ngIf="item.mozaola == '2 true'">2 ناجح</td>
+            <td *ngIf="item.mozaola == '2 false'">2 راسب</td>
+            <td *ngIf="item.mozaola == '3 true'">3 ناجح</td>
+            <td *ngIf="item.mozaola == '3 false'">3 راسب</td>
+            <td *ngIf="!item.mozaola || item.mozaola == '0' || item.mozaola == 0">0</td>
+            <td *ngIf="item.mozaola == '1' || item.mozaola == 1">1</td>
+            <td *ngIf="item.mozaola == '2' || item.mozaola == 2">2</td>
+            <td *ngIf="item.mozaola == '3' || item.mozaola == 3">3</td>
             <td *ngIf="item.image_url">
               <img [src]="item.image_url" alt="{{ item.id }}" role="button" class="img-thumbnail"
                 style="max-width: 100px; max-height: 60px;" (click)="openImage(item)" />

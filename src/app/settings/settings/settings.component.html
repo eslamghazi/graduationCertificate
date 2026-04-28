@@ -215,6 +215,17 @@
     <button
       type="button"
       dir="rtl"
+      class="btn btn-lg btn-block mt-3"
+      [class.btn-outline-primary]="viewStatus === 'view'"
+      [class.btn-primary]="viewStatus === 'edit'"
+      (click)="changeViewStatus()"
+    >
+      {{ viewStatus === 'view' ? 'تفعيل وضع التعديل' : 'تفعيل وضع المشاهدة فقط' }}
+    </button>
+    
+    <button
+      type="button"
+      dir="rtl"
       class="btn btn-outline-danger btn-lg btn-block mt-3"
       aria-haspopup="true"
       aria-expanded="false"
